@@ -2,6 +2,8 @@
 import { Image } from "astro:assets";
 import obesitydashboard from "../../public/obesitydashboard.png";
 import webscrapping_esios from "../../public/webscrapping_esios.png";
+import blackjack from "../../public/blackjack.png";
+import sensor_error_detection from "../../public/Sensor_Error_Detection_and_Localization_with_RNNs.png";
 
 interface Project {
   title: string;
@@ -26,6 +28,20 @@ const projects: Project[] = [
     preview: "",
     status: "Completed",
   },
+    {
+      title: "JavaScript Blackjack",
+      image: blackjack as ImageMetadata,
+      link: "https://github.com/albert-queralto/js_blackjack",
+      preview: "https://js-blackjack.vercel.app/",
+      status: "Deployed",
+    },
+    {
+      title: "Sensor Error Detection and Localization with RNNs",
+      image: sensor_error_detection as ImageMetadata,
+      link: "https://github.com/albert-queralto/Sensor_Error_Detection_and_Localization_with_RNNs",
+      preview: "",
+      status: "Completed",
+    }
 ];
 ---
 
