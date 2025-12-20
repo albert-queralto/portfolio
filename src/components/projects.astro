@@ -1,5 +1,6 @@
 ---
 import { Image } from "astro:assets";
+import catalunya_weather_app from "../../public/catalunya_weather_app.png";
 import obesitydashboard from "../../public/obesitydashboard.png";
 import webscrapping_esios from "../../public/webscrapping_esios.png";
 import blackjack from "../../public/blackjack.png";
@@ -16,6 +17,13 @@ interface Project {
 }
 
 const projects: Project[] = [
+  {
+    title: "Catalunya Weather App",
+    image: catalunya_weather_app as ImageMetadata,
+    link: "https://github.com/albert-queralto/catalunya_weather_app",
+    preview: "https://github.com/albert-queralto/catalunya_weather_app",
+    status: "In progress",
+  },
   {
     title: "Obesity Dashboard",
     image: obesitydashboard as ImageMetadata,
