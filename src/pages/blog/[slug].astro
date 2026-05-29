@@ -17,6 +17,7 @@ const { Content } = await render(post);
 ---
 
 <Layout title={`${post.data.title} — Albert Queraltó`}>
+  <link slot="head" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" />
   <Nav />
   <main class="max-w-3xl mx-auto py-24 md:py-36 text-[var(--white)]">
     <a
