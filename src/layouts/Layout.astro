@@ -10,17 +10,48 @@ const { title } = Astro.props;
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="description" content="Data Scientist and Machine Learning Engineer" />
+    <meta name="description" content="Data Scientist and Software Developer" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <meta property="og:title" content="Albert Queraltó" />
-    <meta property="og:description" content="Data Scientist and Machine Learning Engineer" />
+    <meta property="og:description" content="Data Scientist and Software Developer based in Barcelona. Specialising in machine learning, data science, and scalable AI solutions." />
     <meta property="og:image" content="https://albertqueralto.vercel.app/og.image.png" />
     <meta property="og:url" content="https://albertqueralto.vercel.app" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Albert Queraltó Portfolio" />
 
     <title>{title}</title>
+
+    <!-- Twitter / X card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Albert Queraltó — Data Scientist & Software Developer" />
+    <meta name="twitter:description" content="Data Scientist and Software Developer based in Barcelona. Specialising in machine learning, data science, and scalable AI solutions." />
+    <meta name="twitter:image" content="https://albertqueralto.vercel.app/og.image.png" />
+
+    <!-- JSON-LD structured data -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Albert Queraltó",
+        "url": "https://albertqueralto.vercel.app",
+        "image": "https://albertqueralto.vercel.app/og.image.png",
+        "jobTitle": "Data Scientist & Software Developer",
+        "worksFor": {
+          "@type": "Organization",
+          "name": "Adasa Systems, S.A.U."
+        },
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Barcelona",
+          "addressCountry": "ES"
+        },
+        "sameAs": [
+          "https://github.com/albert-queralto",
+          "https://linkedin.com/in/albertqueralto"
+        ]
+      }
+    </script>
   </head>
   <body class="bg-[--background] sm:px-28 lg:px-20 px-9">
     <slot />
