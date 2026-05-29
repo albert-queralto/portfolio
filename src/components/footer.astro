@@ -3,6 +3,7 @@ import LikeButton from "../React/LikeButton.tsx";
 import GitHubIcon from "../components/icons/GitHubIcon.astro";
 import LinkedInIcon from "../components/icons/LinkedInIcon.astro";
 import EmailIcon from "../components/icons/EmailIcon.astro";
+import DownloadIcon from "../components/icons/DownloadIcon.astro";
 ---
 
 <footer class="w-full py-12 border-t border-[#ffffff10]">
@@ -39,6 +40,15 @@ import EmailIcon from "../components/icons/EmailIcon.astro";
             <div class="text-[var(--white-icon)] hover:text-[var(--white)] transition duration-300 ease-in-out">
               <EmailIcon />
             </div>
+          </a>
+          <a
+            href="/CV.pdf"
+            target="_blank"
+            aria-label="Download CV"
+            class="flex items-center gap-2 text-[var(--white-icon)] hover:text-white transition duration-300 ease-in-out border border-1 border-[var(--white-icon-tr)] px-4 py-3 rounded-xl bg-[#1414149c] hover:bg-[var(--white-icon-tr)]"
+          >
+            <DownloadIcon />
+            <span class="text-sm hidden md:inline">CV</span>
           </a>
         </div>
         <LikeButton client:load />
