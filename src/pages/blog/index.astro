@@ -19,7 +19,7 @@ const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
         posts.map((post) => (
           <a
             href={`/blog/${post.id}`}
-            class="group block rounded-2xl border border-[var(--white-icon-tr)] bg-[#1414149c] p-6 hover:border-[var(--sec)] transition-colors duration-300"
+            class="group block rounded-2xl border border-[var(--white-icon-tr)] bg-[var(--card-bg)] p-6 hover:border-[var(--sec)] transition-colors duration-300"
           >
             <p class="text-xs text-[var(--white-icon)] mb-2">
               {post.data.date.toLocaleDateString("en-GB", {

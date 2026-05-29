@@ -106,7 +106,7 @@ const projects: Project[] = [
         <button
           data-filter={cat}
           data-active={cat === "All" ? "" : undefined}
-          class="px-4 py-1.5 rounded-full text-sm border transition duration-300 ease-in-out text-[var(--white-icon)] border-[var(--white-icon-tr)] bg-[#1414149c] hover:bg-[var(--white-icon-tr)] hover:text-[var(--white)]"
+          class="px-4 py-1.5 rounded-full text-sm border transition duration-300 ease-in-out text-[var(--white-icon)] border-[var(--white-icon-tr)] bg-[var(--card-bg)] hover:bg-[var(--white-icon-tr)] hover:text-[var(--white)]"
         >
           {cat}
         </button>
@@ -117,7 +117,7 @@ const projects: Project[] = [
         projects.map((project) => {
           const hasLivePreview = project.preview !== project.link;
           return (
-            <div class="group flex flex-col rounded-2xl border border-[var(--white-icon-tr)] bg-[#1414149c] overflow-hidden hover:border-[var(--sec)] transition-colors duration-300" data-category={project.category}>
+            <div class="group flex flex-col rounded-2xl border border-[var(--white-icon-tr)] bg-[var(--card-bg)] overflow-hidden hover:border-[var(--sec)] transition-colors duration-300" data-category={project.category}>
               <a href={project.preview} target="_blank" rel="noopener noreferrer" class="block">
                 <div class="overflow-hidden">
                   <Image
@@ -153,7 +153,7 @@ const projects: Project[] = [
                     target="_blank"
                     href={project.link}
                     aria-label="View source on GitHub"
-                    class="flex items-center gap-1.5 text-sm text-[var(--white-icon)] hover:text-white transition duration-300 ease-in-out border border-[var(--white-icon-tr)] px-3 py-2 rounded-xl bg-[#1414149c] hover:bg-[var(--white-icon-tr)]"
+                    class="flex items-center gap-1.5 text-sm text-[var(--white-icon)] hover:text-white transition duration-300 ease-in-out border border-[var(--white-icon-tr)] px-3 py-2 rounded-xl bg-[var(--card-bg)] hover:bg-[var(--white-icon-tr)]"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
                       <path d="M24 12L18.3431 17.6569L16.9289 16.2426L21.1716 12L16.9289 7.75736L18.3431 6.34315L24 12ZM2.82843 12L7.07107 16.2426L5.65685 17.6569L0 12L5.65685 6.34315L7.07107 7.75736L2.82843 12ZM9.78845 21H7.66009L14.2116 3H16.3399L9.78845 21Z" />
@@ -165,7 +165,7 @@ const projects: Project[] = [
                       target="_blank"
                       href={project.preview}
                       aria-label="Open live preview"
-                      class="flex items-center gap-1.5 text-sm text-[var(--white-icon)] hover:text-white transition duration-300 ease-in-out border border-[var(--white-icon-tr)] px-3 py-2 rounded-xl bg-[#1414149c] hover:bg-[var(--white-icon-tr)]"
+                      class="flex items-center gap-1.5 text-sm text-[var(--white-icon)] hover:text-white transition duration-300 ease-in-out border border-[var(--white-icon-tr)] px-3 py-2 rounded-xl bg-[var(--card-bg)] hover:bg-[var(--white-icon-tr)]"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
                         <path d="M16.0037 9.41421L7.39712 18.0208L5.98291 16.6066L14.5895 8H7.00373V6H18.0037V17H16.0037V9.41421Z" />
@@ -184,7 +184,7 @@ const projects: Project[] = [
       target="_blank"
       href="https://github.com/albert-queralto?tab=repositories"
       aria-label="GitHub"
-      class="w-full flex items-center justify-center gap-2 mt-9 text-[var(--white-icon)] hover:text-white transition duration-300 ease-in-out border border-[var(--white-icon-tr)] p-3 rounded-full bg-[#1414149c] hover:bg-[var(--white-icon-tr)] hover:scale-105"
+      class="w-full flex items-center justify-center gap-2 mt-9 text-[var(--white-icon)] hover:text-white transition duration-300 ease-in-out border border-[var(--white-icon-tr)] p-3 rounded-full bg-[var(--card-bg)] hover:bg-[var(--white-icon-tr)] hover:scale-105"
     >
       <span class="md:text-lg text-md">More projects on</span>
       <svg
