@@ -14,6 +14,8 @@ interface Project {
   link: string;
   preview: string;
   status: string;
+  description: string;
+  tags: string[];
 }
 
 const projects: Project[] = [
@@ -23,6 +25,8 @@ const projects: Project[] = [
     link: "https://github.com/albert-queralto/catalunya_weather_app",
     preview: "https://github.com/albert-queralto/catalunya_weather_app",
     status: "In progress",
+    description: "A web app that fetches and visualises real-time weather data for Catalan cities, using open meteorological APIs and interactive charts.",
+    tags: ["Python", "FastAPI", "React", "Recharts"],
   },
   {
     title: "Obesity Dashboard",
@@ -30,6 +34,8 @@ const projects: Project[] = [
     link: "https://github.com/albert-queralto/dashboard_obesity_analysis",
     preview: "https://dashboard-obesity-analysis.onrender.com/",
     status: "Deployed",
+    description: "Interactive dashboard analysing global obesity trends with demographic breakdowns, built with Bokeh and deployed on Render.",
+    tags: ["Python", "Bokeh", "Pandas", "Render"],
   },
   {
     title: "Webscraping of Energy Prices Data and Renewable Energy Production",
@@ -37,6 +43,8 @@ const projects: Project[] = [
     link: "https://github.com/albert-queralto/scraping-energy-prices-spain",
     preview: "https://github.com/albert-queralto/scraping-energy-prices-spain",
     status: "Completed",
+    description: "Automated scraper that collects hourly electricity prices and renewable energy production data from Spain's ESIOS API and stores it in a structured database.",
+    tags: ["Python", "BeautifulSoup", "REST API", "PostgreSQL", "Selenium"],
   },
     {
       title: "JavaScript Blackjack",
@@ -44,6 +52,8 @@ const projects: Project[] = [
       link: "https://github.com/albert-queralto/js_blackjack",
       preview: "https://js-blackjack.vercel.app/",
       status: "Deployed",
+      description: "A fully playable Blackjack game in the browser.",
+      tags: ["JavaScript", "HTML", "CSS", "Vercel"],
     },
     {
       title: "Sensor Error Detection and Localization with RNNs",
@@ -51,6 +61,8 @@ const projects: Project[] = [
       link: "https://github.com/albert-queralto/Sensor_Error_Detection_and_Localization_with_RNNs",
       preview: "https://github.com/albert-queralto/Sensor_Error_Detection_and_Localization_with_RNNs",
       status: "Completed",
+      description: "Deep learning pipeline using LSTM and GRU networks to detect and localise faults in multivariate sensor time-series data.",
+      tags: ["Python", "PyTorch", "LSTM", "GRU", "Time Series"],
     },
     {
       title: "Transformers for Sentiment Classification and Text Translation",
@@ -58,6 +70,8 @@ const projects: Project[] = [
       link: "https://github.com/albert-queralto/transformers_sentiment_classification_translation",
       preview: "https://github.com/albert-queralto/transformers_sentiment_classification_translation",
       status: "Completed",
+      description: "Fine-tuned BERT-based models for multilingual sentiment classification and sequence-to-sequence translation using HuggingFace Transformers.",
+      tags: ["Python", "HuggingFace", "BERT", "PyTorch", "NLP"],
     },
     {
       title: "Energy Prices Data Analysis",
@@ -65,6 +79,8 @@ const projects: Project[] = [
       link: "https://github.com/albert-queralto/analysis_energy_prices",
       preview: "https://github.com/albert-queralto/analysis_energy_prices",
       status: "Completed",
+      description: "Exploratory data analysis and statistical modelling of Spanish energy market prices, identifying seasonal patterns and price drivers.",
+      tags: ["Python", "Pandas", "Matplotlib", "Statsmodels"],
     }
 ];
 ---
@@ -79,64 +95,70 @@ const projects: Project[] = [
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
       {
-        projects.map((project) => (
-          <div class="group">
-            <a
-              href={project.preview}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="block"
-            >
-              <div class="rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 mb-4">
-                <Image
-                  src={project.image}
-                  alt={project.title}
-                  class="w-full h-48 md:h-72 object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-              </div>
-              <div class="flex items-center px-3">
-                <div class="flex-grow">
-                  <h4 class="text-2xl font-semibold">{project.title}</h4>
-                  <span class="py-1 text-sm text-[var(--white-icon)]">
+        projects.map((project) => {
+          const hasLivePreview = project.preview !== project.link;
+          return (
+            <div class="group flex flex-col rounded-2xl border border-[var(--white-icon-tr)] bg-[#1414149c] overflow-hidden hover:border-[var(--sec)] transition-colors duration-300">
+              <a href={project.preview} target="_blank" rel="noopener noreferrer" class="block">
+                <div class="overflow-hidden">
+                  <Image
+                    src={project.image}
+                    alt={`Screenshot of ${project.title}`}
+                    class="w-full h-48 md:h-56 object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                </div>
+              </a>
+
+              <div class="flex flex-col flex-grow px-4 py-4 gap-3">
+                <div class="flex items-start justify-between gap-2">
+                  <h4 class="text-lg font-semibold leading-snug">{project.title}</h4>
+                  <span class="shrink-0 text-xs px-2 py-1 rounded-full border border-[var(--white-icon-tr)] text-[var(--white-icon)]">
                     {project.status}
                   </span>
                 </div>
-                <div class="flex gap-2 ml-auto">
+
+                <p class="text-sm text-[var(--white-icon)] leading-relaxed flex-grow">
+                  {project.description}
+                </p>
+
+                <div class="flex flex-wrap gap-2">
+                  {project.tags.map((tag) => (
+                    <span class="text-xs px-2 py-1 rounded-md bg-[var(--white-icon-tr)] text-[var(--sec)]">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+
+                <div class="flex gap-2 pt-1">
                   <a
                     target="_blank"
                     href={project.link}
-                    aria-label="GitHub"
-                    class="size-14 flex justify-center items-center text-[var(--white-icon)] hover:text-white transition duration-300 ease-in-out border border-1 border-[var(--white-icon-tr)] p-3 rounded-xl bg-[#1414149c] hover:bg-[var(--white-icon-tr)]"
+                    aria-label="View source on GitHub"
+                    class="flex items-center gap-1.5 text-sm text-[var(--white-icon)] hover:text-white transition duration-300 ease-in-out border border-[var(--white-icon-tr)] px-3 py-2 rounded-xl bg-[#1414149c] hover:bg-[var(--white-icon-tr)]"
                   >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      class="size-7"
-                    >
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
                       <path d="M24 12L18.3431 17.6569L16.9289 16.2426L21.1716 12L16.9289 7.75736L18.3431 6.34315L24 12ZM2.82843 12L7.07107 16.2426L5.65685 17.6569L0 12L5.65685 6.34315L7.07107 7.75736L2.82843 12ZM9.78845 21H7.66009L14.2116 3H16.3399L9.78845 21Z" />
                     </svg>
+                    Source
                   </a>
-                  <a
-                    target="_blank"
-                    href={project.preview}
-                    aria-label="Preview"
-                    class="size-14 flex justify-center items-center text-[var(--white-icon)] hover:text-white transition duration-300 ease-in-out border border-1 border-[var(--white-icon-tr)] p-3 rounded-xl bg-[#1414149c] hover:bg-[var(--white-icon-tr)]"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      class="size-7"
+                  {hasLivePreview && (
+                    <a
+                      target="_blank"
+                      href={project.preview}
+                      aria-label="Open live preview"
+                      class="flex items-center gap-1.5 text-sm text-[var(--white-icon)] hover:text-white transition duration-300 ease-in-out border border-[var(--white-icon-tr)] px-3 py-2 rounded-xl bg-[#1414149c] hover:bg-[var(--white-icon-tr)]"
                     >
-                      <path d="M16.0037 9.41421L7.39712 18.0208L5.98291 16.6066L14.5895 8H7.00373V6H18.0037V17H16.0037V9.41421Z" />
-                    </svg>
-                  </a>
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
+                        <path d="M16.0037 9.41421L7.39712 18.0208L5.98291 16.6066L14.5895 8H7.00373V6H18.0037V17H16.0037V9.41421Z" />
+                      </svg>
+                      Preview
+                    </a>
+                  )}
                 </div>
               </div>
-            </a>
-          </div>
-        ))
+            </div>
+          );
+        })
       }
     </div>
     <a
