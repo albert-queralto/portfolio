@@ -1,5 +1,4 @@
 ---
-import LikeButton from "../React/LikeButton.tsx";
 import GitHubIcon from "../components/icons/GitHubIcon.astro";
 import LinkedInIcon from "../components/icons/LinkedInIcon.astro";
 import EmailIcon from "../components/icons/EmailIcon.astro";
@@ -9,7 +8,7 @@ import DownloadIcon from "../components/icons/DownloadIcon.astro";
 <footer class="w-full py-12 border-t border-[#ffffff10]">
   <div class="max-w-5xl mx-auto">
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-10">
-      <div class="flex flex-col lg:items-start items-center space-y-6 gap-9">
+      <div class="flex flex-col lg:items-start items-center">
         <div class="flex space-x-6 sm:space-x-8">
           <a
             href="https://github.com/albert-queralto"
@@ -52,7 +51,6 @@ import DownloadIcon from "../components/icons/DownloadIcon.astro";
             </div>
           </a>
         </div>
-        <LikeButton client:load />
       </div>
 
       <div class="flex flex-col items-center space-y-6">
