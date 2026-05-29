@@ -16,11 +16,13 @@ interface Project {
   status: string;
   description: string;
   tags: string[];
+  category: string;
 }
 
 const projects: Project[] = [
   {
     title: "Catalunya Weather App",
+    category: "Web",
     image: catalunya_weather_app as ImageMetadata,
     link: "https://github.com/albert-queralto/catalunya_weather_app",
     preview: "https://github.com/albert-queralto/catalunya_weather_app",
@@ -30,6 +32,7 @@ const projects: Project[] = [
   },
   {
     title: "Obesity Dashboard",
+    category: "Data Science",
     image: obesitydashboard as ImageMetadata,
     link: "https://github.com/albert-queralto/dashboard_obesity_analysis",
     preview: "https://dashboard-obesity-analysis.onrender.com/",
@@ -39,6 +42,7 @@ const projects: Project[] = [
   },
   {
     title: "Webscraping of Energy Prices Data and Renewable Energy Production",
+    category: "Data Science",
     image: webscrapping_esios as ImageMetadata,
     link: "https://github.com/albert-queralto/scraping-energy-prices-spain",
     preview: "https://github.com/albert-queralto/scraping-energy-prices-spain",
@@ -48,6 +52,7 @@ const projects: Project[] = [
   },
     {
       title: "JavaScript Blackjack",
+      category: "Web",
       image: blackjack as ImageMetadata,
       link: "https://github.com/albert-queralto/js_blackjack",
       preview: "https://js-blackjack.vercel.app/",
@@ -57,6 +62,7 @@ const projects: Project[] = [
     },
     {
       title: "Sensor Error Detection and Localization with RNNs",
+      category: "Machine Learning",
       image: sensor_error_detection as ImageMetadata,
       link: "https://github.com/albert-queralto/Sensor_Error_Detection_and_Localization_with_RNNs",
       preview: "https://github.com/albert-queralto/Sensor_Error_Detection_and_Localization_with_RNNs",
@@ -66,6 +72,7 @@ const projects: Project[] = [
     },
     {
       title: "Transformers for Sentiment Classification and Text Translation",
+      category: "Machine Learning",
       image: sentiment_clf_translation as ImageMetadata,
       link: "https://github.com/albert-queralto/transformers_sentiment_classification_translation",
       preview: "https://github.com/albert-queralto/transformers_sentiment_classification_translation",
@@ -75,6 +82,7 @@ const projects: Project[] = [
     },
     {
       title: "Energy Prices Data Analysis",
+      category: "Data Science",
       image: energy_prices as ImageMetadata,
       link: "https://github.com/albert-queralto/analysis_energy_prices",
       preview: "https://github.com/albert-queralto/analysis_energy_prices",
@@ -93,12 +101,23 @@ const projects: Project[] = [
     <h2 class="text-lg text-[var(--sec)] mb-2 shiny-sec">Personal Work</h2>
     <h3 class="text-4xl md:text-5xl font-medium mb-8">Projects</h3>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+    <div class="flex flex-wrap gap-2 mb-8" id="project-filters">
+      {["All", "Data Science", "Machine Learning", "Web"].map((cat) => (
+        <button
+          data-filter={cat}
+          data-active={cat === "All" ? "" : undefined}
+          class="px-4 py-1.5 rounded-full text-sm border transition duration-300 ease-in-out text-[var(--white-icon)] border-[var(--white-icon-tr)] bg-[#1414149c] hover:bg-[var(--white-icon-tr)] hover:text-[var(--white)]"
+        >
+          {cat}
+        </button>
+      ))}
+    </div>
+    <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-2 gap-8">
       {
         projects.map((project) => {
           const hasLivePreview = project.preview !== project.link;
           return (
-            <div class="group flex flex-col rounded-2xl border border-[var(--white-icon-tr)] bg-[#1414149c] overflow-hidden hover:border-[var(--sec)] transition-colors duration-300">
+            <div class="group flex flex-col rounded-2xl border border-[var(--white-icon-tr)] bg-[#1414149c] overflow-hidden hover:border-[var(--sec)] transition-colors duration-300" data-category={project.category}>
               <a href={project.preview} target="_blank" rel="noopener noreferrer" class="block">
                 <div class="overflow-hidden">
                   <Image
@@ -180,4 +199,30 @@ const projects: Project[] = [
       </svg>
     </a>
   </div>
+
+  <style>
+    [data-filter][data-active] {
+      background-color: var(--sec) !important;
+      color: var(--background) !important;
+      border-color: var(--sec) !important;
+      font-weight: 500;
+    }
+  </style>
+
+  <script>
+    const filters = document.querySelectorAll<HTMLButtonElement>('#project-filters button');
+    const cards = document.querySelectorAll<HTMLElement>('#projects-grid [data-category]');
+
+    filters.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const filter = btn.dataset.filter;
+        filters.forEach((b) => b.removeAttribute('data-active'));
+        btn.setAttribute('data-active', '');
+        cards.forEach((card) => {
+          card.style.display =
+            filter === 'All' || card.dataset.category === filter ? '' : 'none';
+        });
+      });
+    });
+  </script>
 </section>

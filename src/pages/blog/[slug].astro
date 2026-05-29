@@ -1,0 +1,64 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Nav from "@/components/nav.astro";
+import Footer from "@/components/footer.astro";
+import { getCollection, render } from "astro:content";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("blog", ({ data }) => !data.draft);
+  return posts.map((post) => ({
+    params: { slug: post.id },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+---
+
+<Layout title={`${post.data.title} — Albert Queraltó`}>
+  <Nav />
+  <main class="max-w-3xl mx-auto py-24 md:py-36 text-[var(--white)]">
+    <a
+      href="/blog"
+      class="inline-flex items-center gap-1.5 text-sm text-[var(--white-icon)] hover:text-[var(--white)] transition-colors mb-10"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
+        <path d="M7.82843 10.9999H20V12.9999H7.82843L13.1924 18.3638L11.7782 19.778L4 11.9999L11.7782 4.22168L13.1924 5.63589L7.82843 10.9999Z" />
+      </svg>
+      Back to Blog
+    </a>
+
+    <p class="text-sm text-[var(--white-icon)] mb-3">
+      {post.data.date.toLocaleDateString("en-GB", { year: "numeric", month: "long", day: "numeric" })}
+    </p>
+
+    <h1 class="text-3xl md:text-4xl font-semibold leading-tight mb-4">
+      {post.data.title}
+    </h1>
+
+    <p class="text-base text-[var(--white-icon)] mb-6">{post.data.description}</p>
+
+    <div class="flex flex-wrap gap-2 mb-10">
+      {post.data.tags.map((tag) => (
+        <span class="text-xs px-2 py-1 rounded-md bg-[var(--white-icon-tr)] text-[var(--sec)]">
+          {tag}
+        </span>
+      ))}
+    </div>
+
+    <div class="prose prose-invert max-w-none
+      prose-headings:text-[var(--white)] prose-headings:font-semibold
+      prose-p:text-[var(--white-icon)]
+      prose-a:text-[var(--sec)] prose-a:no-underline hover:prose-a:underline
+      prose-code:text-[var(--sec)] prose-code:bg-[var(--white-icon-tr)] prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-code:before:content-none prose-code:after:content-none
+      prose-pre:bg-[#1414149c] prose-pre:border prose-pre:border-[var(--white-icon-tr)] prose-pre:rounded-xl
+      prose-blockquote:border-[var(--sec)] prose-blockquote:text-[var(--white-icon)]
+      prose-strong:text-[var(--white)]
+      prose-li:text-[var(--white-icon)]
+      prose-hr:border-[var(--white-icon-tr)]">
+      <Content />
+    </div>
+  </main>
+  <Footer />
+</Layout>
