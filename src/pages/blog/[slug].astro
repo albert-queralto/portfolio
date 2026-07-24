@@ -20,7 +20,8 @@ interface Props {
 
 const { post } = Astro.props;
 const { Content } = await render(post);
-const readingTime = Math.max(1, Math.ceil(post.body.trim().split(/\s+/).length / 220));
+const postBody = post.body ?? "";
+const readingTime = Math.max(1, Math.ceil(postBody.trim().split(/\s+/).length / 220));
 const canonical = new URL(`/blog/${post.id}`, Astro.site ?? site.url).toString();
 const articleData = {
   "@context": "https://schema.org",
@@ -46,7 +47,7 @@ const articleData = {
 >
   <meta slot="head" property="article:published_time" content={post.data.date.toISOString()} />
   {post.data.tags.map((tag) => <meta slot="head" property="article:tag" content={tag} />)}
-  <script slot="head" type="application/ld+json" set:html={JSON.stringify(articleData)} />
+  <script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify(articleData)} />
 
   <Nav />
   <main id="main-content" class="mx-auto max-w-3xl py-24 text-[var(--white)] md:py-36">

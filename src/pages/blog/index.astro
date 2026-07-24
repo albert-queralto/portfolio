@@ -6,10 +6,13 @@ import { getCollection } from "astro:content";
 
 const posts = (await getCollection("blog", ({ data }) => !data.draft))
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
-  .map((post) => ({
-    ...post,
-    readingTime: Math.max(1, Math.ceil(post.body.trim().split(/\s+/).length / 220)),
-  }));
+  .map((post) => {
+    const postBody = post.body ?? "";
+    return {
+      ...post,
+      readingTime: Math.max(1, Math.ceil(postBody.trim().split(/\s+/).length / 220)),
+    };
+  });
 ---
 
 <Layout
