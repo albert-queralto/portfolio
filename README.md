@@ -3,7 +3,7 @@
 A minimalist portfolio site for **Albert Queraltó**, Data Scientist / ML Engineer. It showcases competencies across data science, ML engineering, big data/cloud, and software development, plus selected projects and contact options.
 
 ## Live Site
-- https://albert-queralto.vercel.app/
+- http://albertqueralto.dev/
 
 ## Overview
 The site features:
@@ -33,5 +33,5 @@ The site features:
 - Social: GitHub, LinkedIn, Email
 
 ## Copyright
-© 2025 Albert Queraltó. All rights reserved.
+© 2026 Albert Queraltó. All rights reserved.
 

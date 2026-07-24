@@ -1,0 +1,12 @@
+services:
+  portfolio:
+    container_name: albert-portfolio
+    image: albert-portfolio:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:80:80"
+    security_opt:
+      - no-new-privileges:true

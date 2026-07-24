@@ -20,6 +20,7 @@ export default defineConfig({
       },
     },
   },
+  site: 'https://albertqueralto.dev',
   output: "static",
   build: {
     inlineStylesheets: "auto",
