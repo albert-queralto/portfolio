@@ -259,7 +259,9 @@ const categories = ["All", "Data Science", "Machine Learning", "Web"] as const;
     const cards = Array.from(grid.querySelectorAll<HTMLElement>(".project-card[data-category]"));
 
     filterContainer.addEventListener("click", (event) => {
-      const button = (event.target as Element).closest<HTMLButtonElement>("button[data-filter]");
+      if (!(event.target instanceof Element)) return;
+
+      const button = event.target.closest<HTMLButtonElement>("button[data-filter]");
       if (!button) return;
 
       const selected = button.dataset.filter ?? "All";
@@ -271,12 +273,19 @@ const categories = ["All", "Data Science", "Machine Learning", "Web"] as const;
 
       cards.forEach((card) => {
         const isVisible = selected === "All" || card.dataset.category === selected;
-        card.hidden = !isVisible;
+        card.toggleAttribute("hidden", !isVisible);
+        card.classList.toggle("hidden", !isVisible);
         if (isVisible) visibleCount += 1;
       });
 
       if (count) count.textContent = `${visibleCount} ${visibleCount === 1 ? "project" : "projects"}`;
     });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initialiseProjectFilters, { once: true });
+  } else {
+    initialiseProjectFilters();
   }
 
   document.addEventListener("astro:page-load", initialiseProjectFilters);
