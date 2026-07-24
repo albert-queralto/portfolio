@@ -1,108 +1,167 @@
 ---
-import LetterGlitch from "../React/LetterGlitch.tsx";
-import LogoWall from "../components/logoWall.astro";
-import SkillsList from "../React/SkillsList.tsx";
-import GitHubIcon from "../components/icons/GitHubIcon.astro";
-import LinkedInIcon from "../components/icons/LinkedInIcon.astro";
-import EmailIcon from "../components/icons/EmailIcon.astro";
-import DownloadIcon from "../components/icons/DownloadIcon.astro";
+import LetterGlitch from "@/React/LetterGlitch";
+import LogoWall from "@/components/logoWall.astro";
+import SkillsList from "@/React/SkillsList";
+import GitHubIcon from "@/components/icons/GitHubIcon.astro";
+import LinkedInIcon from "@/components/icons/LinkedInIcon.astro";
+import EmailIcon from "@/components/icons/EmailIcon.astro";
+import DownloadIcon from "@/components/icons/DownloadIcon.astro";
+import { site } from "@/data/site";
+
+const proofPoints = [
+  { label: "Research", value: "PhD-trained problem solving" },
+  { label: "Engineering", value: "Production Python & APIs" },
+  { label: "ML focus", value: "Time series & anomaly detection" },
+];
 ---
 
-<section class="text-[var(--white)] mt-12 md:mt-0" id="home">
-  <div class="max-w-5xl mx-auto space-y-8 md:py-36 pb-14">
-    <div class="text-left space-y-4">
-      <p class="text-md md:text-lg text-[var(--white-icon)] shiny-white">
-        Hi, I'm Albert Queraltó
-      </p>
-      <div
-        class="flex flex-col lg:flex-row lg:items-center space-y-4 lg:space-y-0 lg:space-x-8 md:gap-4"
-      >
-        <h1
-          class="text-[var(--white)] text-5xl md:text-6xl font-medium text-pretty leading-none"
-        >
-          Data <br /> Scientist /<span class="shiny-sec"> Software Developer</span>
-        </h1>
-        <p class="text-md md:text-2xl text-[var(--white-icon)]">
-        Transforming raw data into intelligent, scalable solutions
-        with advanced <span class="text-[var(--sec)] shiny-sec"
-            >machine learning</span
-          > and <span class="text-[var(--sec)] shiny-sec">data science</span
-          >.
+<section id="home" aria-labelledby="hero-title" class="text-[var(--white)]">
+  <div class="mx-auto max-w-5xl pb-16 pt-16 md:pb-24 md:pt-36">
+    <div class="grid items-center gap-10 lg:grid-cols-[1.3fr_0.7fr] lg:gap-14">
+      <div>
+        <p class="mb-4 text-sm font-medium tracking-wide text-[var(--sec)] md:text-base">
+          {site.name}, PhD · {site.location}
         </p>
+        <h1
+          id="hero-title"
+          class="max-w-4xl text-balance text-4xl font-semibold leading-[1.05] tracking-[-0.035em] md:text-6xl"
+        >
+          I build reliable <span class="shiny-sec">machine-learning systems</span>
+          from real-world data.
+        </h1>
+        <p class="mt-6 max-w-2xl text-pretty text-base leading-relaxed text-[var(--white-icon)] md:text-xl">
+          Data scientist and software developer working across time-series modelling,
+          anomaly detection, data pipelines, APIs, and full-stack decision tools.
+          Currently applying these skills to environmental monitoring systems.
+        </p>
+
+        <div class="mt-8 flex flex-wrap items-center gap-3">
+          <a
+            href="#projects"
+            class="inline-flex min-h-12 items-center justify-center rounded-xl bg-[var(--sec)] px-5 py-3 text-sm font-semibold text-[var(--background)] transition-transform hover:-translate-y-0.5"
+          >
+            View selected work
+          </a>
+          <a
+            href="/CV.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex min-h-12 items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--card-bg)] px-5 py-3 text-sm font-medium text-[var(--white)] transition-colors hover:border-[var(--sec)]"
+          >
+            <DownloadIcon />
+            View CV
+          </a>
+        </div>
+
+        <div class="mt-5 flex items-center gap-2" aria-label="Social links">
+          <a
+            target="_blank"
+            rel="noopener noreferrer"
+            href={site.github}
+            aria-label="Albert Queraltó on GitHub"
+            class="flex size-11 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--card-bg)] text-[var(--white-icon)] transition-colors hover:border-[var(--sec)] hover:text-[var(--white)]"
+          >
+            <GitHubIcon />
+          </a>
+          <a
+            target="_blank"
+            rel="noopener noreferrer"
+            href={site.linkedin}
+            aria-label="Albert Queraltó on LinkedIn"
+            class="flex size-11 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--card-bg)] text-[var(--white-icon)] transition-colors hover:border-[var(--sec)] hover:text-[var(--white)]"
+          >
+            <LinkedInIcon />
+          </a>
+          <a
+            href={`mailto:${site.email}?subject=Portfolio%20enquiry`}
+            aria-label={`Email ${site.name}`}
+            class="flex size-11 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--card-bg)] text-[var(--white-icon)] transition-colors hover:border-[var(--sec)] hover:text-[var(--white)]"
+          >
+            <EmailIcon />
+          </a>
+        </div>
       </div>
-      <div class="flex justify-start gap-2 pt-3 md:pt-6">
-        <a
-          target="_blank"
-          href="https://github.com/albert-queralto"
-          aria-label="GitHub"
-          class="text-[var(--white-icon)] hover:text-white transition duration-300 ease-in-out border border-1 border-[var(--white-icon-tr)] p-3 rounded-xl bg-[var(--card-bg)] hover:bg-[var(--white-icon-tr)]"
-        >
-          <GitHubIcon />
-        </a>
-        <a
-          target="_blank"
-          href="https://linkedin.com/in/albertqueralto"
-          aria-label="LinkedIn"
-          class="text-[var(--white-icon)] hover:text-white transition duration-300 ease-in-out border border-1 border-[var(--white-icon-tr)] p-3 rounded-xl bg-[var(--card-bg)] hover:bg-[var(--white-icon-tr)]"
-        >
-          <LinkedInIcon />
-        </a>
-        <a
-          target="_blank"
-          href="https://mail.google.com/mail/?view=cm&fs=1&to=albert@albertqueralto.dev&su=Hey%20Albert!"
-          aria-label="Email"
-          class="text-[var(--white-icon)] hover:text-white transition duration-300 ease-in-out border border-1 border-[var(--white-icon-tr)] p-3 rounded-xl bg-[var(--card-bg)] hover:bg-[var(--white-icon-tr)]"
-        >
-          <EmailIcon />
-        </a>
-        <!-- <a
-          href="/CV.pdf"
-          target="_blank"
-          aria-label="Download CV"
-          class="flex items-center gap-2 text-[var(--white-icon)] hover:text-white transition duration-300 ease-in-out border border-1 border-[var(--white-icon-tr)] px-4 py-3 rounded-xl bg-[var(--card-bg)] hover:bg-[var(--white-icon-tr)]"
-        > -->
-          <!-- <DownloadIcon />
-          <span class="text-sm hidden md:inline">CV</span> -->
-        </a>
+
+      <div
+        class="relative mx-auto aspect-square w-full max-w-[340px] overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--card-bg)] lg:max-w-none"
+        aria-hidden="true"
+      >
+        <div class="absolute inset-0 opacity-90">
+          <LetterGlitch
+            client:load
+            glitchColors={["#446e91", "#76a4ff", "#1a2338"]}
+            glitchSpeed={45}
+            centerVignette={false}
+            outerVignette={true}
+            smooth={true}
+          />
+        </div>
+        <div class="absolute inset-x-5 bottom-5 rounded-2xl border border-white/10 bg-black/50 p-4 backdrop-blur-md">
+          <p class="font-mono text-xs uppercase tracking-[0.18em] text-white/60">
+            Data → Models → Products
+          </p>
+          <p class="mt-1 text-sm font-medium text-white">
+            Useful systems, not notebook-only demos.
+          </p>
+        </div>
       </div>
     </div>
 
-    <LogoWall />
+    <dl class="mt-12 grid gap-3 sm:grid-cols-3">
+      {
+        proofPoints.map((item) => (
+          <div class="rounded-2xl border border-[var(--border)] bg-[var(--card-bg)] p-4">
+            <dt class="text-xs font-semibold uppercase tracking-[0.13em] text-[var(--sec)]">
+              {item.label}
+            </dt>
+            <dd class="mt-1 text-sm font-medium text-[var(--white)]">{item.value}</dd>
+          </div>
+        ))
+      }
+    </dl>
 
-    <div class="flex flex-col lg:flex-row items-center gap-8">
-      <SkillsList client:load />
-      <div
-        class="flex justify-center md:w-full md:h-[292px] size-[290px] pt-3 md:pt-9 md:ml-16"
-      >
-        <LetterGlitch
-          client:load
-          glitchColors={["#446e91ff", "#76a4ffff", "#1a2338ff"]}
-          glitchSpeed={33}
-          centerVignette={false}
-          outerVignette={true}
-          smooth={true}
-        />
+    <div class="mt-10">
+      <LogoWall />
+    </div>
+
+    <div class="mt-8 grid items-start gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:gap-12">
+      <div class="pt-2">
+        <p class="text-sm font-semibold uppercase tracking-[0.15em] text-[var(--sec)]">
+          How I work
+        </p>
+        <h2 class="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
+          From ambiguous problem to maintainable system.
+        </h2>
+        <p class="mt-4 max-w-xl text-[var(--white-icon)]">
+          I combine scientific reasoning with software engineering: clarify the decision,
+          validate the data, build the smallest useful model, and make the result observable
+          and usable in production.
+        </p>
       </div>
+      <SkillsList client:load />
     </div>
   </div>
 </section>
 
 <style is:global>
   .shiny-sec {
-    background: linear-gradient(135deg, #76a8ff 25%, #e5f3ff 50%, #76c1ff 75%);
-    background-size: 400% 100%;
-    -webkit-background-clip: text;
+    background: linear-gradient(120deg, #76a8ff 20%, #e5f3ff 50%, #76c1ff 80%);
+    background-size: 300% 100%;
     background-clip: text;
     color: transparent;
-    animation: shine 3s linear infinite;
+    animation: shine 5s ease-in-out infinite;
+  }
+
+  html.light .shiny-sec {
+    background-image: linear-gradient(120deg, #0f4f8c 20%, #3194dd 50%, #0f4f8c 80%);
   }
 
   @keyframes shine {
-    0% {
+    0%,
+    100% {
       background-position: 100% 50%;
     }
-    30%,
-    70% {
+    50% {
       background-position: 0% 50%;
     }
   }

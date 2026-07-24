@@ -1,122 +1,76 @@
 ---
-import GitHubIcon from "../components/icons/GitHubIcon.astro";
-import LinkedInIcon from "../components/icons/LinkedInIcon.astro";
-import EmailIcon from "../components/icons/EmailIcon.astro";
-import DownloadIcon from "../components/icons/DownloadIcon.astro";
+import GitHubIcon from "@/components/icons/GitHubIcon.astro";
+import LinkedInIcon from "@/components/icons/LinkedInIcon.astro";
+import EmailIcon from "@/components/icons/EmailIcon.astro";
+import DownloadIcon from "@/components/icons/DownloadIcon.astro";
+import { site } from "@/data/site";
+
+const year = new Date().getFullYear();
 ---
 
-<footer class="w-full py-12 border-t border-[#ffffff10]">
-  <div class="max-w-5xl mx-auto">
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-10">
-      <div class="flex flex-col lg:items-start items-center">
-        <div class="flex space-x-6 sm:space-x-8">
-          <a
-            href="https://github.com/albert-queralto"
-            target="_blank"
-            aria-label="GitHub"
-            class="flex flex-col items-center group"
-          >
-            <div class="text-[var(--white-icon)] hover:text-[var(--white)] transition duration-300 ease-in-out">
-              <GitHubIcon />
-            </div>
-          </a>
-          <a
-            href="https://linkedin.com/in/albertqueralto"
-            target="_blank"
-            aria-label="LinkedIn"
-            class="flex flex-col items-center group"
-          >
-            <div class="text-[var(--white-icon)] hover:text-[var(--white)] transition duration-300 ease-in-out">
-              <LinkedInIcon />
-            </div>
-          </a>
-          <a
-            href="https://mail.google.com/mail/?view=cm&fs=1&to=albert@albertqueralto.dev&su=Hey%20Albert!"
-            target="_blank"
-            aria-label="Email"
-            class="flex flex-col items-center group"
-          >
-            <div class="text-[var(--white-icon)] hover:text-[var(--white)] transition duration-300 ease-in-out">
-              <EmailIcon />
-            </div>
-          </a>
-          <!-- <a
-            href="/CV.pdf"
-            target="_blank"
-            aria-label="Download CV"
-            class="flex flex-col items-center group"
-          > -->
-            <!-- <div class="text-[var(--white-icon)] hover:text-[var(--white)] transition duration-300 ease-in-out">
-              <DownloadIcon />
-            </div> -->
-          </a>
-        </div>
+<footer class="border-t border-[var(--border)] py-10 text-[var(--white-icon)]">
+  <div class="mx-auto max-w-5xl">
+    <div class="flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
+      <div>
+        <p class="font-semibold text-[var(--white)]">{site.name}</p>
+        <p class="mt-1 max-w-md text-sm">
+          Data science, machine learning, and software engineering for real-world systems.
+        </p>
       </div>
 
-      <div class="flex flex-col items-center space-y-6">
-        <div class="grid grid-cols-1 gap-3 w-full max-w-xs py-6">
-          {
-            [
-              {
-                desc: "Built with",
-                name: "Astro",
-                icon: "/svg/astro.svg",
-                alt: "Astro Logo",
-              },
-              {
-                desc: "Styled with",
-                name: "TailwindCSS",
-                icon: "/svg/tailwindcss.svg",
-                alt: "TailwindCSS Logo",
-              },
-              {
-                desc: "Deployed on",
-                name: "Vercel",
-                icon: "/svg/vercel.svg",
-                alt: "Vercel Logo",
-              },
-            ].map((tech) => (
-              <div class="flex items-center justify-center lg:justify-normal space-x-3">
-                <span class="text-[var(--white-icon)] text-sm">
-                  {tech.desc}
-                </span>
-                <img
-                  src={tech.icon}
-                  alt={tech.alt}
-                  class="h-5 w-5 object-contain filter brightness-0 invert opacity-50"
-                  loading="lazy"
-                />
-                <span class="text-[var(--white-icon)] text-sm">
-                  {tech.name}
-                </span>
-              </div>
-            ))
-          }
-        </div>
-      </div>
-
-      <div class="flex flex-col items-center lg:items-start space-y-6">
-        <div class="w-full max-w-xs">
-          <!-- <iframe
-            style="border-radius:12px; border:0;"
-            src="https://open.spotify.com/embed/playlist/2irOd49FRRLFWYccolQeea?utm_source=generator&theme=0&locale=en_US"
-            class="w-full h-40"
-            allowfullscreen=""
-            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-            loading="lazy"></iframe> -->
-        </div>
-      </div>
+      <nav aria-label="Footer navigation">
+        <ul class="flex flex-wrap gap-x-5 gap-y-2 text-sm">
+          <li><a class="hover:text-[var(--white)]" href="/#home">Home</a></li>
+          <li><a class="hover:text-[var(--white)]" href="/#projects">Projects</a></li>
+          <li><a class="hover:text-[var(--white)]" href="/blog">Blog</a></li>
+          <li><a class="hover:text-[var(--white)]" href="/#contact">Contact</a></li>
+        </ul>
+      </nav>
     </div>
 
-    <div class="mt-12 pt-8 border-t border-[#ffffff10]">
-      <p class="text-center text-sm text-[var(--white-icon)] space-y-2">
-        <!-- If you are using this template, by MIT License you can't remove the copyright notice -->
-        <span class="block sm:inline"
-          >Copyright © {new Date().getFullYear()} <a href="https://github.com/albert-queralto"
-            >Albert Queraltó</a
-          >. All rights reserved.</span
+    <div class="mt-8 flex flex-col gap-6 border-t border-[var(--border)] pt-8 sm:flex-row sm:items-center sm:justify-between">
+      <div class="flex items-center gap-2">
+        <a
+          href={site.github}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="GitHub"
+          class="flex size-10 items-center justify-center rounded-xl border border-[var(--border)] transition-colors hover:border-[var(--sec)] hover:text-[var(--white)]"
         >
-      </p>
+          <GitHubIcon />
+        </a>
+        <a
+          href={site.linkedin}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="LinkedIn"
+          class="flex size-10 items-center justify-center rounded-xl border border-[var(--border)] transition-colors hover:border-[var(--sec)] hover:text-[var(--white)]"
+        >
+          <LinkedInIcon />
+        </a>
+        <a
+          href={`mailto:${site.email}`}
+          aria-label="Email"
+          class="flex size-10 items-center justify-center rounded-xl border border-[var(--border)] transition-colors hover:border-[var(--sec)] hover:text-[var(--white)]"
+        >
+          <EmailIcon />
+        </a>
+        <a
+          href="/CV.pdf"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="View CV"
+          class="flex min-h-10 items-center gap-2 rounded-xl border border-[var(--border)] px-3 text-sm transition-colors hover:border-[var(--sec)] hover:text-[var(--white)]"
+        >
+          <DownloadIcon />
+          CV
+        </a>
+      </div>
+
+      <div class="text-sm sm:text-right">
+        <p>Built with Astro and Tailwind CSS. Served with Docker and Nginx.</p>
+        <p class="mt-1">© {year} {site.name}. All rights reserved.</p>
+      </div>
     </div>
   </div>
 </footer>

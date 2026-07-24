@@ -1,228 +1,282 @@
 ---
 import { Image } from "astro:assets";
-import catalunya_weather_app from "../../public/catalunya_weather_app.png";
-import obesitydashboard from "../../public/obesitydashboard.png";
-import webscrapping_esios from "../../public/webscrapping_esios.png";
+import catalunyaWeatherApp from "../../public/catalunya_weather_app.png";
+import obesityDashboard from "../../public/obesitydashboard.png";
+import webScrapingEsios from "../../public/web_scraping_esios.png";
 import blackjack from "../../public/blackjack.png";
-import sensor_error_detection from "../../public/Sensor_Error_Detection_and_Localization_with_RNNs.png";
-import sentiment_clf_translation from "../../public/transformers_sentiment_text.png";
-import energy_prices from "../../public/energy_prices.png";
+import sensorErrorDetection from "../../public/Sensor_Error_Detection_and_Localization_with_RNNs.png";
+import sentimentClassification from "../../public/transformers_sentiment_text.png";
+import energyPrices from "../../public/energy_prices.png";
 
 interface Project {
   title: string;
   image: ImageMetadata;
-  link: string;
-  preview: string;
-  status: string;
+  source: string;
+  preview?: string;
+  status: "Deployed" | "Completed" | "In progress";
   description: string;
   tags: string[];
-  category: string;
+  category: "Data Science" | "Machine Learning" | "Web";
+  focus: string;
 }
 
 const projects: Project[] = [
   {
+    title: "Sensor Error Detection and Localisation with RNNs",
+    category: "Machine Learning",
+    focus: "Deep learning · Time series",
+    image: sensorErrorDetection,
+    source: "https://github.com/albert-queralto/Sensor_Error_Detection_and_Localization_with_RNNs",
+    status: "Completed",
+    description:
+      "A recurrent-neural-network pipeline using LSTM and GRU models to detect and localise faults in multivariate sensor streams.",
+    tags: ["Python", "PyTorch", "LSTM", "GRU", "Time series"],
+  },
+  {
     title: "Catalunya Weather App",
     category: "Web",
-    image: catalunya_weather_app as ImageMetadata,
-    link: "https://github.com/albert-queralto/catalunya_weather_app",
-    preview: "https://github.com/albert-queralto/catalunya_weather_app",
+    focus: "Full-stack data product",
+    image: catalunyaWeatherApp,
+    source: "https://github.com/albert-queralto/catalunya_weather_app",
     status: "In progress",
-    description: "A web app that fetches and visualises real-time weather data for Catalan cities, using open meteorological APIs and interactive charts.",
+    description:
+      "A full-stack application that collects and visualises current weather data for Catalan cities through an API-backed React interface.",
     tags: ["Python", "FastAPI", "React", "Recharts"],
   },
   {
     title: "Obesity Dashboard",
     category: "Data Science",
-    image: obesitydashboard as ImageMetadata,
-    link: "https://github.com/albert-queralto/dashboard_obesity_analysis",
+    focus: "Interactive analytics",
+    image: obesityDashboard,
+    source: "https://github.com/albert-queralto/dashboard_obesity_analysis",
     preview: "https://dashboard-obesity-analysis.onrender.com/",
     status: "Deployed",
-    description: "Interactive dashboard analysing global obesity trends with demographic breakdowns, built with Bokeh and deployed on Render.",
+    description:
+      "An interactive dashboard for exploring global obesity patterns and demographic differences, built with a Python analytics stack.",
     tags: ["Python", "Bokeh", "Pandas", "Render"],
   },
   {
-    title: "Webscraping of Energy Prices Data and Renewable Energy Production",
+    title: "Spanish Energy Data Pipeline",
     category: "Data Science",
-    image: webscrapping_esios as ImageMetadata,
-    link: "https://github.com/albert-queralto/scraping-energy-prices-spain",
-    preview: "https://github.com/albert-queralto/scraping-energy-prices-spain",
+    focus: "Data ingestion · Automation",
+    image: webScrapingEsios,
+    source: "https://github.com/albert-queralto/scraping-energy-prices-spain",
     status: "Completed",
-    description: "Automated scraper that collects hourly electricity prices and renewable energy production data from Spain's ESIOS API and stores it in a structured database.",
-    tags: ["Python", "BeautifulSoup", "REST API", "PostgreSQL", "Selenium"],
+    description:
+      "An automated pipeline that gathers electricity-price and renewable-generation data from Spanish energy sources and stores structured results for analysis.",
+    tags: ["Python", "REST API", "PostgreSQL", "Selenium"],
   },
-    {
-      title: "JavaScript Blackjack",
-      category: "Web",
-      image: blackjack as ImageMetadata,
-      link: "https://github.com/albert-queralto/js_blackjack",
-      preview: "https://js-blackjack.vercel.app/",
-      status: "Deployed",
-      description: "A fully playable Blackjack game in the browser.",
-      tags: ["JavaScript", "HTML", "CSS", "Vercel"],
-    },
-    {
-      title: "Sensor Error Detection and Localization with RNNs",
-      category: "Machine Learning",
-      image: sensor_error_detection as ImageMetadata,
-      link: "https://github.com/albert-queralto/Sensor_Error_Detection_and_Localization_with_RNNs",
-      preview: "https://github.com/albert-queralto/Sensor_Error_Detection_and_Localization_with_RNNs",
-      status: "Completed",
-      description: "Deep learning pipeline using LSTM and GRU networks to detect and localise faults in multivariate sensor time-series data.",
-      tags: ["Python", "PyTorch", "LSTM", "GRU", "Time Series"],
-    },
-    {
-      title: "Transformers for Sentiment Classification and Text Translation",
-      category: "Machine Learning",
-      image: sentiment_clf_translation as ImageMetadata,
-      link: "https://github.com/albert-queralto/transformers_sentiment_classification_translation",
-      preview: "https://github.com/albert-queralto/transformers_sentiment_classification_translation",
-      status: "Completed",
-      description: "Fine-tuned BERT-based models for multilingual sentiment classification and sequence-to-sequence translation using HuggingFace Transformers.",
-      tags: ["Python", "HuggingFace", "BERT", "PyTorch", "NLP"],
-    },
-    {
-      title: "Energy Prices Data Analysis",
-      category: "Data Science",
-      image: energy_prices as ImageMetadata,
-      link: "https://github.com/albert-queralto/analysis_energy_prices",
-      preview: "https://github.com/albert-queralto/analysis_energy_prices",
-      status: "Completed",
-      description: "Exploratory data analysis and statistical modelling of Spanish energy market prices, identifying seasonal patterns and price drivers.",
-      tags: ["Python", "Pandas", "Matplotlib", "Statsmodels"],
-    }
+  {
+    title: "Transformer NLP Experiments",
+    category: "Machine Learning",
+    focus: "NLP · Transfer learning",
+    image: sentimentClassification,
+    source: "https://github.com/albert-queralto/transformers_sentiment_classification_translation",
+    status: "Completed",
+    description:
+      "Fine-tuning experiments for multilingual sentiment classification and sequence-to-sequence translation with transformer models.",
+    tags: ["Python", "Transformers", "BERT", "PyTorch", "NLP"],
+  },
+  {
+    title: "Spanish Energy Price Analysis",
+    category: "Data Science",
+    focus: "EDA · Statistical modelling",
+    image: energyPrices,
+    source: "https://github.com/albert-queralto/analysis_energy_prices",
+    status: "Completed",
+    description:
+      "Exploratory and statistical analysis of Spanish electricity-market prices, focused on seasonal behaviour and potential price drivers.",
+    tags: ["Python", "Pandas", "Matplotlib", "Statsmodels"],
+  },
+  {
+    title: "Browser Blackjack",
+    category: "Web",
+    focus: "Frontend application",
+    image: blackjack,
+    source: "https://github.com/albert-queralto/js_blackjack",
+    preview: "https://js-blackjack.vercel.app/",
+    status: "Deployed",
+    description:
+      "A responsive browser implementation of Blackjack with game-state management and a compact interactive interface.",
+    tags: ["JavaScript", "HTML", "CSS", "Vercel"],
+  },
 ];
+
+const categories = ["All", "Data Science", "Machine Learning", "Web"] as const;
 ---
 
-<section
-  id="projects"
-  class="py-12 border-t border-[#ffffff10] text-[var(--white)]"
->
-  <div class="max-w-5xl mx-auto">
-    <h2 class="text-lg text-[var(--sec)] mb-2 shiny-sec">Personal Work</h2>
-    <h3 class="text-4xl md:text-5xl font-medium mb-8">Projects</h3>
-
-    <div class="flex flex-wrap gap-2 mb-8" id="project-filters">
-      {["All", "Data Science", "Machine Learning", "Web"].map((cat) => (
-        <button
-          data-filter={cat}
-          data-active={cat === "All" ? "" : undefined}
-          class="px-4 py-1.5 rounded-full text-sm border transition duration-300 ease-in-out text-[var(--white-icon)] border-[var(--white-icon-tr)] bg-[var(--card-bg)] hover:bg-[var(--white-icon-tr)] hover:text-[var(--white)]"
-        >
-          {cat}
-        </button>
-      ))}
+<section id="projects" aria-labelledby="projects-title" class="border-t border-[var(--border)] py-16 text-[var(--white)] md:py-24">
+  <div class="mx-auto max-w-5xl">
+    <div class="max-w-3xl">
+      <p class="text-sm font-semibold uppercase tracking-[0.15em] text-[var(--sec)]">
+        Selected work
+      </p>
+      <h2 id="projects-title" class="mt-3 text-4xl font-semibold tracking-tight md:text-5xl">
+        Projects that connect models, data, and software.
+      </h2>
+      <p class="mt-4 text-[var(--white-icon)] md:text-lg">
+        A selection of machine-learning experiments, analytical products, data pipelines,
+        and web applications. Each project links to its implementation.
+      </p>
     </div>
-    <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+    <div class="mt-8 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex flex-wrap gap-2" id="project-filters" aria-label="Filter projects">
+        {
+          categories.map((category) => (
+            <button
+              type="button"
+              data-filter={category}
+              aria-pressed={category === "All" ? "true" : "false"}
+              class="project-filter min-h-10 rounded-full border border-[var(--border)] bg-[var(--card-bg)] px-4 py-2 text-sm font-medium text-[var(--white-icon)] transition-colors hover:border-[var(--sec)] hover:text-[var(--white)]"
+            >
+              {category}
+            </button>
+          ))
+        }
+      </div>
+      <p id="project-count" class="text-sm text-[var(--white-icon)]" aria-live="polite">
+        {projects.length} projects
+      </p>
+    </div>
+
+    <div id="projects-grid" class="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2">
       {
         projects.map((project) => {
-          const hasLivePreview = project.preview !== project.link;
+          const destination = project.preview ?? project.source;
           return (
-            <div class="group flex flex-col rounded-2xl border border-[var(--white-icon-tr)] bg-[var(--card-bg)] overflow-hidden hover:border-[var(--sec)] transition-colors duration-300" data-category={project.category}>
-              <a href={project.preview} target="_blank" rel="noopener noreferrer" class="block">
-                <div class="overflow-hidden">
-                  <Image
-                    src={project.image}
-                    alt={`Screenshot of ${project.title}`}
-                    class="w-full h-48 md:h-56 object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                </div>
+            <article
+              class="project-card group flex flex-col overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card-bg)] transition-[border-color,transform] duration-300 hover:-translate-y-1 hover:border-[var(--sec)]"
+              data-category={project.category}
+            >
+              <a
+                href={destination}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="block overflow-hidden border-b border-[var(--border)]"
+                aria-label={`Open ${project.title}${project.preview ? " live preview" : " source code"}`}
+              >
+                <Image
+                  src={project.image}
+                  alt={`Interface preview for ${project.title}`}
+                  widths={[560, 800]}
+                  sizes="(min-width: 768px) 480px, calc(100vw - 40px)"
+                  class="aspect-[16/10] w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                  loading="lazy"
+                />
               </a>
 
-              <div class="flex flex-col flex-grow px-4 py-4 gap-3">
-                <div class="flex items-start justify-between gap-2">
-                  <h4 class="text-lg font-semibold leading-snug">{project.title}</h4>
-                  <span class="shrink-0 text-xs px-2 py-1 rounded-full border border-[var(--white-icon-tr)] text-[var(--white-icon)]">
+              <div class="flex flex-1 flex-col p-5">
+                <div class="flex items-start justify-between gap-4">
+                  <div>
+                    <p class="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--sec)]">
+                      {project.focus}
+                    </p>
+                    <h3 class="mt-2 text-xl font-semibold leading-tight">{project.title}</h3>
+                  </div>
+                  <span class="shrink-0 rounded-full border border-[var(--border)] px-2.5 py-1 text-xs text-[var(--white-icon)]">
                     {project.status}
                   </span>
                 </div>
 
-                <p class="text-sm text-[var(--white-icon)] leading-relaxed flex-grow">
+                <p class="mt-4 flex-1 text-sm leading-relaxed text-[var(--white-icon)]">
                   {project.description}
                 </p>
 
-                <div class="flex flex-wrap gap-2">
+                <ul class="mt-5 flex flex-wrap gap-2" aria-label={`${project.title} technologies`}>
                   {project.tags.map((tag) => (
-                    <span class="text-xs px-2 py-1 rounded-md bg-[var(--white-icon-tr)] text-[var(--sec)]">
+                    <li class="rounded-md bg-[var(--white-icon-tr)] px-2 py-1 text-xs text-[var(--sec-strong)]">
                       {tag}
-                    </span>
+                    </li>
                   ))}
-                </div>
+                </ul>
 
-                <div class="flex gap-2 pt-1">
+                <div class="mt-5 flex flex-wrap gap-2 border-t border-[var(--border)] pt-4">
                   <a
                     target="_blank"
-                    href={project.link}
-                    aria-label="View source on GitHub"
-                    class="flex items-center gap-1.5 text-sm text-[var(--white-icon)] hover:text-white transition duration-300 ease-in-out border border-[var(--white-icon-tr)] px-3 py-2 rounded-xl bg-[var(--card-bg)] hover:bg-[var(--white-icon-tr)]"
+                    rel="noopener noreferrer"
+                    href={project.source}
+                    class="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[var(--border)] px-3 py-2 text-sm font-medium text-[var(--white-icon)] transition-colors hover:border-[var(--sec)] hover:text-[var(--white)]"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
-                      <path d="M24 12L18.3431 17.6569L16.9289 16.2426L21.1716 12L16.9289 7.75736L18.3431 6.34315L24 12ZM2.82843 12L7.07107 16.2426L5.65685 17.6569L0 12L5.65685 6.34315L7.07107 7.75736L2.82843 12ZM9.78845 21H7.66009L14.2116 3H16.3399L9.78845 21Z" />
+                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" class="size-4">
+                      <path d="m8.7 16.7-4.7-4.7 4.7-4.7 1.4 1.4L6.8 12l3.3 3.3-1.4 1.4Zm6.6 0-1.4-1.4 3.3-3.3-3.3-3.3 1.4-1.4 4.7 4.7-4.7 4.7ZM10.2 19l2-14h2l-2 14h-2Z" />
                     </svg>
-                    Source
+                    Source code
                   </a>
-                  {hasLivePreview && (
+                  {project.preview && (
                     <a
                       target="_blank"
+                      rel="noopener noreferrer"
                       href={project.preview}
-                      aria-label="Open live preview"
-                      class="flex items-center gap-1.5 text-sm text-[var(--white-icon)] hover:text-white transition duration-300 ease-in-out border border-[var(--white-icon-tr)] px-3 py-2 rounded-xl bg-[var(--card-bg)] hover:bg-[var(--white-icon-tr)]"
+                      class="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[var(--border)] px-3 py-2 text-sm font-medium text-[var(--white-icon)] transition-colors hover:border-[var(--sec)] hover:text-[var(--white)]"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
-                        <path d="M16.0037 9.41421L7.39712 18.0208L5.98291 16.6066L14.5895 8H7.00373V6H18.0037V17H16.0037V9.41421Z" />
+                      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" class="size-4">
+                        <path d="m16 9.41-8.6 8.61-1.42-1.41L14.59 8H7V6h11v11h-2V9.41Z" />
                       </svg>
-                      Preview
+                      Live preview
                     </a>
                   )}
                 </div>
               </div>
-            </div>
+            </article>
           );
         })
       }
     </div>
+
     <a
       target="_blank"
+      rel="noopener noreferrer"
       href="https://github.com/albert-queralto?tab=repositories"
-      aria-label="GitHub"
-      class="w-full flex items-center justify-center gap-2 mt-9 text-[var(--white-icon)] hover:text-white transition duration-300 ease-in-out border border-[var(--white-icon-tr)] p-3 rounded-full bg-[var(--card-bg)] hover:bg-[var(--white-icon-tr)] hover:scale-105"
+      class="mt-8 flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl border border-[var(--border)] bg-[var(--card-bg)] px-5 py-3 font-medium text-[var(--white-icon)] transition-colors hover:border-[var(--sec)] hover:text-[var(--white)]"
     >
-      <span class="md:text-lg text-md">More projects on</span>
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="currentColor"
-        class="size-6"
-      >
-        <path
-          d="M12.001 2C6.47598 2 2.00098 6.475 2.00098 12C2.00098 16.425 4.86348 20.1625 8.83848 21.4875C9.33848 21.575 9.52598 21.275 9.52598 21.0125C9.52598 20.775 9.51348 19.9875 9.51348 19.15C7.00098 19.6125 6.35098 18.5375 6.15098 17.975C6.03848 17.6875 5.55098 16.8 5.12598 16.5625C4.77598 16.375 4.27598 15.9125 5.11348 15.9C5.90098 15.8875 6.46348 16.625 6.65098 16.925C7.55098 18.4375 8.98848 18.0125 9.56348 17.75C9.65098 17.1 9.91348 16.6625 10.201 16.4125C7.97598 16.1625 5.65098 15.3 5.65098 11.475C5.65098 10.3875 6.03848 9.4875 6.67598 8.7875C6.57598 8.5375 6.22598 7.5125 6.77598 6.1375C6.77598 6.1375 7.61348 5.875 9.52598 7.1625C10.326 6.9375 11.176 6.825 12.026 6.825C12.876 6.825 13.726 6.9375 14.526 7.1625C16.4385 5.8625 17.276 6.1375 17.276 6.1375C17.826 7.5125 17.476 8.5375 17.376 8.7875C18.0135 9.4875 18.401 10.375 18.401 11.475C18.401 15.3125 16.0635 16.1625 13.8385 16.4125C14.201 16.725 14.5135 17.325 14.5135 18.2625C14.5135 19.6 14.501 20.675 14.501 21.0125C14.501 21.275 14.6885 21.5875 15.1885 21.4875C19.259 20.1133 21.9999 16.2963 22.001 12C22.001 6.475 17.526 2 12.001 2Z"
-        ></path>
+      Explore more repositories on GitHub
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" class="size-5">
+        <path d="m16 9.41-8.6 8.61-1.42-1.41L14.59 8H7V6h11v11h-2V9.41Z" />
       </svg>
     </a>
   </div>
-
-  <style>
-    [data-filter][data-active] {
-      background-color: var(--sec) !important;
-      color: var(--background) !important;
-      border-color: var(--sec) !important;
-      font-weight: 500;
-    }
-  </style>
-
-  <script>
-    const filters = document.querySelectorAll<HTMLButtonElement>('#project-filters button');
-    const cards = document.querySelectorAll<HTMLElement>('#projects-grid [data-category]');
-
-    filters.forEach((btn) => {
-      btn.addEventListener('click', () => {
-        const filter = btn.dataset.filter;
-        filters.forEach((b) => b.removeAttribute('data-active'));
-        btn.setAttribute('data-active', '');
-        cards.forEach((card) => {
-          card.style.display =
-            filter === 'All' || card.dataset.category === filter ? '' : 'none';
-        });
-      });
-    });
-  </script>
 </section>
+
+<style>
+  .project-filter[aria-pressed="true"] {
+    border-color: var(--sec);
+    background: var(--sec);
+    color: var(--background);
+  }
+</style>
+
+<script>
+  function initialiseProjectFilters() {
+    const filterContainer = document.getElementById("project-filters");
+    const grid = document.getElementById("projects-grid");
+    const count = document.getElementById("project-count");
+    if (!filterContainer || !grid || filterContainer.dataset.ready === "true") return;
+
+    filterContainer.dataset.ready = "true";
+    const filters = Array.from(filterContainer.querySelectorAll<HTMLButtonElement>("button[data-filter]"));
+    const cards = Array.from(grid.querySelectorAll<HTMLElement>(".project-card[data-category]"));
+
+    filterContainer.addEventListener("click", (event) => {
+      const button = (event.target as Element).closest<HTMLButtonElement>("button[data-filter]");
+      if (!button) return;
+
+      const selected = button.dataset.filter ?? "All";
+      let visibleCount = 0;
+
+      filters.forEach((filter) => {
+        filter.setAttribute("aria-pressed", String(filter === button));
+      });
+
+      cards.forEach((card) => {
+        const isVisible = selected === "All" || card.dataset.category === selected;
+        card.hidden = !isVisible;
+        if (isVisible) visibleCount += 1;
+      });
+
+      if (count) count.textContent = `${visibleCount} ${visibleCount === 1 ? "project" : "projects"}`;
+    });
+  }
+
+  document.addEventListener("astro:page-load", initialiseProjectFilters);
+</script>

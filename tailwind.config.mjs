@@ -1,3 +1,5 @@
+import typography from "@tailwindcss/typography";
+
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ["./src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}"],
@@ -5,15 +7,15 @@ export default {
     extend: {
       keyframes: {
         scaleAnim: {
-          '0%': { transform: 'scale(1)' },
-          '50%': { transform: 'scale(1.1)' },
-          '100%': { transform: 'scale(1)' },
+          "0%": { transform: "scale(1)" },
+          "50%": { transform: "scale(1.1)" },
+          "100%": { transform: "scale(1)" },
         },
       },
       animation: {
-        scale: 'scaleAnim 300ms ease-in-out',
+        scale: "scaleAnim 300ms ease-in-out",
       },
     },
   },
-  plugins: [require('@tailwindcss/typography')],
+  plugins: [typography],
 };

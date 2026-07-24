@@ -1,9 +1,12 @@
 // @ts-check
+import { fileURLToPath } from "node:url";
 import { defineConfig } from "astro/config";
 import tailwind from "@astrojs/tailwind";
 import react from "@astrojs/react";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
+
+const srcDirectory = fileURLToPath(new URL("./src", import.meta.url));
 
 // https://astro.build/config
 export default defineConfig({
@@ -15,12 +18,12 @@ export default defineConfig({
   vite: {
     resolve: {
       alias: {
-        "@": "/src",
-        "@components": "/src/components",
+        "@": srcDirectory,
+        "@components": `${srcDirectory}/components`,
       },
     },
   },
-  site: 'https://albertqueralto.dev',
+  site: "https://albertqueralto.dev",
   output: "static",
   build: {
     inlineStylesheets: "auto",

@@ -2,7 +2,9 @@
 import Layout from "@/layouts/Layout.astro";
 import Nav from "@/components/nav.astro";
 import Footer from "@/components/footer.astro";
-import { getCollection, render } from "astro:content";
+import { site } from "@/data/site";
+import { getCollection, render, type CollectionEntry } from "astro:content";
+import "katex/dist/katex.min.css";
 
 export async function getStaticPaths() {
   const posts = await getCollection("blog", ({ data }) => !data.draft);
@@ -12,54 +14,130 @@ export async function getStaticPaths() {
   }));
 }
 
+interface Props {
+  post: CollectionEntry<"blog">;
+}
+
 const { post } = Astro.props;
 const { Content } = await render(post);
+const readingTime = Math.max(1, Math.ceil(post.body.trim().split(/\s+/).length / 220));
+const canonical = new URL(`/blog/${post.id}`, Astro.site ?? site.url).toString();
+const articleData = {
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  headline: post.data.title,
+  description: post.data.description,
+  datePublished: post.data.date.toISOString(),
+  author: {
+    "@type": "Person",
+    name: site.name,
+    url: site.url,
+  },
+  mainEntityOfPage: canonical,
+  keywords: post.data.tags.join(", "),
+};
 ---
 
-<Layout title={`${post.data.title} — Albert Queraltó`}>
-  <link slot="head" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" />
+<Layout
+  title={`${post.data.title} — ${site.name}`}
+  description={post.data.description}
+  canonical={canonical}
+  type="article"
+>
+  <meta slot="head" property="article:published_time" content={post.data.date.toISOString()} />
+  {post.data.tags.map((tag) => <meta slot="head" property="article:tag" content={tag} />)}
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(articleData)} />
+
   <Nav />
-  <main class="max-w-3xl mx-auto py-24 md:py-36 text-[var(--white)]">
-    <a
-      href="/blog"
-      class="inline-flex items-center gap-1.5 text-sm text-[var(--white-icon)] hover:text-[var(--white)] transition-colors mb-10"
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
-        <path d="M7.82843 10.9999H20V12.9999H7.82843L13.1924 18.3638L11.7782 19.778L4 11.9999L11.7782 4.22168L13.1924 5.63589L7.82843 10.9999Z" />
-      </svg>
-      Back to Blog
-    </a>
+  <main id="main-content" class="mx-auto max-w-3xl py-24 text-[var(--white)] md:py-36">
+    <article>
+      <a
+        href="/blog"
+        class="inline-flex min-h-10 items-center gap-2 rounded-lg text-sm font-medium text-[var(--white-icon)] transition-colors hover:text-[var(--white)]"
+      >
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" class="size-4">
+          <path d="M7.83 11H20v2H7.83l5.36 5.36-1.41 1.42L4 12l7.78-7.78 1.41 1.42L7.83 11Z" />
+        </svg>
+        Back to all articles
+      </a>
 
-    <p class="text-sm text-[var(--white-icon)] mb-3">
-      {post.data.date.toLocaleDateString("en-GB", { year: "numeric", month: "long", day: "numeric" })}
-    </p>
+      <header class="mt-10 border-b border-[var(--border)] pb-10">
+        <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-[var(--white-icon)]">
+          <time datetime={post.data.date.toISOString()}>
+            {post.data.date.toLocaleDateString("en-GB", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}
+          </time>
+          <span aria-hidden="true">·</span>
+          <span>{readingTime} min read</span>
+        </div>
 
-    <h1 class="text-3xl md:text-4xl font-semibold leading-tight mb-4">
-      {post.data.title}
-    </h1>
+        <h1 class="mt-4 text-balance text-3xl font-semibold leading-tight tracking-tight md:text-5xl">
+          {post.data.title}
+        </h1>
+        <p class="mt-5 text-base leading-relaxed text-[var(--white-icon)] md:text-lg">
+          {post.data.description}
+        </p>
 
-    <p class="text-base text-[var(--white-icon)] mb-6">{post.data.description}</p>
+        <ul class="mt-6 flex flex-wrap gap-2" aria-label="Article topics">
+          {post.data.tags.map((tag) => (
+            <li class="rounded-md bg-[var(--white-icon-tr)] px-2.5 py-1 text-xs text-[var(--sec-strong)]">
+              {tag}
+            </li>
+          ))}
+        </ul>
+      </header>
 
-    <div class="flex flex-wrap gap-2 mb-10">
-      {post.data.tags.map((tag) => (
-        <span class="text-xs px-2 py-1 rounded-md bg-[var(--white-icon-tr)] text-[var(--sec)]">
-          {tag}
-        </span>
-      ))}
-    </div>
-
-    <div class="prose prose-invert max-w-none
-      prose-headings:text-[var(--white)] prose-headings:font-semibold
-      prose-p:text-[var(--white-icon)]
-      prose-a:text-[var(--sec)] prose-a:no-underline hover:prose-a:underline
-      prose-code:text-[var(--sec)] prose-code:bg-[var(--white-icon-tr)] prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-code:before:content-none prose-code:after:content-none
-      prose-pre:bg-[var(--card-bg)] prose-pre:border prose-pre:border-[var(--white-icon-tr)] prose-pre:rounded-xl
-      prose-blockquote:border-[var(--sec)] prose-blockquote:text-[var(--white-icon)]
-      prose-strong:text-[var(--white)]
-      prose-li:text-[var(--white-icon)]
-      prose-hr:border-[var(--white-icon-tr)]">
-      <Content />
-    </div>
+      <div class="article-prose prose mt-10 max-w-none prose-headings:scroll-mt-28 prose-headings:font-semibold prose-a:no-underline hover:prose-a:underline prose-code:before:content-none prose-code:after:content-none">
+        <Content />
+      </div>
+    </article>
   </main>
   <Footer />
 </Layout>
+
+<style is:global>
+  .article-prose {
+    --tw-prose-body: var(--white-icon);
+    --tw-prose-headings: var(--white);
+    --tw-prose-lead: var(--white-icon);
+    --tw-prose-links: var(--sec-strong);
+    --tw-prose-bold: var(--white);
+    --tw-prose-counters: var(--white-icon);
+    --tw-prose-bullets: var(--sec);
+    --tw-prose-hr: var(--border);
+    --tw-prose-quotes: var(--white-icon);
+    --tw-prose-quote-borders: var(--sec);
+    --tw-prose-captions: var(--white-icon);
+    --tw-prose-code: var(--sec-strong);
+    --tw-prose-pre-code: var(--white);
+    --tw-prose-pre-bg: var(--card-bg);
+    --tw-prose-th-borders: var(--border);
+    --tw-prose-td-borders: var(--border);
+  }
+
+  .article-prose :not(pre) > code {
+    border-radius: 0.35rem;
+    background: var(--white-icon-tr);
+    padding: 0.15rem 0.35rem;
+  }
+
+  .article-prose pre {
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+  }
+
+  .article-prose table {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  .article-prose .katex-display {
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-block: 0.5rem;
+  }
+</style>

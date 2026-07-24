@@ -2,240 +2,245 @@
 interface NavItem {
   label: string;
   href: string;
+  homeSection?: string;
   icon: string;
 }
 
 const currentPath = Astro.url.pathname;
-const isHome = currentPath === '/';
+const isHome = currentPath === "/";
 
 const navItems: NavItem[] = [
   {
     label: "Home",
     href: isHome ? "#home" : "/#home",
-    icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M21 20C21 20.5523 20.5523 21 20 21H4C3.44772 21 3 20.5523 3 20V9.48907C3 9.18048 3.14247 8.88917 3.38606 8.69972L11.3861 2.47749C11.7472 2.19663 12.2528 2.19663 12.6139 2.47749L20.6139 8.69972C20.8575 8.88917 21 9.18048 21 9.48907V20ZM19 19V9.97815L12 4.53371L5 9.97815V19H19Z"></path></svg>`,
+    homeSection: "home",
+    icon: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.49a1 1 0 0 1 .39-.79l8-6.22a1 1 0 0 1 1.22 0l8 6.22a1 1 0 0 1 .39.79V20Zm-2-1V9.98l-7-5.45-7 5.45V19h14Z"/></svg>`,
   },
   {
     label: "Projects",
     href: isHome ? "#projects" : "/#projects",
-    icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M4 5V19H20V7H11.5858L9.58579 5H4ZM12.4142 5H21C21.5523 5 22 5.44772 22 6V20C22 20.5523 21.5523 21 21 21H3C2.44772 21 2 20.5523 2 20V4C2 3.44772 2.44772 3 3 3H10.4142L12.4142 5Z"></path></svg>`,
+    homeSection: "projects",
+    icon: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.41 5H21a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h7.41l2 2ZM4 5v14h16V7h-8.41l-2-2H4Z"/></svg>`,
   },
   {
     label: "Blog",
     href: "/blog",
-    icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M20 22H4C3.44772 22 3 21.5523 3 21V3C3 2.44772 3.44772 2 4 2H20C20.5523 2 21 2.44772 21 3V21C21 21.5523 20.5523 22 20 22ZM19 20V4H5V20H19ZM7 6H11V10H7V6ZM7 12H17V14H7V12ZM7 16H17V18H7V16ZM13 7H17V9H13V7Z"></path></svg>`,
+    icon: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 22H4a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1Zm-1-2V4H5v16h14ZM7 6h4v4H7V6Zm0 6h10v2H7v-2Zm0 4h10v2H7v-2Zm6-9h4v2h-4V7Z"/></svg>`,
   },
   {
     label: "Contact",
     href: isHome ? "#contact" : "/#contact",
-    icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M21.7267 2.95694L16.2734 22.0432C16.1225 22.5716 15.7979 22.5956 15.5563 22.1126L11 13L1.9229 9.36919C1.41322 9.16532 1.41953 8.86022 1.95695 8.68108L21.0432 2.31901C21.5716 2.14285 21.8747 2.43866 21.7267 2.95694ZM19.0353 5.09647L6.81221 9.17085L12.4488 11.4255L15.4895 17.5068L19.0353 5.09647Z"></path></svg>`,
+    homeSection: "contact",
+    icon: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21.73 2.96-5.46 19.08c-.15.53-.47.56-.71.07L11 13 1.92 9.37c-.51-.2-.5-.51.04-.69l19.08-6.36c.53-.18.83.12.69.64ZM19.04 5.1 6.81 9.17l5.64 2.26 3.04 6.08 3.55-12.41Z"/></svg>`,
   },
 ];
 ---
 
-<div class="flex justify-center w-full">
+<div class="pointer-events-none fixed inset-x-0 z-[100] flex justify-center px-3 md:top-6">
   <nav
     id="main-nav"
-    class="fixed left-1/2 -translate-x-1/2 z-[100] bg-[var(--background)] border border-1 border-transparent backdrop-blur-xl transition-all duration-500 ease-in-out md:top-6 md:bottom-auto bottom-0 w-[80%]"
+    aria-label="Primary navigation"
+    class="pointer-events-auto fixed bottom-0 left-1/2 w-full -translate-x-1/2 border border-[var(--border)] nav-surface backdrop-blur-xl transition-[width,background-color,border-radius] duration-500 md:static md:w-[min(80%,760px)] md:translate-x-0 md:rounded-full"
   >
-    <div class="container mx-auto flex justify-center items-center p-3">
-      <ul
-        class="flex w-full justify-between md:space-x-6 md:justify-center md:gap-12 gap-6"
-      >
-        {
-          navItems.map((item) => (
-            <li class="flex-1 md:flex-none">
+    <ul class="mx-auto flex min-h-16 items-stretch justify-between px-2 md:min-h-14 md:items-center md:justify-center md:gap-10 md:px-5">
+      {
+        navItems.map((item) => {
+          const isBlogActive = currentPath.startsWith("/blog") && item.href === "/blog";
+          const isServerActive = isBlogActive || (isHome && item.homeSection === "home");
+
+          return (
+            <li class="flex min-w-0 flex-1 md:flex-none">
               <a
                 href={item.href}
-                class={`flex flex-col items-center gap-1 text-[var(--white-icon)] transition-colors text-xs md:text-base relative group ${currentPath.startsWith('/blog') && item.href === '/blog' ? 'active' : ''}`}
+                data-section={item.homeSection}
+                aria-current={isServerActive ? "page" : undefined}
+                class:list={[
+                  "nav-link relative flex min-h-14 w-full flex-col items-center justify-center gap-0.5 rounded-xl px-2 text-[11px] font-medium text-[var(--white-icon)] transition-colors hover:text-[var(--white)] md:min-h-0 md:w-auto md:flex-row md:gap-2 md:px-1 md:py-2 md:text-sm",
+                  { active: isServerActive },
+                ]}
               >
-                <div class="absolute -left-6 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full transition-all duration-300 scale-0 opacity-0 bg-[#A9FF5B] nav-indicator hidden md:block" />
-                <span class="md:hidden flex items-center justify-center w-6 h-6">
-                  <fragment set:html={item.icon} />
-                </span>
-                <span class="hidden md:inline-block">{item.label}</span>
-                <span class="md:hidden">{item.label}</span>
+                <span class="nav-icon size-5 fill-current md:hidden" set:html={item.icon} />
+                <span class="truncate">{item.label}</span>
+                <span class="nav-indicator absolute bottom-1 h-1 w-1 scale-0 rounded-full bg-[var(--sec)] opacity-0 transition-all md:-left-4 md:bottom-auto md:top-1/2 md:-translate-y-1/2" />
               </a>
             </li>
-          ))
-        }
-        <li class="flex-1 md:flex-none flex items-center justify-center">
-          <button
-            id="theme-toggle"
-            class="flex items-center justify-center text-[var(--white-icon)] hover:text-[var(--white)] transition-colors"
-            aria-label="Toggle theme"
-          >
-            <svg id="toggle-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12 18C8.68629 18 6 15.3137 6 12C6 8.68629 8.68629 6 12 6C15.3137 6 18 8.68629 18 12C18 15.3137 15.3137 18 12 18ZM12 16C14.2091 16 16 14.2091 16 12C16 9.79086 14.2091 8 12 8C9.79086 8 8 9.79086 8 12C8 14.2091 9.79086 16 12 16ZM11 1H13V4H11V1ZM11 20H13V23H11V20ZM3.51472 4.92893L4.92893 3.51472L7.05025 5.63604L5.63604 7.05025L3.51472 4.92893ZM16.9497 18.364L18.364 16.9497L20.4853 19.0711L19.0711 20.4853L16.9497 18.364ZM19.0711 3.51472L20.4853 4.92893L18.364 7.05025L16.9497 5.63604L19.0711 3.51472ZM5.63604 16.9497L7.05025 18.364L4.92893 19.0711L3.51472 20.4853L2.10051 19.0711L4.22183 16.9497H5.63604ZM23 11V13H20V11H23ZM4 11V13H1V11H4Z"/></svg>
-            <svg id="toggle-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M11.3807 2.01886C9.91573 3.38768 9 5.28696 9 7.4C9 11.5869 12.4131 15 16.6 15C17.4223 15 18.2142 14.8635 18.9528 14.6104C17.8472 16.0292 16.0945 17 14.1 17C10.2399 17 7.1 13.8601 7.1 10C7.1 6.45005 9.73938 3.51739 13.1569 3.05078L11.3807 2.01886ZM12 4C8.68629 4 6 6.68629 6 10C6 13.3137 8.68629 16 12 16C14.2047 16 16.1357 14.7937 17.2 13C16.2 13.6569 15 14 13.7 14C10.3863 14 7.7 11.3137 7.7 8C7.7 6.05823 8.66484 4.33671 10.1462 3.27476C10.7515 3.09497 11.3688 4 12 4Z"/></svg>
-          </button>
-        </li>
-      </ul>
-    </div>
+          );
+        })
+      }
+      <li class="flex flex-1 items-center justify-center md:flex-none">
+        <button
+          id="theme-toggle"
+          type="button"
+          class="flex size-11 items-center justify-center rounded-xl text-[var(--white-icon)] transition-colors hover:text-[var(--white)] md:size-9"
+          aria-label="Switch to light theme"
+          aria-pressed="false"
+          title="Switch colour theme"
+        >
+          <svg id="toggle-sun" aria-hidden="true" viewBox="0 0 24 24" class="size-5 fill-current">
+            <path d="M12 18a6 6 0 1 1 0-12 6 6 0 0 1 0 12Zm0-2a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM11 1h2v3h-2V1Zm0 19h2v3h-2v-3ZM3.51 4.93l1.42-1.42 2.12 2.13-1.41 1.41-2.13-2.12Zm13.44 13.43 1.41-1.41 2.13 2.12-1.42 1.42-2.12-2.13Zm2.12-14.85 1.42 1.42-2.13 2.12-1.41-1.41 2.12-2.13ZM5.64 16.95l1.41 1.41-2.12 2.13-1.42-1.42 2.13-2.12ZM23 11v2h-3v-2h3ZM4 11v2H1v-2h3Z" />
+          </svg>
+          <svg id="toggle-moon" aria-hidden="true" viewBox="0 0 24 24" class="hidden size-5 fill-current">
+            <path d="M10.36 2.05a9.5 9.5 0 1 0 11.59 11.59A7.5 7.5 0 0 1 10.36 2.05ZM4 12a7.5 7.5 0 0 1 4.1-6.68A9.51 9.51 0 0 0 18.68 15.9 7.5 7.5 0 0 1 4 12Z" />
+          </svg>
+        </button>
+      </li>
+    </ul>
   </nav>
 </div>
+
 <style>
-  nav {
-    transform: translateX(-50%);
-    background-color: var(--background);
-    transition:
-      background-color 0.3s ease,
-      border-radius 0.3s ease,
-      border-color 0.3s ease;
+  .nav-surface {
+    background: rgba(var(--background-rgb), 0.88);
+  }
+
+  .nav-icon :global(svg) {
+    display: block;
+    width: 100%;
+    height: 100%;
   }
 
   nav.scrolling {
-    background-color: var(--component-bg);
-    border-color: #ffffff10;
-    border-radius: 9999px;
+    background-color: color-mix(in srgb, var(--component-bg) 92%, transparent);
   }
 
-  nav a.active .nav-indicator {
-    transform: translateY(-50%) scale(1);
+  .nav-link.active {
+    color: var(--white);
+  }
+
+  .nav-link.active .nav-indicator {
     opacity: 1;
+    transform: scale(1);
   }
 
-  nav a.active {
-    color: white !important;
+  @media (min-width: 768px) {
+    .nav-link.active .nav-indicator {
+      transform: translateY(-50%) scale(1);
+    }
   }
 
   @media (max-width: 767px) {
     nav {
-      width: 100% !important;
-      transform: translateX(-50%);
-      bottom: 0;
-      left: 50%;
-      position: fixed;
+      padding-bottom: env(safe-area-inset-bottom);
       border-radius: 1rem 1rem 0 0;
-      border-color: #ffffff10;
     }
+  }
+</style>
 
-    nav.scrolling {
-      border-radius: 1rem 1rem 0 0;
-      background-color: var(--component-bg);
-    }
+<style is:global>
+  body {
+    padding-bottom: calc(4rem + env(safe-area-inset-bottom));
+  }
 
+  html.light #toggle-sun {
+    display: none;
+  }
+
+  html.light #toggle-moon {
+    display: block;
+  }
+
+  @media (min-width: 768px) {
     body {
-      padding-bottom: 70px;
+      padding-bottom: 0;
     }
   }
 </style>
 
 <script>
-  function applyTheme(isLight: boolean) {
-    document.documentElement.classList.toggle("light", isLight);
-  }
+  let cleanupNav: (() => void) | undefined;
 
-  function initTheme() {
-    applyTheme(document.documentElement.classList.contains("light"));
-  }
-
-  // Re-run on every page load (including after view transitions) so the
-  // click listener is always bound to the current DOM element.
   document.addEventListener("astro:page-load", () => {
-    initTheme();
-    const toggleBtn = document.getElementById("theme-toggle");
-    toggleBtn?.addEventListener("click", () => {
-      const isLight = !document.documentElement.classList.contains("light");
-      applyTheme(isLight);
-      localStorage.setItem("theme", isLight ? "light" : "dark");
-    });
-  });
+    cleanupNav?.();
 
-  const nav = document.getElementById("main-nav");
-  const maxScroll = 1000;
-  let rafId: number | null = null;
+    const controller = new AbortController();
+    const { signal } = controller;
+    const nav = document.getElementById("main-nav");
+    const toggle = document.getElementById("theme-toggle");
+    const navLinks = Array.from(document.querySelectorAll<HTMLAnchorElement>(".nav-link"));
+    const sectionLinks = navLinks.filter((link) => link.dataset.section);
+    let animationFrame: number | undefined;
+    let observer: IntersectionObserver | undefined;
 
-  function updateNav() {
-    if (window.scrollY > 0) {
-      nav?.classList.add("scrolling");
-
-      const scrollProgress = Math.min(window.scrollY / maxScroll, 1);
-      const easeProgress = 1 - Math.pow(1 - scrollProgress, 4);
-
-      const minWidth = 528;
-      const maxWidth = window.innerWidth * 0.8;
-      const currentWidth = maxWidth - (maxWidth - minWidth) * easeProgress;
-
-      if (window.innerWidth >= 768) {
-        nav?.style.setProperty("width", `${currentWidth}px`);
-      }
-    } else {
-      nav?.classList.remove("scrolling");
-      nav?.style.setProperty("width", "80%");
-    }
-    rafId = null;
-  }
-
-  window.addEventListener(
-    "scroll",
-    () => {
-      if (!rafId) {
-        rafId = requestAnimationFrame(updateNav);
-      }
-    },
-    { passive: true }
-  );
-
-  document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
-    anchor.addEventListener("click", function (e) {
-      e.preventDefault();
-      const target = e.currentTarget as HTMLAnchorElement;
-      const targetId = target.getAttribute("href")?.substring(1) || "";
-      const targetElement = document.getElementById(targetId);
-      if (targetElement) {
-        targetElement.scrollIntoView({
-          behavior: "smooth",
-        });
-      }
-    });
-  });
-
-  document.addEventListener("DOMContentLoaded", () => {
-    const sections = document.querySelectorAll("section[id]");
-    const navLinks = document.querySelectorAll("nav a[href^='#']");
-    const observerOptions = { threshold: 0.6 };
-
-    const observerCallback = (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          navLinks.forEach((link) => link.classList.remove("active"));
-          const id = entry.target.getAttribute("id");
-          const activeLink = document.querySelector(`nav a[href="#${id}"]`);
-          if (activeLink) {
-            activeLink.classList.add("active");
-          }
-        }
-      });
+    const updateThemeControls = () => {
+      const isLight = document.documentElement.classList.contains("light");
+      document.documentElement.style.colorScheme = isLight ? "light" : "dark";
+      toggle?.setAttribute("aria-pressed", String(isLight));
+      toggle?.setAttribute(
+        "aria-label",
+        isLight ? "Switch to dark theme" : "Switch to light theme",
+      );
+      document
+        .querySelector<HTMLMetaElement>('meta[name="theme-color"]')
+        ?.setAttribute("content", isLight ? "#f7f8fa" : "#101010");
     };
 
-    const observer = new IntersectionObserver(
-      observerCallback,
-      observerOptions
-    );
-    sections.forEach((section) => observer.observe(section));
+    updateThemeControls();
 
-    if (window.location.pathname.startsWith('/blog')) {
-      navLinks.forEach((link) => link.classList.remove("active"));
-      document.querySelector(`nav a[href="/blog"]`)?.classList.add("active");
+    toggle?.addEventListener(
+      "click",
+      () => {
+        const isLight = !document.documentElement.classList.contains("light");
+        document.documentElement.classList.toggle("light", isLight);
+        localStorage.setItem("theme", isLight ? "light" : "dark");
+        updateThemeControls();
+      },
+      { signal },
+    );
+
+    const updateNav = () => {
+      if (!nav) return;
+      const hasScrolled = window.scrollY > 8;
+      nav.classList.toggle("scrolling", hasScrolled);
+
+      if (window.innerWidth >= 768) {
+        const progress = Math.min(window.scrollY / 900, 1);
+        const eased = 1 - Math.pow(1 - progress, 4);
+        const maxWidth = Math.min(window.innerWidth * 0.8, 760);
+        const minWidth = 520;
+        nav.style.width = `${maxWidth - (maxWidth - minWidth) * eased}px`;
+      } else {
+        nav.style.removeProperty("width");
+      }
+      animationFrame = undefined;
+    };
+
+    const requestNavUpdate = () => {
+      if (animationFrame === undefined) {
+        animationFrame = requestAnimationFrame(updateNav);
+      }
+    };
+
+    window.addEventListener("scroll", requestNavUpdate, { passive: true, signal });
+    window.addEventListener("resize", requestNavUpdate, { passive: true, signal });
+    updateNav();
+
+    if (window.location.pathname === "/" && sectionLinks.length > 0) {
+      const setActiveSection = (id: string) => {
+        sectionLinks.forEach((link) => {
+          const isActive = link.dataset.section === id;
+          link.classList.toggle("active", isActive);
+          if (isActive) link.setAttribute("aria-current", "location");
+          else link.removeAttribute("aria-current");
+        });
+      };
+
+      const sections = Array.from(document.querySelectorAll<HTMLElement>("section[id]"));
+      observer = new IntersectionObserver(
+        (entries) => {
+          const visible = entries
+            .filter((entry) => entry.isIntersecting)
+            .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+          if (visible?.target.id) setActiveSection(visible.target.id);
+        },
+        { rootMargin: "-20% 0px -55%", threshold: [0.1, 0.35, 0.65] },
+      );
+      sections.forEach((section) => observer?.observe(section));
     }
+
+    cleanupNav = () => {
+      controller.abort();
+      observer?.disconnect();
+      if (animationFrame !== undefined) cancelAnimationFrame(animationFrame);
+    };
   });
 </script>
-
-<style>
-  @media (max-width: 767px) {
-    body {
-      padding-bottom: 70px;
-    }
-  }
-
-  /* nav a.active {
-    color: white !important;
-  } */
-</style>
-
-<style is:global>
-  #toggle-moon { display: none; }
-  html.light #toggle-moon { display: flex; }
-  html.light #toggle-sun { display: none; }
-  html.light nav.scrolling { border-color: #11182715; }
-  nav a.active { color: var(--white) !important; }
-</style>

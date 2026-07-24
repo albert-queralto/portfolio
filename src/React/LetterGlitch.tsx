@@ -1,293 +1,206 @@
-import { useRef, useEffect } from "react";
+import { useEffect, useRef } from "react";
 
-const LetterGlitch = ({
-  glitchColors = ["#446e91ff", "#76a4ffff", "#1a2338ff"],
-  glitchSpeed = 33,
-  centerVignette = false,
-  outerVignette = false,
-  smooth = true,
-}: {
-  glitchColors: string[];
-  glitchSpeed: number;
-  centerVignette: boolean;
-  outerVignette: boolean;
-  smooth: boolean;
-}) => {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const animationRef = useRef<number | null>(null);
-  const letters = useRef<
-    {
-      char: string;
-      color: string;
-      targetColor: string;
-      colorProgress: number;
-    }[]
-  >([]);
-  const grid = useRef({ columns: 0, rows: 0 });
-  const context = useRef<CanvasRenderingContext2D | null>(null);
-  const lastGlitchTime = useRef(Date.now());
+type RGB = { r: number; g: number; b: number };
 
-  const fontSize = 16;
-  const charWidth = 10;
-  const charHeight = 20;
+type Letter = {
+  char: string;
+  color: RGB;
+  startColor: RGB;
+  targetColor: RGB;
+  progress: number;
+};
 
-  const lettersAndSymbols = [
-    "A",
-    "B",
-    "C",
-    "D",
-    "E",
-    "F",
-    "G",
-    "H",
-    "I",
-    "J",
-    "K",
-    "L",
-    "M",
-    "N",
-    "O",
-    "P",
-    "Q",
-    "R",
-    "S",
-    "T",
-    "U",
-    "V",
-    "W",
-    "X",
-    "Y",
-    "Z",
-    "!",
-    "@",
-    "#",
-    "$",
-    "&",
-    "*",
-    "(",
-    ")",
-    "-",
-    "_",
-    "+",
-    "=",
-    "/",
-    "[",
-    "]",
-    "{",
-    "}",
-    ";",
-    ":",
-    "<",
-    ">",
-    ",",
-    "0",
-    "1",
-    "2",
-    "3",
-    "4",
-    "5",
-    "6",
-    "7",
-    "8",
-    "9",
-  ];
+type Props = {
+  glitchColors?: string[];
+  glitchSpeed?: number;
+  centerVignette?: boolean;
+  outerVignette?: boolean;
+  smooth?: boolean;
+};
 
-  const getRandomChar = () => {
-    return lettersAndSymbols[
-      Math.floor(Math.random() * lettersAndSymbols.length)
-    ];
-  };
+const symbols = "ABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$&*()-_+=/[]{};:<>.,0123456789";
+const fontSize = 16;
+const charWidth = 10;
+const charHeight = 20;
 
-  const getRandomColor = () => {
-    return glitchColors[Math.floor(Math.random() * glitchColors.length)];
-  };
-
-  const hexToRgb = (hex: string) => {
-    const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
-    hex = hex.replace(shorthandRegex, (m, r, g, b) => {
-      return r + r + g + g + b + b;
-    });
-
-    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result
-      ? {
-          r: parseInt(result[1], 16),
-          g: parseInt(result[2], 16),
-          b: parseInt(result[3], 16),
-        }
-      : null;
-  };
-
-  const interpolateColor = (
-    start: { r: number; g: number; b: number },
-    end: { r: number; g: number; b: number },
-    factor: number,
-  ) => {
-    const result = {
-      r: Math.round(start.r + (end.r - start.r) * factor),
-      g: Math.round(start.g + (end.g - start.g) * factor),
-      b: Math.round(start.b + (end.b - start.b) * factor),
+function parseColor(value: string): RGB | null {
+  const hex = value.trim().replace(/^#/, "");
+  if (/^[\da-f]{3}$/i.test(hex)) {
+    return {
+      r: Number.parseInt(hex[0] + hex[0], 16),
+      g: Number.parseInt(hex[1] + hex[1], 16),
+      b: Number.parseInt(hex[2] + hex[2], 16),
     };
-    return `rgb(${result.r}, ${result.g}, ${result.b})`;
+  }
+  if (/^[\da-f]{6}$/i.test(hex)) {
+    return {
+      r: Number.parseInt(hex.slice(0, 2), 16),
+      g: Number.parseInt(hex.slice(2, 4), 16),
+      b: Number.parseInt(hex.slice(4, 6), 16),
+    };
+  }
+  return null;
+}
+
+function interpolate(start: RGB, end: RGB, factor: number): RGB {
+  return {
+    r: Math.round(start.r + (end.r - start.r) * factor),
+    g: Math.round(start.g + (end.g - start.g) * factor),
+    b: Math.round(start.b + (end.b - start.b) * factor),
   };
+}
 
-  const calculateGrid = (width: number, height: number) => {
-    const columns = Math.ceil(width / charWidth);
-    const rows = Math.ceil(height / charHeight);
-    return { columns, rows };
-  };
+function asCss(color: RGB) {
+  return `rgb(${color.r} ${color.g} ${color.b})`;
+}
 
-  const initializeLetters = (columns: number, rows: number) => {
-    grid.current = { columns, rows };
-    const totalLetters = columns * rows;
-    letters.current = Array.from({ length: totalLetters }, () => ({
-      char: getRandomChar(),
-      color: getRandomColor(),
-      targetColor: getRandomColor(),
-      colorProgress: 1,
-    }));
-  };
-
-  const resizeCanvas = () => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const parent = canvas.parentElement;
-    if (!parent) return;
-
-    const dpr = window.devicePixelRatio || 1;
-    const rect = parent.getBoundingClientRect();
-
-    canvas.width = rect.width * dpr;
-    canvas.height = rect.height * dpr;
-
-    canvas.style.width = `${rect.width}px`;
-    canvas.style.height = `${rect.height}px`;
-
-    if (context.current) {
-      context.current.setTransform(dpr, 0, 0, dpr, 0, 0);
-    }
-
-    const { columns, rows } = calculateGrid(rect.width, rect.height);
-    initializeLetters(columns, rows);
-    drawLetters();
-  };
-
-  const drawLetters = () => {
-    if (!context.current || letters.current.length === 0) return;
-    const ctx = context.current;
-    const { width, height } = canvasRef.current!.getBoundingClientRect();
-    ctx.clearRect(0, 0, width, height);
-    ctx.font = `${fontSize}px monospace`;
-    ctx.textBaseline = "top";
-
-    letters.current.forEach((letter, index) => {
-      const x = (index % grid.current.columns) * charWidth;
-      const y = Math.floor(index / grid.current.columns) * charHeight;
-      ctx.fillStyle = letter.color;
-      ctx.fillText(letter.char, x, y);
-    });
-  };
-
-  const updateLetters = () => {
-    if (!letters.current || letters.current.length === 0) return; // Prevent accessing empty array
-
-    const updateCount = Math.max(1, Math.floor(letters.current.length * 0.05));
-
-    for (let i = 0; i < updateCount; i++) {
-      const index = Math.floor(Math.random() * letters.current.length);
-      if (!letters.current[index]) continue; // Skip if index is invalid
-
-      letters.current[index].char = getRandomChar();
-      letters.current[index].targetColor = getRandomColor();
-
-      if (!smooth) {
-        letters.current[index].color = letters.current[index].targetColor;
-        letters.current[index].colorProgress = 1;
-      } else {
-        letters.current[index].colorProgress = 0;
-      }
-    }
-  };
-
-  const handleSmoothTransitions = () => {
-    let needsRedraw = false;
-    letters.current.forEach((letter) => {
-      if (letter.colorProgress < 1) {
-        letter.colorProgress += 0.05;
-        if (letter.colorProgress > 1) letter.colorProgress = 1;
-
-        const startRgb = hexToRgb(letter.color);
-        const endRgb = hexToRgb(letter.targetColor);
-        if (startRgb && endRgb) {
-          letter.color = interpolateColor(
-            startRgb,
-            endRgb,
-            letter.colorProgress,
-          );
-          needsRedraw = true;
-        }
-      }
-    });
-
-    if (needsRedraw) {
-      drawLetters();
-    }
-  };
-
-  const animate = () => {
-    const now = Date.now();
-    if (now - lastGlitchTime.current >= glitchSpeed) {
-      updateLetters();
-      drawLetters();
-      lastGlitchTime.current = now;
-    }
-
-    if (smooth) {
-      handleSmoothTransitions();
-    }
-
-    animationRef.current = requestAnimationFrame(animate);
-  };
+export default function LetterGlitch({
+  glitchColors = ["#446e91", "#76a4ff", "#1a2338"],
+  glitchSpeed = 45,
+  centerVignette = false,
+  outerVignette = true,
+  smooth = true,
+}: Props) {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    const parent = canvas?.parentElement;
+    if (!canvas || !parent) return;
 
-    context.current = canvas.getContext("2d");
-    resizeCanvas();
-    animate();
+    const context = canvas.getContext("2d");
+    if (!context) return;
 
-    let resizeTimeout: NodeJS.Timeout;
+    const palette = glitchColors.map(parseColor).filter((color): color is RGB => Boolean(color));
+    if (palette.length === 0) palette.push({ r: 118, g: 164, b: 255 });
 
-    const handleResize = () => {
-      clearTimeout(resizeTimeout);
-      resizeTimeout = setTimeout(() => {
-        cancelAnimationFrame(animationRef.current as number);
-        resizeCanvas();
-        animate();
-      }, 100);
+    let letters: Letter[] = [];
+    let columns = 0;
+    let animationFrame = 0;
+    let lastUpdate = performance.now();
+    let isVisible = !document.hidden;
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    const randomCharacter = () => symbols[Math.floor(Math.random() * symbols.length)];
+    const randomColor = () => palette[Math.floor(Math.random() * palette.length)];
+
+    const draw = () => {
+      const rect = canvas.getBoundingClientRect();
+      context.clearRect(0, 0, rect.width, rect.height);
+      context.font = `${fontSize}px ui-monospace, SFMono-Regular, Menlo, monospace`;
+      context.textBaseline = "top";
+
+      letters.forEach((letter, index) => {
+        const x = (index % columns) * charWidth;
+        const y = Math.floor(index / columns) * charHeight;
+        context.fillStyle = asCss(letter.color);
+        context.fillText(letter.char, x, y);
+      });
     };
 
-    window.addEventListener("resize", handleResize);
+    const initialise = () => {
+      const rect = parent.getBoundingClientRect();
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.max(1, Math.floor(rect.width * dpr));
+      canvas.height = Math.max(1, Math.floor(rect.height * dpr));
+      canvas.style.width = `${rect.width}px`;
+      canvas.style.height = `${rect.height}px`;
+      context.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      columns = Math.max(1, Math.ceil(rect.width / charWidth));
+      const rows = Math.max(1, Math.ceil(rect.height / charHeight));
+      letters = Array.from({ length: columns * rows }, () => {
+        const color = randomColor();
+        return {
+          char: randomCharacter(),
+          color: { ...color },
+          startColor: { ...color },
+          targetColor: { ...randomColor() },
+          progress: 1,
+        };
+      });
+      draw();
+    };
+
+    const mutate = () => {
+      const updates = Math.max(1, Math.floor(letters.length * 0.045));
+      for (let index = 0; index < updates; index += 1) {
+        const letter = letters[Math.floor(Math.random() * letters.length)];
+        if (!letter) continue;
+        letter.char = randomCharacter();
+        letter.startColor = { ...letter.color };
+        letter.targetColor = { ...randomColor() };
+        letter.progress = smooth ? 0 : 1;
+        if (!smooth) letter.color = { ...letter.targetColor };
+      }
+    };
+
+    const animate = (timestamp: number) => {
+      if (!isVisible) return;
+
+      if (timestamp - lastUpdate >= Math.max(16, glitchSpeed)) {
+        mutate();
+        lastUpdate = timestamp;
+      }
+
+      if (smooth) {
+        for (const letter of letters) {
+          if (letter.progress >= 1) continue;
+          letter.progress = Math.min(1, letter.progress + 0.08);
+          letter.color = interpolate(letter.startColor, letter.targetColor, letter.progress);
+        }
+      }
+
+      draw();
+      animationFrame = requestAnimationFrame(animate);
+    };
+
+    const resizeObserver = new ResizeObserver(initialise);
+    resizeObserver.observe(parent);
+    initialise();
+
+    if (!reduceMotion) {
+      animationFrame = requestAnimationFrame(animate);
+    }
+
+    const handleVisibility = () => {
+      isVisible = !document.hidden;
+      if (isVisible && !reduceMotion) {
+        cancelAnimationFrame(animationFrame);
+        animationFrame = requestAnimationFrame(animate);
+      } else {
+        cancelAnimationFrame(animationFrame);
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibility);
 
     return () => {
-      cancelAnimationFrame(animationRef.current!);
-      window.removeEventListener("resize", handleResize);
+      cancelAnimationFrame(animationFrame);
+      resizeObserver.disconnect();
+      document.removeEventListener("visibilitychange", handleVisibility);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [glitchSpeed, smooth]);
+  }, [glitchColors, glitchSpeed, smooth]);
 
   return (
-    <div className="relative w-full h-full overflow-hidden" style={{ background: 'var(--background)' }}>
-      <canvas ref={canvasRef} className="block w-full h-full" />
+    <div className="relative h-full w-full overflow-hidden" style={{ background: "var(--background)" }}>
+      <canvas ref={canvasRef} aria-hidden="true" className="block h-full w-full" />
       {outerVignette && (
-        <div className="absolute top-0 left-0 w-full h-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(var(--background-rgb),0) 60%, rgba(var(--background-rgb),1) 100%)' }}></div>
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(circle, rgba(var(--background-rgb), 0) 50%, rgba(var(--background-rgb), 1) 100%)",
+          }}
+        />
       )}
       {centerVignette && (
-        <div className="absolute top-0 left-0 w-full h-full pointer-events-none bg-[radial-gradient(circle,_rgba(0,0,0,0.8)_0%,_rgba(0,0,0,0)_60%)]"></div>
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle,_rgba(0,0,0,0.75)_0%,_rgba(0,0,0,0)_62%)]"
+        />
       )}
     </div>
   );
-};
-
-export default LetterGlitch;
+}

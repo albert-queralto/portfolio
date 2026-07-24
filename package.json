@@ -5,8 +5,11 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
-    "build": "astro check && astro build",
+    "check": "astro check",
+    "build": "npm run check && astro build",
     "preview": "astro preview",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "astro": "astro"
   },
   "dependencies": {
@@ -16,7 +19,7 @@
     "@types/react": "^19.1.10",
     "@types/react-dom": "^19.1.5",
     "astro": "^5.13.2",
-    "ogl": "^1.0.11",
+    "katex": "^0.16.47",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "rehype-katex": "^7.0.1",
@@ -30,5 +33,10 @@
     "prettier": "^3.6.2",
     "prettier-plugin-astro": "^0.14.1",
     "tailwindcss": "^3.4.17"
+  },
+  "private": true,
+  "description": "Portfolio of Albert Queraltó, PhD — data scientist and software developer.",
+  "engines": {
+    "node": ">=22"
   }
 }

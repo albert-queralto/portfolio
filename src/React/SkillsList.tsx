@@ -1,142 +1,134 @@
-import React, { useState } from "react";
+import { useId, useState, type ReactNode } from "react";
 
-const CategoryIcons = {
-  "Data Science": (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      className="w-6 h-6 text-[var(--sec)] opacity-70"
-    >
-      <path d="M3 3C2.44772 3 2 3.44772 2 4V20C2 20.5523 2.44772 21 3 21H21C21.5523 21 22 20.5523 22 20V4C22 3.44772 21.5523 3 21 3H3ZM6 7H8V9H6V7ZM6 11H8V13H6V11ZM6 15H8V17H6V15ZM10 7H18V9H10V7ZM10 11H18V13H10V11ZM10 15H18V17H10V15Z"></path>
-    </svg>
-  ),
-  "Machine Learning Engineering": (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      className="w-6 h-6 text-[var(--sec)] opacity-70"
-    >
-      <path d="M12 2C6.486 2 2 6.486 2 12c0 4.991 3.657 9.128 8.438 9.878.617.113.844-.267.844-.594 0-.293-.011-1.07-.017-2.099-3.338.726-4.042-1.61-4.042-1.61-.561-1.426-1.371-1.807-1.371-1.807-1.121-.766.085-.75.085-.75 1.24.088 1.894 1.273 1.894 1.273 1.103 1.889 2.894 1.344 3.6 1.028.112-.799.432-1.345.785-1.656-2.665-.303-5.467-1.367-5.467-6.084 0-1.344.469-2.445 1.236-3.306-.124-.303-.536-1.523.117-3.176 0 0 1.008-.323 3.301 1.26a11.42 11.42 0 0 1 3.003-.404c1.018.005 2.045.138 3.003.404 2.292-1.583 3.299-1.26 3.299-1.26.655 1.653.243 2.873.119 3.176.77.861 1.236 1.962 1.236 3.306 0 4.728-2.807 5.777-5.479 6.075.444.382.84 1.139.84 2.297 0 1.659-.016 2.995-.016 3.401 0 .33.225.711.85.59C18.348 21.125 22 16.991 22 12c0-5.514-4.486-10-10-10Z"></path>
-    </svg>
-  ),
-  "Big Data & Cloud": (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      className="w-6 h-6 text-[var(--sec)] opacity-70"
-    >
-      <path d="M6 19h13a4 4 0 0 0 0-8h-.26A6.5 6.5 0 0 0 6.34 6.34 6.5 6.5 0 0 0 6 19Zm0-2a4.5 4.5 0 0 1 .43-9 4.5 4.5 0 0 1 8.35-2.14 6.5 6.5 0 0 1 5.17 11.14H6Z"></path>
-    </svg>
-  ),
-  "Software Development": (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      className="w-6 h-6 text-[var(--sec)] opacity-70"
-    >
-      <path d="M4 4h16v2H4V4Zm0 14h16v2H4v-2Zm2-7h12v2H6v-2Z"></path>
-    </svg>
-  ),
+type SkillCategory = {
+  title: string;
+  summary: string;
+  items: string[];
+  icon: ReactNode;
 };
 
+const iconClass = "h-6 w-6 shrink-0 text-[var(--sec)]";
 
-const SkillsList = () => {
-  const [openItem, setOpenItem] = useState<string | null>(null);
+const categories: SkillCategory[] = [
+  {
+    title: "Data & analytics",
+    summary: "Turn messy operational data into trustworthy signals.",
+    items: [
+      "Time-series cleaning, feature engineering, and exploratory analysis",
+      "Statistical modelling, validation, and interpretable reporting",
+      "Visualisation and decision tools with Plotly, Bokeh, Power BI, and Streamlit",
+    ],
+    icon: (
+      <svg viewBox="0 0 24 24" fill="currentColor" className={iconClass} aria-hidden="true">
+        <path d="M3 3a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1H3Zm3 4h2v2H6V7Zm0 4h2v2H6v-2Zm0 4h2v2H6v-2Zm4-8h8v2h-8V7Zm0 4h8v2h-8v-2Zm0 4h8v2h-8v-2Z" />
+      </svg>
+    ),
+  },
+  {
+    title: "Machine-learning systems",
+    summary: "Develop models that survive contact with production data.",
+    items: [
+      "Supervised learning and deep learning with scikit-learn, PyTorch, and TensorFlow",
+      "Time-series prediction, anomaly detection, and model interpretation with SHAP",
+      "Model-serving APIs, monitoring hooks, reproducible training, and containerisation",
+    ],
+    icon: (
+      <svg viewBox="0 0 24 24" fill="currentColor" className={iconClass} aria-hidden="true">
+        <path d="M9 2h6v2h2a3 3 0 0 1 3 3v2h2v6h-2v2a3 3 0 0 1-3 3h-2v2H9v-2H7a3 3 0 0 1-3-3v-2H2V9h2V7a3 3 0 0 1 3-3h2V2Zm-2 4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H7Zm2 3h6v6H9V9Z" />
+      </svg>
+    ),
+  },
+  {
+    title: "Data platforms & pipelines",
+    summary: "Move data reliably from source systems to applications.",
+    items: [
+      "API, FTP, file, and scheduled ingestion workflows",
+      "PostgreSQL, PostGIS, Databricks, and structured analytical storage",
+      "Apache Airflow scheduling, ETL automation, and data-quality checks",
+    ],
+    icon: (
+      <svg viewBox="0 0 24 24" fill="currentColor" className={iconClass} aria-hidden="true">
+        <path d="M12 2c5 0 9 1.57 9 3.5v13c0 1.93-4 3.5-9 3.5s-9-1.57-9-3.5v-13C3 3.57 7 2 12 2Zm7 11.22c-1.7.8-4.2 1.28-7 1.28s-5.3-.48-7-1.28v2.28c0 .65 2.45 2 7 2s7-1.35 7-2v-2.28Zm0-5c-1.7.8-4.2 1.28-7 1.28S6.7 9.02 5 8.22v2.28c0 .65 2.45 2 7 2s7-1.35 7-2V8.22ZM12 4C7.45 4 5 5.35 5 6s2.45 2 7 2 7-1.35 7-2-2.45-2-7-2Zm7 14.22c-1.7.8-4.2 1.28-7 1.28s-5.3-.48-7-1.28v.28c0 .65 2.45 2 7 2s7-1.35 7-2v-.28Z" />
+      </svg>
+    ),
+  },
+  {
+    title: "Software engineering",
+    summary: "Package analytical work into usable, maintainable products.",
+    items: [
+      "Python services with FastAPI and Flask",
+      "React and TypeScript interfaces for model configuration and results",
+      "Docker, Linux, Git, testing, and clean architectural boundaries",
+    ],
+    icon: (
+      <svg viewBox="0 0 24 24" fill="currentColor" className={iconClass} aria-hidden="true">
+        <path d="m8.7 16.7-4.7-4.7 4.7-4.7 1.4 1.4L6.8 12l3.3 3.3-1.4 1.4Zm6.6 0-1.4-1.4 3.3-3.3-3.3-3.3 1.4-1.4 4.7 4.7-4.7 4.7ZM10.2 19l2-14h2l-2 14h-2Z" />
+      </svg>
+    ),
+  },
+];
 
-  const skills = {
-    "Data Science": [
-      "Data cleaning & preprocessing (Numpy, Pandas)",
-      "Exploratory Data Analysis (EDA)",
-      "Statistical modeling & hypothesis testing (Scipy, Statsmodels)",
-      "Data visualization (Matplotlib, Seaborn, Plotly, Bokeh)",
-      "Dashboards (Power BI, Tableau)"
-    ],
-    "Machine Learning Engineering": [
-      "Supervised & unsupervised learning (Scikit-learn)",
-      "Deep Learning (PyTorch, TensorFlow, Keras)",
-      "Model deployment (FastAPI, Flask, Streamlit)",
-      "MLOps (MLflow, Docker, CI/CD)"
-    ],
-    "Big Data & Cloud": [
-      "Data pipelines with Airflow & Spark",
-      "Cloud platforms (AWS, GCP, Azure)",
-      "Distributed computing & scalability",
-      "Database management (SQL, NoSQL, time-series DBs)"
-    ],
-    "Software Development": [
-      "Web apps with TypeScript & React.js",
-      "Version control with Git & GitHub/GitLab",
-      "Python programming for data & backend",
-      "C++ for performance-critical applications",
-      "Linux & shell scripting",
-      "Agile software development practices",
-      "Clean code & design patterns"
-    ],
-  };
-
-  const toggleItem = (item: string) => {
-    setOpenItem(openItem === item ? null : item);
-  };
+export default function SkillsList() {
+  const [openItem, setOpenItem] = useState<string | null>(categories[0].title);
+  const baseId = useId();
 
   return (
-    <div className="text-left pt-3 md:pt-9">
-      <h3 className="text-[var(--white)] text-3xl md:text-4xl font-semibold md:mb-6">
-        What I do?
-      </h3>
-      <ul className="space-y-4 mt-4 text-lg">
-        {Object.entries(skills).map(([category, items]) => (
-          <li key={category} className="w-full">
-            <div
-              onClick={() => toggleItem(category)}
-              className="md:w-[400px] w-full bg-[var(--card-bg)] rounded-2xl text-left hover:bg-opacity-80 transition-all border border-[var(--white-icon-tr)] cursor-pointer overflow-hidden"
-            >
-              <div className="flex items-center gap-3 p-4">
-                {CategoryIcons[category]}
-                <div className="flex items-center gap-2 flex-grow justify-between">
-                  <div className="min-w-0 max-w-[200px] md:max-w-none overflow-hidden">
-                    <span className="block truncate text-[var(--white)] text-lg">
-                      {category}
-                    </span>
-                  </div>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                    className={`w-6 h-6 text-[var(--white)] transform transition-transform flex-shrink-0 ${
-                      openItem === category ? "rotate-180" : ""
-                    }`}
-                  >
-                    <path d="M11.9999 13.1714L16.9497 8.22168L18.3639 9.63589L11.9999 15.9999L5.63599 9.63589L7.0502 8.22168L11.9999 13.1714Z"></path>
-                  </svg>
-                </div>
-              </div>
+    <div className="space-y-3" aria-label="Core capabilities">
+      {categories.map((category) => {
+        const isOpen = openItem === category.title;
+        const panelId = `${baseId}-${category.title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
 
-              <div
-                className={`transition-all duration-300 px-4 ${
-                  openItem === category
-                    ? "max-h-[500px] pb-4 opacity-100"
-                    : "max-h-0 opacity-0"
-                }`}
+        return (
+          <section
+            key={category.title}
+            className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card-bg)]"
+          >
+            <h3>
+              <button
+                type="button"
+                aria-expanded={isOpen}
+                aria-controls={panelId}
+                onClick={() => setOpenItem(isOpen ? null : category.title)}
+                className="flex w-full items-start gap-3 p-4 text-left transition-colors hover:bg-[var(--white-icon-tr)]"
               >
-                <ul className="space-y-2 text-[var(--white-icon)] text-sm">
-                  {items.map((item, index) => (
-                    <div key={index} className="flex items-center">
-                      <span className="pl-1">•</span>
-                      <li className="pl-3">{item}</li>
-                    </div>
+                <span className="mt-0.5">{category.icon}</span>
+                <span className="min-w-0 flex-1">
+                  <span className="block font-semibold text-[var(--white)]">{category.title}</span>
+                  <span className="mt-0.5 block text-sm text-[var(--white-icon)]">
+                    {category.summary}
+                  </span>
+                </span>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  aria-hidden="true"
+                  className={`mt-1 h-5 w-5 shrink-0 text-[var(--white-icon)] transition-transform ${isOpen ? "rotate-180" : ""}`}
+                >
+                  <path d="m12 15.17 6.36-6.36-1.41-1.42L12 12.34 7.05 7.39 5.64 8.81 12 15.17Z" />
+                </svg>
+              </button>
+            </h3>
+            <div
+              id={panelId}
+              aria-hidden={!isOpen}
+              className={`grid transition-[grid-template-rows,opacity] duration-300 ${
+                isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+              }`}
+            >
+              <div className="overflow-hidden">
+                <ul className="space-y-2 border-t border-[var(--border)] px-5 py-4 text-sm leading-relaxed text-[var(--white-icon)]">
+                  {category.items.map((item) => (
+                    <li key={item} className="flex gap-3">
+                      <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--sec)]" />
+                      <span>{item}</span>
+                    </li>
                   ))}
                 </ul>
               </div>
             </div>
-          </li>
-        ))}
-      </ul>
+          </section>
+        );
+      })}
     </div>
   );
-};
-
-export default SkillsList;
+}

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://albertqueralto.dev/sitemap.xml

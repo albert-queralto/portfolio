@@ -4,62 +4,71 @@ import Nav from "@/components/nav.astro";
 import Footer from "@/components/footer.astro";
 import { getCollection } from "astro:content";
 
-const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
-  (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
-);
+const posts = (await getCollection("blog", ({ data }) => !data.draft))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .map((post) => ({
+    ...post,
+    readingTime: Math.max(1, Math.ceil(post.body.trim().split(/\s+/).length / 220)),
+  }));
 ---
 
-<Layout title="Blog — Albert Queraltó">
+<Layout
+  title="Machine Learning & Data Science Blog — Albert Queraltó"
+  description="Practical explanations of machine learning, deep learning, data science, and the engineering decisions behind reliable models."
+>
   <Nav />
-  <main class="max-w-5xl mx-auto py-24 md:py-36 text-[var(--white)]">
-    <h2 class="text-lg text-[var(--sec)] mb-2 shiny-sec">Writing</h2>
-    <h1 class="text-4xl md:text-5xl font-medium mb-12">Blog</h1>
-    <div class="flex flex-col gap-6">
+  <main id="main-content" class="mx-auto max-w-5xl py-24 text-[var(--white)] md:py-36">
+    <header class="max-w-3xl">
+      <p class="text-sm font-semibold uppercase tracking-[0.15em] text-[var(--sec)]">Writing</p>
+      <h1 class="mt-3 text-4xl font-semibold tracking-tight md:text-5xl">
+        Machine learning, explained from first principles.
+      </h1>
+      <p class="mt-5 text-[var(--white-icon)] md:text-lg">
+        Notes on model architectures, optimisation, feature engineering, and practical
+        machine-learning workflows—written to make the underlying ideas reusable.
+      </p>
+    </header>
+
+    <div class="mt-12 grid gap-5 md:grid-cols-2">
       {
         posts.map((post) => (
-          <a
-            href={`/blog/${post.id}`}
-            class="group block rounded-2xl border border-[var(--white-icon-tr)] bg-[var(--card-bg)] p-6 hover:border-[var(--sec)] transition-colors duration-300"
-          >
-            <p class="text-xs text-[var(--white-icon)] mb-2">
-              {post.data.date.toLocaleDateString("en-GB", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })}
-            </p>
-            <h3 class="text-xl font-semibold mb-2 group-hover:text-[var(--sec)] transition-colors">
-              {post.data.title}
-            </h3>
-            <p class="text-sm text-[var(--white-icon)] mb-4">
-              {post.data.description}
-            </p>
-            <div class="flex flex-wrap gap-2">
-              {post.data.tags.map((tag) => (
-                <span class="text-xs px-2 py-1 rounded-md bg-[var(--white-icon-tr)] text-[var(--sec)]">
-                  {tag}
-                </span>
-              ))}
-            </div>
-          </a>
+          <article class="group rounded-2xl border border-[var(--border)] bg-[var(--card-bg)] transition-[border-color,transform] hover:-translate-y-0.5 hover:border-[var(--sec)]">
+            <a href={`/blog/${post.id}`} class="flex h-full flex-col p-6">
+              <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[var(--white-icon)]">
+                <time datetime={post.data.date.toISOString()}>
+                  {post.data.date.toLocaleDateString("en-GB", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
+                </time>
+                <span aria-hidden="true">·</span>
+                <span>{post.readingTime} min read</span>
+              </div>
+              <h2 class="mt-4 text-xl font-semibold leading-snug transition-colors group-hover:text-[var(--sec)]">
+                {post.data.title}
+              </h2>
+              <p class="mt-3 flex-1 text-sm leading-relaxed text-[var(--white-icon)]">
+                {post.data.description}
+              </p>
+              <ul class="mt-5 flex flex-wrap gap-2" aria-label="Article topics">
+                {post.data.tags.slice(0, 3).map((tag) => (
+                  <li class="rounded-md bg-[var(--white-icon-tr)] px-2 py-1 text-xs text-[var(--sec-strong)]">
+                    {tag}
+                  </li>
+                ))}
+              </ul>
+              <span class="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-[var(--white)]">
+                Read article
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" class="size-4 transition-transform group-hover:translate-x-1">
+                  <path d="m16 9.41-8.6 8.61-1.42-1.41L14.59 8H7V6h11v11h-2V9.41Z" />
+                </svg>
+              </span>
+            </a>
+          </article>
         ))
       }
     </div>
   </main>
   <Footer />
 </Layout>
-
-<style is:global>
-  .shiny-sec {
-    background: linear-gradient(135deg, #76a8ff 25%, #e5f3ff 50%, #76c1ff 75%);
-    background-size: 400% 100%;
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    animation: shine 3s linear infinite;
-  }
-  @keyframes shine {
-    0% { background-position: 100% 50%; }
-    30%, 70% { background-position: 0% 50%; }
-  }
-</style>

@@ -1,90 +1,99 @@
 ---
 const technologies = [
-  "astro",
-  "python",
-  "c++",
-  "r",
-  "latex",
-  "linux",
-  "docker",
-  "react",
-  "typeScript",
-  "nodejs",
-  "HTML5",
-  "CSS3",
-  "javaScript",
-  "git",
-  "mysql",
-  "postgres",
-  "mongoDB",
-  "cassandra",
-  "neo4j",
-  "bash",
-  "matplotlib",
-  "seaborn",
-  "bokeh",
-  "plotly",
-  "powerBI",
-  "numpy",
-  "pandas",
-  "scipy",
-  "scikitlearn",
-  "tensorflow",
-  "keras",
-  "pytorch",
-  "selenium",
-  "fastAPI",
-  "flask"
+  { file: "python", name: "Python" },
+  { file: "pandas", name: "Pandas" },
+  { file: "numpy", name: "NumPy" },
+  { file: "scikitlearn", name: "scikit-learn" },
+  { file: "pytorch", name: "PyTorch" },
+  { file: "tensorflow", name: "TensorFlow" },
+  { file: "fastAPI", name: "FastAPI" },
+  { file: "postgres", name: "PostgreSQL" },
+  { file: "docker", name: "Docker" },
+  { file: "linux", name: "Linux" },
+  { file: "bash", name: "Bash" },
+  { file: "git", name: "Git" },
+  { file: "react", name: "React" },
+  { file: "typeScript", name: "TypeScript" },
+  { file: "plotly", name: "Plotly" },
+  { file: "powerBI", name: "Power BI" },
 ];
 ---
 
-<div class="relative overflow-x-hidden py-8">
-  <div
-    class="pointer-events-none absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-[var(--background)] to-transparent z-20"
-  >
-  </div>
-  <div
-    class="pointer-events-none absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-[var(--background)] to-transparent z-20"
-  >
-  </div>
+<div class="tech-wall rounded-2xl border border-[var(--border)] bg-[var(--card-bg)] py-5" aria-label="Core technology stack">
+  <p class="mb-4 px-5 text-xs font-semibold uppercase tracking-[0.15em] text-[var(--white-icon)]">
+    Core stack
+  </p>
+  <div class="relative overflow-hidden">
+    <div class="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-[var(--card-bg)] to-transparent md:w-24" />
+    <div class="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-[var(--card-bg)] to-transparent md:w-24" />
 
-  <div class="flex animate-scroll hover:animate-paused gap-12 md:gap-20 w-max">
-    {
-      [...technologies, ...technologies, ...technologies].map((tech) => (
-        <div class="flex items-center gap-2 group transition-all duration-300">
-          <img
-            src={`/svg/${tech}.svg`}
-            alt={tech}
-            class="h-7 w-auto object-contain transition-transform group-hover:scale-110 opacity-60"
-            width="30"
-            height="30"
-            loading="lazy"
-          />
-          <span class="text-lg font-medium text-[var(--white-icon)]">
-            {tech.charAt(0).toUpperCase() + tech.slice(1)}
-          </span>
-        </div>
-      ))
-    }
+    <div class="tech-track flex w-max">
+      {
+        [0, 1].map((copyIndex) => (
+          <ul
+            class="flex shrink-0 items-center gap-10 px-5 md:gap-14"
+            aria-hidden={copyIndex === 1 ? "true" : undefined}
+          >
+            {technologies.map((tech) => (
+              <li class="flex shrink-0 items-center gap-2.5 text-[var(--white-icon)]">
+                <img
+                  src={`/svg/${tech.file}.svg`}
+                  alt=""
+                  aria-hidden="true"
+                  class="h-6 w-6 object-contain opacity-70 grayscale transition-[filter,opacity,transform] duration-300"
+                  width="24"
+                  height="24"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <span class="whitespace-nowrap text-sm font-medium">{tech.name}</span>
+              </li>
+            ))}
+          </ul>
+        ))
+      }
+    </div>
   </div>
 </div>
 
-<style is:global>
-  @keyframes scroll {
-    from {
-      transform: translateX(0);
-    }
+<style>
+  .tech-track {
+    animation: tech-scroll 42s linear infinite;
+  }
+
+  .tech-wall:hover .tech-track,
+  .tech-wall:focus-within .tech-track {
+    animation-play-state: paused;
+  }
+
+  .tech-wall li:hover img {
+    filter: none;
+    opacity: 1;
+    transform: scale(1.08);
+  }
+
+  @keyframes tech-scroll {
     to {
       transform: translateX(-50%);
     }
   }
-  .animate-scroll {
-    animation: scroll 60s linear infinite;
-  }
 
-  @media (min-width: 768px) {
-    .animate-scroll {
-      animation-duration: 50s;
+  @media (prefers-reduced-motion: reduce) {
+    .tech-track {
+      display: block;
+      width: auto;
+      animation: none;
+    }
+
+    .tech-track ul:first-child {
+      width: 100%;
+      flex-wrap: wrap;
+      justify-content: center;
+      row-gap: 1rem;
+    }
+
+    .tech-track ul:last-child {
+      display: none;
     }
   }
 </style>
