@@ -81,12 +81,11 @@ $$
 \end{cases}
 $$
 
+
 The payment-delay target used by the companion regression model is:
 
-$$
 \text{delay_days} =
 \text{paid_date} - \text{due_date}
-$$
 
 A negative value means the invoice was paid early. A value of zero means it was paid on its due date. A positive value represents the number of days late.
 
@@ -817,8 +816,7 @@ The Brier score measures the mean squared difference between predicted probabili
 
 $$
 \text{Brier Score}
-==================
-
+=
 \frac{1}{N}
 \sum_{i=1}^{N}
 (p_i-y_i)^2
@@ -908,8 +906,7 @@ Its target is `delay_days`, and its main evaluation metric is mean absolute erro
 
 $$
 \text{MAE}
-==========
-
+=
 \frac{1}{N}
 \sum_{i=1}^{N}
 |\hat{y}_i-y_i|
@@ -992,8 +989,7 @@ The priority score combines:
 
 $$
 \text{Priority}
-===============
-
+=
 0.45P(\text{late})
 +
 0.25A
