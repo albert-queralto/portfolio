@@ -73,19 +73,21 @@ The model is intended to make an **issue-time prediction**. It should behave as 
 
 For resolved invoices, the late-payment label can be derived by comparing the payment date with the due date:
 
-$$
+$
 \text{paid_late} =
 \begin{cases}
 1 & \text{if paid_date} > \text{due_date} \
 0 & \text{otherwise}
 \end{cases}
-$$
+$
 
 
 The payment-delay target used by the companion regression model is:
 
+$
 \text{delay_days} =
 \text{paid_date} - \text{due_date}
+$
 
 A negative value means the invoice was paid early. A value of zero means it was paid on its due date. A positive value represents the number of days late.
 
