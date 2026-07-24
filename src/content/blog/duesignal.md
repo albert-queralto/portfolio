@@ -56,14 +56,14 @@ This article focuses primarily on the classifier.
 
 For an invoice (i), the classifier estimates:
 
-[
+$$
 P(Y_i = 1 \mid X_i)
-]
+$$
 
 where:
 
-* (Y_i = 1) means the invoice is eventually paid after its due date
-* (X_i) contains information available when the invoice is issued
+* $(Y_i = 1)$ means the invoice is eventually paid after its due date
+* $(X_i)$ contains information available when the invoice is issued
 
 That final condition is essential.
 
@@ -73,20 +73,20 @@ The model is intended to make an **issue-time prediction**. It should behave as 
 
 For resolved invoices, the late-payment label can be derived by comparing the payment date with the due date:
 
-[
+$$
 \text{paid_late} =
 \begin{cases}
 1 & \text{if paid_date} > \text{due_date} \
 0 & \text{otherwise}
 \end{cases}
-]
+$$
 
 The payment-delay target used by the companion regression model is:
 
-[
+$$
 \text{delay_days} =
 \text{paid_date} - \text{due_date}
-]
+$$
 
 A negative value means the invoice was paid early. A value of zero means it was paid on its due date. A positive value represents the number of days late.
 
@@ -815,19 +815,19 @@ When calibration needs improvement, it should be performed using a chronological
 
 The Brier score measures the mean squared difference between predicted probabilities and actual outcomes:
 
-[
+$$
 \text{Brier Score}
 ==================
 
 \frac{1}{N}
 \sum_{i=1}^{N}
 (p_i-y_i)^2
-]
+$$
 
 where:
 
-* (p_i) is the predicted late-payment probability
-* (y_i) is the actual binary result
+* $(p_i)$ is the predicted late-payment probability
+* $(y_i)$ is the actual binary result
 
 Lower values are better.
 
@@ -906,14 +906,14 @@ DueSignal therefore trains a second model using `GradientBoostingRegressor`.
 
 Its target is `delay_days`, and its main evaluation metric is mean absolute error:
 
-[
+$$
 \text{MAE}
 ==========
 
 \frac{1}{N}
 \sum_{i=1}^{N}
 |\hat{y}_i-y_i|
-]
+$$
 
 The baseline predicts the median training delay for every evaluation invoice.
 
@@ -990,7 +990,7 @@ The priority score combines:
 * **25%** due-date urgency
 * **5%** reminder pressure
 
-[
+$$
 \text{Priority}
 ===============
 
@@ -1001,14 +1001,14 @@ The priority score combines:
 0.25U
 +
 0.05R
-]
+$$
 
 where:
 
-* (P(\text{late})) is the model probability
-* (A) is the amount percentile within currency
-* (U) is normalized due-date urgency
-* (R) is normalized reminder pressure
+* $(P(\text{late}))$ is the model probability
+* $(A)$ is the amount percentile within currency
+* $(U)$ is normalized due-date urgency
+* $(R)$ is normalized reminder pressure
 
 The following code illustrates the calculation:
 
