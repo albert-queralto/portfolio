@@ -9,6 +9,7 @@ category: "Web"
 focus: "Full-stack data product"
 image: "/catalunya_weather_app.png"
 source: "https://github.com/albert-queralto/catalunya_weather_app"
+preview: "http://91.99.58.122:8000/"
 technologies:
   - Python
   - FastAPI
