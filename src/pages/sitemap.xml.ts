@@ -19,6 +19,11 @@ function escapeXml(value: string) {
 export async function GET() {
   const posts = await getCollection("blog", ({ data }) => !data.draft);
   
+  const projects = await getCollection(
+    "projects",
+    ({ data }) => !data.draft,
+  );
+
   const urls = [
     { location: site.url, priority: "1.0" },
     { location: `${site.url}/blog`, priority: "0.8" },
@@ -36,11 +41,6 @@ export async function GET() {
       priority: post.data.featured ? "0.8" : "0.7",
     })),
   ];
-
-  const projects = await getCollection(
-    "projects",
-    ({ data }) => !data.draft,
-  );
 
   const body = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
