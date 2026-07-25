@@ -1,0 +1,97 @@
+<section
+  aria-labelledby="architecture-title"
+  class="my-12 rounded-2xl border border-[var(--border)] bg-[var(--card-bg)] p-5 md:p-8"
+>
+  <div class="max-w-2xl">
+    <p
+      class="text-xs font-semibold uppercase tracking-[0.15em] text-[var(--sec)]"
+    >
+      System design
+    </p>
+    <h2 id="architecture-title" class="mt-2 text-2xl font-semibold">
+      DueSignal architecture
+    </h2>
+  </div>
+
+  <div class="mt-8 grid items-center gap-3 md:grid-cols-[1fr_auto_1fr_auto_1fr]">
+    <div class="architecture-box">
+      <strong>React frontend</strong>
+      <span>Dashboards, imports, configuration and collection workflows</span>
+    </div>
+
+    <span class="architecture-arrow" aria-hidden="true">→</span>
+
+    <div class="architecture-box">
+      <strong>FastAPI application</strong>
+      <span>Authentication, validation, business rules and prediction APIs</span>
+    </div>
+
+    <span class="architecture-arrow" aria-hidden="true">→</span>
+
+    <div class="architecture-box">
+      <strong>PostgreSQL</strong>
+      <span>Tenants, invoices, customers, predictions and model records</span>
+    </div>
+  </div>
+
+  <div class="my-3 flex justify-center" aria-hidden="true">
+    <span class="text-xl text-[var(--sec)]">↓</span>
+  </div>
+
+  <div class="grid items-center gap-3 md:grid-cols-[1fr_auto_1fr_auto_1fr]">
+    <div class="architecture-box">
+      <strong>Celery workers</strong>
+      <span>CSV imports, model training and scheduled processing</span>
+    </div>
+
+    <span class="architecture-arrow" aria-hidden="true">↔</span>
+
+    <div class="architecture-box">
+      <strong>Redis</strong>
+      <span>Job queue and worker coordination</span>
+    </div>
+
+    <span class="architecture-arrow" aria-hidden="true">↔</span>
+
+    <div class="architecture-box">
+      <strong>ML pipeline</strong>
+      <span>Feature generation, validation, training and monitoring</span>
+    </div>
+  </div>
+</section>
+
+<style>
+  .architecture-box {
+    display: flex;
+    min-height: 9rem;
+    flex-direction: column;
+    justify-content: center;
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+    background: var(--background);
+    padding: 1.25rem;
+  }
+
+  .architecture-box strong {
+    color: var(--white);
+  }
+
+  .architecture-box span {
+    margin-top: 0.5rem;
+    color: var(--white-icon);
+    font-size: 0.875rem;
+    line-height: 1.6;
+  }
+
+  .architecture-arrow {
+    text-align: center;
+    color: var(--sec);
+    font-size: 1.5rem;
+  }
+
+  @media (max-width: 767px) {
+    .architecture-arrow {
+      transform: rotate(90deg);
+    }
+  }
+</style>

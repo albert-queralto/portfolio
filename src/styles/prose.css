@@ -1,0 +1,41 @@
+.article-prose {
+    --tw-prose-body: var(--white-icon);
+    --tw-prose-headings: var(--white);
+    --tw-prose-lead: var(--white-icon);
+    --tw-prose-links: var(--sec-strong);
+    --tw-prose-bold: var(--white);
+    --tw-prose-counters: var(--white-icon);
+    --tw-prose-bullets: var(--sec);
+    --tw-prose-hr: var(--border);
+    --tw-prose-quotes: var(--white-icon);
+    --tw-prose-quote-borders: var(--sec);
+    --tw-prose-captions: var(--white-icon);
+    --tw-prose-code: var(--sec-strong);
+    --tw-prose-pre-code: var(--white);
+    --tw-prose-pre-bg: var(--card-bg);
+    --tw-prose-th-borders: var(--border);
+    --tw-prose-td-borders: var(--border);
+  }
+
+  .article-prose :not(pre) > code {
+    border-radius: 0.35rem;
+    background: var(--white-icon-tr);
+    padding: 0.15rem 0.35rem;
+  }
+
+  .article-prose pre {
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+  }
+
+  .article-prose table {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  .article-prose .katex-display {
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-block: 0.5rem;
+  }

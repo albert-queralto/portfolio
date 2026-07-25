@@ -1,0 +1,174 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Nav from "@/components/nav.astro";
+import Footer from "@/components/footer.astro";
+import DueSignalArchitecture from "@/components/DueSignalArchitecture.astro";
+import { site } from "@/data/site";
+import "@/styles/prose.css";
+
+import {
+  getCollection,
+  render,
+  type CollectionEntry,
+} from "astro:content";
+
+export async function getStaticPaths() {
+  const projects = await getCollection(
+    "projects",
+    ({ data }) => !data.draft,
+  );
+
+  return projects.map((project) => ({
+    params: {
+      slug: project.id,
+    },
+    props: {
+      project,
+    },
+  }));
+}
+
+interface Props {
+  project: CollectionEntry<"projects">;
+}
+
+const { project } = Astro.props;
+const { Content } = await render(project);
+
+const canonical = new URL(
+  `/projects/${project.id}`,
+  Astro.site ?? site.url,
+).toString();
+---
+
+<Layout
+  title={`${project.data.title} — ${site.name}`}
+  description={project.data.description}
+  canonical={canonical}
+>
+  <Nav />
+
+  <main
+    id="main-content"
+    class="mx-auto max-w-5xl py-24 text-[var(--white)] md:py-36"
+  >
+    <a
+      href="/#projects"
+      class="inline-flex min-h-10 items-center gap-2 text-sm font-medium text-[var(--white-icon)] transition-colors hover:text-[var(--white)]"
+    >
+      <span aria-hidden="true">←</span>
+      Back to selected work
+    </a>
+
+    <header class="mt-10">
+      <div class="flex flex-wrap items-center gap-3">
+        <span
+          class="rounded-full border border-[var(--border)] px-3 py-1 text-xs text-[var(--sec)]"
+        >
+          {project.data.focus}
+        </span>
+
+        <span
+          class="rounded-full border border-[var(--border)] px-3 py-1 text-xs text-[var(--white-icon)]"
+        >
+          {project.data.status}
+        </span>
+      </div>
+
+      <h1
+        class="mt-5 max-w-4xl text-balance text-4xl font-semibold leading-tight tracking-tight md:text-6xl"
+      >
+        {project.data.title}
+      </h1>
+
+      <p
+        class="mt-6 max-w-3xl text-lg leading-relaxed text-[var(--white-icon)]"
+      >
+        {project.data.description}
+      </p>
+
+      <div class="mt-8 flex flex-wrap gap-3">
+        {
+          project.data.preview && (
+            <a
+              href={project.data.preview}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex min-h-12 items-center rounded-xl bg-[var(--sec)] px-5 py-3 text-sm font-semibold text-[var(--background)]"
+            >
+              Open application
+            </a>
+          )
+        }
+
+        {
+          project.data.source && (
+            <a
+              href={project.data.source}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex min-h-12 items-center rounded-xl border border-[var(--border)] px-5 py-3 text-sm font-medium hover:border-[var(--sec)]"
+            >
+              Source code
+            </a>
+          )
+        }
+
+        {
+          project.data.article && (
+            <a
+              href={project.data.article}
+              class="inline-flex min-h-12 items-center rounded-xl border border-[var(--border)] px-5 py-3 text-sm font-medium hover:border-[var(--sec)]"
+            >
+              Read technical article
+            </a>
+          )
+        }
+      </div>
+
+      <ul
+        class="mt-8 flex flex-wrap gap-2"
+        aria-label={`${project.data.title} technologies`}
+      >
+        {
+          project.data.technologies.map((technology) => (
+            <li class="rounded-md bg-[var(--white-icon-tr)] px-2.5 py-1 text-xs text-[var(--sec-strong)]">
+              {technology}
+            </li>
+          ))
+        }
+      </ul>
+    </header>
+
+    <img
+      src={project.data.image}
+      alt={`${project.data.title} application preview`}
+      width="1600"
+      height="1000"
+      class="mt-12 aspect-[16/10] w-full rounded-2xl border border-[var(--border)] object-cover"
+    />
+
+    {
+      project.data.metrics.length > 0 && (
+        <dl class="mt-6 grid gap-3 sm:grid-cols-3">
+          {project.data.metrics.map((metric) => (
+            <div class="rounded-2xl border border-[var(--border)] bg-[var(--card-bg)] p-5">
+              <dt class="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--sec)]">
+                {metric.label}
+              </dt>
+              <dd class="mt-2 font-medium">{metric.value}</dd>
+            </div>
+          ))}
+        </dl>
+      )
+    }
+
+    {project.id === "duesignal" && <DueSignalArchitecture />}
+
+    <article class="article-prose prose mt-12 max-w-none">
+      <Content />
+    </article>
+  </main>
+
+  <Footer />
+</Layout>
