@@ -11,7 +11,9 @@ import { site } from "@/data/site";
 const proofPoints = [
   { label: "Research", value: "PhD-trained problem solving" },
   { label: "Engineering", value: "Maintainable APIs and full-stack tools" },
-  { label: "ML focus", value: "Time series & anomaly detection" },
+  { label: "Applied ML", value: "Real-time Time series & anomaly detection" },
+  { label: "Production", value: "FastAPI, React, PostgreSQL, Docker"},
+  { label: "Data systems", value: "API, FTP, Airflow and geospatial pipelines"},
 ];
 ---
 
@@ -88,7 +90,7 @@ const proofPoints = [
       >
         <div class="absolute inset-0 opacity-90">
           <LetterGlitch
-            client:load
+            client:visible
             glitchColors={["#446e91", "#76a4ff", "#1a2338"]}
             glitchSpeed={45}
             centerVignette={false}

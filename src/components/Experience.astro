@@ -1,0 +1,111 @@
+---
+const experience = [
+  {
+    period: "June 2025 — Present",
+    role: "Software Developer",
+    company: "Adasa Systems",
+    location: "El Prat de Llobregat, Spain",
+    achievements: [
+      "Implement backend functionality using Python and an IoT platform.",
+      "Integrate API, FTP, hydrological, meteorological, raster, and ensemble geographical data.",
+      "Build scheduled ingestion workflows with custom schedulers and Apache Airflow.",
+      "Store and expose operational data through PostgreSQL, PostGIS, GeoServer, and APIs.",
+    ],
+  },
+  {
+    period: "January 2023 — Present",
+    role: "Data Scientist",
+    company: "Adasa Systems",
+    location: "El Prat de Llobregat, Spain",
+    achievements: [
+      "Developed machine-learning models for real-time water-treatment and dam time-series data.",
+      "Built a contamination-event detector with more than 80% detection capability.",
+      "Used SHAP to interpret model predictions.",
+      "Created Streamlit and FastAPI tools for configuring, migrating, and visualizing models.",
+      "Developed a RAG application with ChromaDB, LangChain, Ollama, FastAPI, and React.",
+    ],
+  },
+  {
+    period: "June 2022 — January 2023",
+    role: "Data Scientist",
+    company: "HP through Between Technology",
+    location: "Sant Cugat del Vallès, Spain",
+    achievements: [
+      "Automated database ETL processes with Python and Databricks.",
+      "Analyzed repair, printing, customer-service, and review data.",
+      "Automated recurring reporting workflows with Python and PostgreSQL.",
+    ],
+  },
+  {
+    period: "January 2019 — June 2022",
+    role: "Data Scientist and Researcher",
+    company: "Institute of Materials Science of Barcelona",
+    location: "Cerdanyola del Vallès, Spain",
+    achievements: [
+      "Led high-throughput experimentation and data-driven material-discovery work.",
+      "Automated experimental hardware and data acquisition with Python.",
+      "Developed machine-learning models for experimental optimization and prediction.",
+    ],
+  },
+];
+---
+
+<section
+  id="experience"
+  aria-labelledby="experience-title"
+  class="border-t border-[var(--border)] py-16 text-[var(--white)] md:py-24"
+>
+  <div class="mx-auto max-w-5xl">
+    <div class="max-w-3xl">
+      <p
+        class="text-sm font-semibold uppercase tracking-[0.15em] text-[var(--sec)]"
+      >
+        Experience
+      </p>
+
+      <h2
+        id="experience-title"
+        class="mt-3 text-4xl font-semibold tracking-tight md:text-5xl"
+      >
+        Applied data science in operational environments.
+      </h2>
+
+      <p class="mt-5 text-[var(--white-icon)] md:text-lg">
+        Experience building models, data pipelines, APIs, and technical tools
+        for environmental monitoring, industrial systems, customer analytics,
+        and scientific research.
+      </p>
+    </div>
+
+    <ol class="mt-12 space-y-6">
+      {
+        experience.map((position) => (
+          <li class="grid gap-4 rounded-2xl border border-[var(--border)] bg-[var(--card-bg)] p-5 md:grid-cols-[190px_1fr] md:p-7">
+            <div>
+              <p class="text-sm font-medium text-[var(--sec)]">
+                {position.period}
+              </p>
+            </div>
+
+            <div>
+              <h3 class="text-xl font-semibold">{position.role}</h3>
+
+              <p class="mt-1 text-sm text-[var(--white-icon)]">
+                {position.company} · {position.location}
+              </p>
+
+              <ul class="mt-5 space-y-2 text-sm leading-relaxed text-[var(--white-icon)]">
+                {position.achievements.map((achievement) => (
+                  <li class="flex gap-3">
+                    <span class="mt-2 size-1.5 shrink-0 rounded-full bg-[var(--sec)]" />
+                    <span>{achievement}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>
