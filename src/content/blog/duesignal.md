@@ -5,6 +5,9 @@ description: "How I designed DueSignal’s machine-learning pipeline to predict 
 date: 2026-07-25
 tags: ["Machine Learning", "Scikit-learn", "Python", "Fintech", "MLOps"]
 draft: false
+cover: "/og/invoice-late-payment-predictor.png"
+featured: true
+project: "duesignal"
 ------------
 
 Predicting whether an invoice will be paid late sounds like a straightforward binary-classification problem:

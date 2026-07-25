@@ -3,9 +3,10 @@ import Layout from "@/layouts/Layout.astro";
 import Nav from "@/components/nav.astro";
 import Footer from "@/components/footer.astro";
 import { site } from "@/data/site";
-import { getCollection, render, type CollectionEntry } from "astro:content";
+import { getCollection, getEntry, render, type CollectionEntry } from "astro:content";
 import "katex/dist/katex.min.css";
 import "@/styles/prose.css"
+import TableOfContents from "@/components/TableOfContents.astro";
 
 export async function getStaticPaths() {
   const posts = await getCollection("blog", ({ data }) => !data.draft);
@@ -20,7 +21,10 @@ interface Props {
 }
 
 const { post } = Astro.props;
-const { Content } = await render(post);
+const relatedProject = post.data.project
+  ? await getEntry("projects", post.data.project)
+  : undefined;
+const { Content, headings } = await render(post);
 const postBody = post.body ?? "";
 const readingTime = Math.max(1, Math.ceil(postBody.trim().split(/\s+/).length / 220));
 const canonical = new URL(`/blog/${post.id}`, Astro.site ?? site.url).toString();
@@ -45,13 +49,19 @@ const articleData = {
   description={post.data.description}
   canonical={canonical}
   type="article"
+  ogImage={post.data.cover ?? "/og/default.png"}
 >
   <meta slot="head" property="article:published_time" content={post.data.date.toISOString()} />
   {post.data.tags.map((tag) => <meta slot="head" property="article:tag" content={tag} />)}
   <script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify(articleData)} />
 
   <Nav />
-  <main id="main-content" class="mx-auto max-w-3xl py-24 text-[var(--white)] md:py-36">
+    <main
+      id="main-content"
+      class="mx-auto max-w-6xl py-24 text-[var(--white)] md:py-36"
+    >
+      <div class="grid gap-12 lg:grid-cols-[minmax(0,1fr)_240px]">
+        <article class="min-w-0">
     <article>
       <a
         href="/blog"
@@ -91,11 +101,37 @@ const articleData = {
           ))}
         </ul>
       </header>
+      {
+        relatedProject && (
+          <aside class="mt-8 rounded-2xl border border-[var(--border)] bg-[var(--card-bg)] p-5">
+            <p class="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--sec)]">
+              Related project
+            </p>
+
+            <h2 class="mt-2 text-lg font-semibold">
+              {relatedProject.data.title}
+            </h2>
+
+            <p class="mt-2 text-sm leading-relaxed text-[var(--white-icon)]">
+              {relatedProject.data.description}
+            </p>
+
+            <a
+              href={`/projects/${relatedProject.id}`}
+              class="mt-4 inline-flex text-sm font-semibold text-[var(--sec-strong)] hover:underline"
+            >
+              View the complete case study →
+            </a>
+          </aside>
+        )
+      }
 
       <div class="article-prose prose mt-10 max-w-none prose-headings:scroll-mt-28 prose-headings:font-semibold prose-a:no-underline hover:prose-a:underline prose-code:before:content-none prose-code:after:content-none">
         <Content />
       </div>
     </article>
+      <TableOfContents headings={headings} />
+    </div>
   </main>
   <Footer />
 </Layout>

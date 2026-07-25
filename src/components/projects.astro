@@ -1,128 +1,50 @@
 ---
-import { Image } from "astro:assets";
-import catalunyaWeatherApp from "../../public/catalunya_weather_app.png";
-import obesityDashboard from "../../public/obesitydashboard.png";
-import webScrapingEsios from "../../public/web_scraping_esios.png";
-import blackjack from "../../public/blackjack.png";
-import sensorErrorDetection from "../../public/Sensor_Error_Detection_and_Localization_with_RNNs.png";
-import sentimentClassification from "../../public/transformers_sentiment_text.png";
-import energyPrices from "../../public/energy_prices.png";
+import { getCollection } from "astro:content";
 
-interface Project {
-  title: string;
-  image: ImageMetadata;
-  source: string;
-  preview?: string;
-  status: "Deployed" | "Completed" | "In progress";
-  description: string;
-  tags: string[];
-  category: "Data Science" | "Machine Learning" | "Web";
-  focus: string;
-}
+const projects = (
+  await getCollection("projects", ({ data }) => !data.draft)
+).sort((a, b) => a.data.order - b.data.order);
 
-const projects: Project[] = [
-  {
-    title: "Sensor Error Detection and Localization with RNNs",
-    category: "Machine Learning",
-    focus: "Deep learning · Time series",
-    image: sensorErrorDetection,
-    source: "https://github.com/albert-queralto/Sensor_Error_Detection_and_Localization_with_RNNs",
-    status: "Completed",
-    description:
-      "A recurrent-neural-network pipeline using LSTM and GRU models to detect and localise faults in multivariate sensor streams.",
-    tags: ["Python", "PyTorch", "LSTM", "GRU", "Time series"],
-  },
-  {
-    title: "Catalunya Weather App",
-    category: "Web",
-    focus: "Full-stack data product",
-    image: catalunyaWeatherApp,
-    source: "https://github.com/albert-queralto/catalonia-weather-app",
-    preview: "http://91.99.58.122:8000/",
-    status: "Deployed",
-    description:
-      "A full-stack application that collects and visualizes current weather data for Catalan cities through an API-backed React interface.",
-    tags: ["Python", "FastAPI", "React", "Recharts"],
-  },
-  {
-    title: "Obesity Dashboard",
-    category: "Data Science",
-    focus: "Interactive analytics",
-    image: obesityDashboard,
-    source: "https://github.com/albert-queralto/dashboard_obesity_analysis",
-    preview: "https://dashboard-obesity-analysis.onrender.com/",
-    status: "Deployed",
-    description:
-      "An interactive dashboard for exploring global obesity patterns and demographic differences, built with a Python analytics stack.",
-    tags: ["Python", "Bokeh", "Pandas", "Render"],
-  },
-  {
-    title: "Spanish Energy Data Pipeline",
-    category: "Data Science",
-    focus: "Data ingestion · Automation",
-    image: webScrapingEsios,
-    source: "https://github.com/albert-queralto/scraping-energy-prices-spain",
-    status: "Completed",
-    description:
-      "An automated pipeline that gathers electricity-price and renewable-generation data from Spanish energy sources and stores structured results for analysis.",
-    tags: ["Python", "REST API", "PostgreSQL", "Selenium"],
-  },
-  {
-    title: "Transformer NLP Experiments",
-    category: "Machine Learning",
-    focus: "NLP · Transfer learning",
-    image: sentimentClassification,
-    source: "https://github.com/albert-queralto/transformers_sentiment_classification_translation",
-    status: "Completed",
-    description:
-      "Fine-tuning experiments for multilingual sentiment classification and sequence-to-sequence translation with transformer models.",
-    tags: ["Python", "Transformers", "BERT", "PyTorch", "NLP"],
-  },
-  {
-    title: "Spanish Energy Price Analysis",
-    category: "Data Science",
-    focus: "EDA · Statistical modelling",
-    image: energyPrices,
-    source: "https://github.com/albert-queralto/analysis_energy_prices",
-    status: "Completed",
-    description:
-      "Exploratory and statistical analysis of Spanish electricity-market prices, focused on seasonal behaviour and potential price drivers.",
-    tags: ["Python", "Pandas", "Matplotlib", "Statsmodels"],
-  },
-  {
-    title: "Browser Blackjack",
-    category: "Web",
-    focus: "Frontend application",
-    image: blackjack,
-    source: "https://github.com/albert-queralto/js_blackjack",
-    preview: "https://js-blackjack.vercel.app/",
-    status: "Deployed",
-    description:
-      "A responsive browser implementation of Blackjack with game-state management and a compact interactive interface.",
-    tags: ["JavaScript", "HTML", "CSS", "Vercel"],
-  },
+const categories = [
+  "All",
+  ...Array.from(
+    new Set(projects.map((project) => project.data.category)),
+  ),
 ];
-
-const categories = ["All", "Data Science", "Machine Learning", "Web"] as const;
 ---
 
-<section id="projects" aria-labelledby="projects-title" class="border-t border-[var(--border)] py-16 text-[var(--white)] md:py-24">
+<section
+  id="projects"
+  aria-labelledby="projects-title"
+  class="border-t border-[var(--border)] py-16 text-[var(--white)] md:py-24"
+>
   <div class="mx-auto max-w-5xl">
     <div class="max-w-3xl">
-      <p class="text-sm font-semibold uppercase tracking-[0.15em] text-[var(--sec)]">
+      <p
+        class="text-sm font-semibold uppercase tracking-[0.15em] text-[var(--sec)]"
+      >
         Selected work
       </p>
-      <h2 id="projects-title" class="mt-3 text-4xl font-semibold tracking-tight md:text-5xl">
+
+      <h2
+        id="projects-title"
+        class="mt-3 text-4xl font-semibold tracking-tight md:text-5xl"
+      >
         Projects that connect models, data, and software.
       </h2>
+
       <p class="mt-4 text-[var(--white-icon)] md:text-lg">
-        A selection of machine-learning experiments, analytical products, data pipelines,
-        and web applications. Each project links to its implementation.
+        Machine-learning systems, analytical products, data pipelines, and web
+        applications with detailed explanations of the decisions behind them.
       </p>
     </div>
 
     <div class="mt-8 flex flex-wrap items-center justify-between gap-4">
-      <div class="flex flex-wrap gap-2" id="project-filters" aria-label="Filter projects">
+      <div
+        id="project-filters"
+        class="flex flex-wrap gap-2"
+        aria-label="Filter projects"
+      >
         {
           categories.map((category) => (
             <button
@@ -136,106 +58,119 @@ const categories = ["All", "Data Science", "Machine Learning", "Web"] as const;
           ))
         }
       </div>
-      <p id="project-count" class="text-sm text-[var(--white-icon)]" aria-live="polite">
+
+      <p
+        id="project-count"
+        class="text-sm text-[var(--white-icon)]"
+        aria-live="polite"
+      >
         {projects.length} projects
       </p>
     </div>
 
-    <div id="projects-grid" class="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2">
+    <div
+      id="projects-grid"
+      class="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2"
+    >
       {
-        projects.map((project) => {
-          const destination = project.preview ?? project.source;
-          return (
-            <article
-              class="project-card group flex flex-col overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card-bg)] transition-[border-color,transform] duration-300 hover:-translate-y-1 hover:border-[var(--sec)]"
-              data-category={project.category}
+        projects.map((project) => (
+          <article
+            class:list={[
+              "project-card group flex flex-col overflow-hidden rounded-2xl border bg-[var(--card-bg)] transition-[border-color,transform] duration-300 hover:-translate-y-1 hover:border-[var(--sec)]",
+              project.data.featured
+                ? "border-[var(--sec)]"
+                : "border-[var(--border)]",
+            ]}
+            data-category={project.data.category}
+          >
+            <a
+              href={`/projects/${project.id}`}
+              class="block overflow-hidden border-b border-[var(--border)]"
             >
-              <a
-                href={destination}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="block overflow-hidden border-b border-[var(--border)]"
-                aria-label={`Open ${project.title}${project.preview ? " live preview" : " source code"}`}
-              >
-                <Image
-                  src={project.image}
-                  alt={`Interface preview for ${project.title}`}
-                  widths={[560, 800]}
-                  sizes="(min-width: 768px) 480px, calc(100vw - 40px)"
-                  class="aspect-[16/10] w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-                  loading="lazy"
-                />
-              </a>
+              <img
+                src={project.data.image}
+                alt={`${project.data.title} application preview`}
+                width="1600"
+                height="1000"
+                loading="lazy"
+                decoding="async"
+                class="aspect-[16/10] w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+              />
+            </a>
 
-              <div class="flex flex-1 flex-col p-5">
-                <div class="flex items-start justify-between gap-4">
-                  <div>
-                    <p class="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--sec)]">
-                      {project.focus}
-                    </p>
-                    <h3 class="mt-2 text-xl font-semibold leading-tight">{project.title}</h3>
-                  </div>
-                  <span class="shrink-0 rounded-full border border-[var(--border)] px-2.5 py-1 text-xs text-[var(--white-icon)]">
-                    {project.status}
-                  </span>
+            <div class="flex flex-1 flex-col p-5">
+              <div class="flex items-start justify-between gap-4">
+                <div>
+                  <p
+                    class="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--sec)]"
+                  >
+                    {project.data.focus}
+                  </p>
+
+                  <h3 class="mt-2 text-xl font-semibold leading-tight">
+                    <a
+                      href={`/projects/${project.id}`}
+                      class="hover:text-[var(--sec)]"
+                    >
+                      {project.data.title}
+                    </a>
+                  </h3>
                 </div>
 
-                <p class="mt-4 flex-1 text-sm leading-relaxed text-[var(--white-icon)]">
-                  {project.description}
-                </p>
+                <span
+                  class="shrink-0 rounded-full border border-[var(--border)] px-2.5 py-1 text-xs text-[var(--white-icon)]"
+                >
+                  {project.data.status}
+                </span>
+              </div>
 
-                <ul class="mt-5 flex flex-wrap gap-2" aria-label={`${project.title} technologies`}>
-                  {project.tags.map((tag) => (
+              <p
+                class="mt-4 flex-1 text-sm leading-relaxed text-[var(--white-icon)]"
+              >
+                {project.data.description}
+              </p>
+
+              <ul
+                class="mt-5 flex flex-wrap gap-2"
+                aria-label={`${project.data.title} technologies`}
+              >
+                {
+                  project.data.technologies.slice(0, 5).map((technology) => (
                     <li class="rounded-md bg-[var(--white-icon-tr)] px-2 py-1 text-xs text-[var(--sec-strong)]">
-                      {tag}
+                      {technology}
                     </li>
-                  ))}
-                </ul>
+                  ))
+                }
+              </ul>
 
-                <div class="mt-5 flex flex-wrap gap-2 border-t border-[var(--border)] pt-4">
-                  <a
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    href={project.source}
-                    class="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[var(--border)] px-3 py-2 text-sm font-medium text-[var(--white-icon)] transition-colors hover:border-[var(--sec)] hover:text-[var(--white)]"
-                  >
-                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" class="size-4">
-                      <path d="m8.7 16.7-4.7-4.7 4.7-4.7 1.4 1.4L6.8 12l3.3 3.3-1.4 1.4Zm6.6 0-1.4-1.4 3.3-3.3-3.3-3.3 1.4-1.4 4.7 4.7-4.7 4.7ZM10.2 19l2-14h2l-2 14h-2Z" />
-                    </svg>
-                    Source code
-                  </a>
-                  {project.preview && (
+              <div
+                class="mt-5 flex flex-wrap gap-2 border-t border-[var(--border)] pt-4"
+              >
+                <a
+                  href={`/projects/${project.id}`}
+                  class="inline-flex min-h-10 items-center rounded-xl border border-[var(--border)] px-3 py-2 text-sm font-medium hover:border-[var(--sec)]"
+                >
+                  View case study
+                </a>
+
+                {
+                  project.data.preview && (
                     <a
+                      href={project.data.preview}
                       target="_blank"
                       rel="noopener noreferrer"
-                      href={project.preview}
-                      class="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[var(--border)] px-3 py-2 text-sm font-medium text-[var(--white-icon)] transition-colors hover:border-[var(--sec)] hover:text-[var(--white)]"
+                      class="inline-flex min-h-10 items-center rounded-xl border border-[var(--border)] px-3 py-2 text-sm font-medium text-[var(--white-icon)] hover:border-[var(--sec)] hover:text-[var(--white)]"
                     >
-                      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" class="size-4">
-                        <path d="m16 9.41-8.6 8.61-1.42-1.41L14.59 8H7V6h11v11h-2V9.41Z" />
-                      </svg>
                       Live preview
                     </a>
-                  )}
-                </div>
+                  )
+                }
               </div>
-            </article>
-          );
-        })
+            </div>
+          </article>
+        ))
       }
     </div>
-
-    <a
-      target="_blank"
-      rel="noopener noreferrer"
-      href="https://github.com/albert-queralto?tab=repositories"
-      class="mt-8 flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl border border-[var(--border)] bg-[var(--card-bg)] px-5 py-3 font-medium text-[var(--white-icon)] transition-colors hover:border-[var(--sec)] hover:text-[var(--white)]"
-    >
-      Explore more repositories on GitHub
-      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" class="size-5">
-        <path d="m16 9.41-8.6 8.61-1.42-1.41L14.59 8H7V6h11v11h-2V9.41Z" />
-      </svg>
-    </a>
   </div>
 </section>
 
@@ -249,44 +184,72 @@ const categories = ["All", "Data Science", "Machine Learning", "Web"] as const;
 
 <script>
   function initialiseProjectFilters() {
-    const filterContainer = document.getElementById("project-filters");
+    const filterContainer =
+      document.getElementById("project-filters");
     const grid = document.getElementById("projects-grid");
     const count = document.getElementById("project-count");
-    if (!filterContainer || !grid || filterContainer.dataset.ready === "true") return;
+
+    if (
+      !filterContainer ||
+      !grid ||
+      filterContainer.dataset.ready === "true"
+    ) {
+      return;
+    }
 
     filterContainer.dataset.ready = "true";
-    const filters = Array.from(filterContainer.querySelectorAll<HTMLButtonElement>("button[data-filter]"));
-    const cards = Array.from(grid.querySelectorAll<HTMLElement>(".project-card[data-category]"));
+
+    const filters = Array.from(
+      filterContainer.querySelectorAll<HTMLButtonElement>(
+        "button[data-filter]",
+      ),
+    );
+
+    const cards = Array.from(
+      grid.querySelectorAll<HTMLElement>(
+        ".project-card[data-category]",
+      ),
+    );
 
     filterContainer.addEventListener("click", (event) => {
-      if (!(event.target instanceof Element)) return;
+      const button = (event.target as Element).closest<HTMLButtonElement>(
+        "button[data-filter]",
+      );
 
-      const button = event.target.closest<HTMLButtonElement>("button[data-filter]");
       if (!button) return;
 
       const selected = button.dataset.filter ?? "All";
       let visibleCount = 0;
 
       filters.forEach((filter) => {
-        filter.setAttribute("aria-pressed", String(filter === button));
+        filter.setAttribute(
+          "aria-pressed",
+          String(filter === button),
+        );
       });
 
       cards.forEach((card) => {
-        const isVisible = selected === "All" || card.dataset.category === selected;
-        card.toggleAttribute("hidden", !isVisible);
-        card.classList.toggle("hidden", !isVisible);
-        if (isVisible) visibleCount += 1;
+        const visible =
+          selected === "All" ||
+          card.dataset.category === selected;
+
+        card.hidden = !visible;
+
+        if (visible) {
+          visibleCount += 1;
+        }
       });
 
-      if (count) count.textContent = `${visibleCount} ${visibleCount === 1 ? "project" : "projects"}`;
+      if (count) {
+        count.textContent = `${visibleCount} ${
+          visibleCount === 1 ? "project" : "projects"
+        }`;
+      }
     });
   }
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", initialiseProjectFilters, { once: true });
-  } else {
-    initialiseProjectFilters();
-  }
-
-  document.addEventListener("astro:page-load", initialiseProjectFilters);
+  document.addEventListener(
+    "astro:page-load",
+    initialiseProjectFilters,
+  );
 </script>

@@ -45,6 +45,11 @@ const canonical = new URL(
   title={`${project.data.title} — ${site.name}`}
   description={project.data.description}
   canonical={canonical}
+  ogImage={
+    project.id === "duesignal"
+      ? "/og/duesignal.png"
+      : project.data.image
+  }
 >
   <Nav />
 
