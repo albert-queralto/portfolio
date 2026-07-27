@@ -1,180 +1,289 @@
-# Portfolio chatbot: RAGFlow Cloud + Ollama on the 4 GB VPS
+# Fully local portfolio chatbot: RAGFlow + Ollama + Docker
 
-This stack deliberately does **not** run RAGFlow on the portfolio server. The VPS only runs:
+This project runs the complete chatbot stack on the same Docker host:
 
-- the existing Astro/Nginx portfolio;
-- Ollama with one small model loaded at a time;
-- a protected Ollama gateway for RAGFlow;
-- a small server-side proxy so the RAGFlow API key never reaches the browser.
+- Astro portfolio
+- Public chat proxy
+- RAGFlow v0.25.6
+- Infinity document/vector engine
+- MySQL
+- MinIO
+- Valkey/Redis
+- Ollama
+- Nginx and Certbot
 
-## 1. Create the Ollama DNS record
+RAGFlow reaches Ollama through the internal Docker address `http://ollama:11434`. Ollama is not exposed publicly.
 
-In Namecheap, add an `A` record:
+## 1. Replace the project on the server
 
-- Host: `ollama`
-- Value: the same VPS IPv4 address used by `albertqueralto.dev`
-- TTL: Automatic
-
-Wait until this resolves:
+Back up the current deployment and extract this project into `~/portfolio`.
 
 ```bash
-dig +short ollama.albertqueralto.dev
+cd ~
+mv portfolio portfolio.backup.$(date +%Y%m%d-%H%M%S)
+unzip portfolio-ragflow-local.zip
+mv portfolio-ragflow-local portfolio
+cd portfolio
 ```
 
-## 2. Configure secrets
+## 2. Add the RAGFlow DNS record
+
+Create an `A` record with your DNS provider:
+
+```text
+ragflow.albertqueralto.dev -> your server IPv4 address
+```
+
+Check it:
+
+```bash
+dig +short ragflow.albertqueralto.dev
+```
+
+## 3. Generate local passwords
 
 ```bash
 cd ~/portfolio
-cp .env.example .env
-openssl rand -hex 32
-nano .env
+./scripts/generate-local-env.sh
 ```
 
-Put the generated token in `OLLAMA_GATEWAY_TOKEN`. Leave the RAGFlow values as placeholders until the assistant is created.
+This creates `.env` with random MySQL, MinIO, and Redis passwords. Keep `.env` out of Git.
 
-Never commit `.env`.
-
-## 3. Build and start the Docker services
+## 4. Start the complete stack
 
 ```bash
-docker compose up -d --build
+./scripts/start-local-ragflow.sh
 ```
 
-Check the containers:
+The `ollama-init` container automatically downloads:
+
+```text
+gemma3:1b
+embeddinggemma:300m-qat-q4_0
+```
+
+Monitor startup:
 
 ```bash
 docker compose ps
-docker stats --no-stream
+docker compose logs -f ragflow
 ```
 
-## 4. Expand the TLS certificate to the Ollama subdomain
+Check the model download:
 
-The current certificate must also include `ollama.albertqueralto.dev`:
+```bash
+docker compose logs ollama-init
+docker compose exec ollama ollama list
+```
+
+RAGFlow is also bound locally on the server at `127.0.0.1:9380` for bootstrap scripts. It is not exposed to the internet on that port.
+
+## 5. Expand the TLS certificate
+
+The existing certificate named `albertqueralto.dev` must include the RAGFlow subdomain:
 
 ```bash
 docker compose run --rm certbot certonly \
-  --webroot -w /var/www/certbot \
+  --webroot \
+  --webroot-path /var/www/certbot \
   --cert-name albertqueralto.dev \
   --expand \
   -d albertqueralto.dev \
   -d www.albertqueralto.dev \
-  -d ollama.albertqueralto.dev \
-  --email albert@albertqueralto.dev \
-  --agree-tos \
-  --no-eff-email
+  -d ragflow.albertqueralto.dev
+```
 
+Reload Nginx:
+
+```bash
+docker compose exec reverse-proxy nginx -t
 docker compose exec reverse-proxy nginx -s reload
 ```
 
-## 5. Pull the small Ollama models
+Open:
 
-Recommended starting point:
-
-```bash
-docker compose exec ollama ollama pull gemma3:1b
-docker compose exec ollama ollama pull embeddinggemma:300m-qat-q4_0
-docker compose exec ollama ollama list
+```text
+https://ragflow.albertqueralto.dev
 ```
 
-The Compose limits keep only one model loaded and allow only one request at a time. This saves RAM, but switching between the embedding and chat models adds latency.
+Create the first local account.
 
-## 6. Connect RAGFlow to Ollama
+## 6. Register the Ollama models in RAGFlow
 
-Use RAGFlow Cloud, or a RAGFlow installation on another server with at least its documented minimum resources.
+In RAGFlow, open your avatar and then **Model providers**. Add or configure the **Ollama** provider.
 
-In **Settings → Model providers → Ollama**, add:
+Use:
 
-### Chat model
+```text
+Base URL: http://ollama:11434
+API key: local-ollama
+```
 
-- Model name: `gemma3:1b`
-- Model type: Chat
-- Base URL: `https://ollama.albertqueralto.dev`
-- API key: the exact value of `OLLAMA_GATEWAY_TOKEN`
+Do not use `localhost`: inside the RAGFlow container, `localhost` points back to RAGFlow itself.
 
-### Embedding model
+Register these exact model names:
 
-- Model name: `embeddinggemma:300m-qat-q4_0`
-- Model type: Embedding
-- Base URL: `https://ollama.albertqueralto.dev`
-- API key: the exact value of `OLLAMA_GATEWAY_TOKEN`
+```text
+Chat model: gemma3:1b
+Embedding model: embeddinggemma:300m-qat-q4_0
+```
 
-Model names must match `ollama list` exactly. Do not add a trailing slash to the base URL.
+Test both models in the RAGFlow UI. Their identifiers should appear as:
 
-## 7. Build the portfolio knowledge base
+```text
+gemma3:1b@Ollama
+embeddinggemma:300m-qat-q4_0@Ollama
+```
 
-Create a RAGFlow dataset and upload a small, curated set of files. Good sources from this portfolio are:
+## 7. Create a local API key
 
-- `public/CV.pdf`
-- project Markdown files in `src/content/projects/`
-- selected blog posts in `src/content/blog/`
-- a short plain-text biography and contact/availability FAQ
+In the self-hosted RAGFlow UI:
 
-Parse the documents, inspect chunks, and remove duplicated navigation or boilerplate.
+1. Click your avatar.
+2. Open **API**.
+3. Create an API key.
+4. Copy it into `.env`:
 
-Create a Chat Assistant using this dataset. Select:
+```bash
+nano ~/portfolio/.env
+```
 
-- Chat model: `gemma3:1b@Ollama`
-- Embedding model: `embeddinggemma:300m-qat-q4_0@Ollama`
-- Temperature: about `0.2`
-- A concise prompt instructing it to answer only from the portfolio knowledge base and admit when information is absent
-
-## 8. Add the RAGFlow API credentials
-
-In RAGFlow, create an API key and copy the Chat Assistant ID. Update `.env`:
+Set:
 
 ```dotenv
-RAGFLOW_BASE_URL=https://cloud.ragflow.io
-RAGFLOW_CHAT_ID=your-chat-assistant-id
-RAGFLOW_API_KEY=ragflow-your-api-key
-OLLAMA_GATEWAY_TOKEN=your-existing-random-token
+RAGFLOW_API_KEY=ragflow-your-local-api-key
 ```
 
-Restart only the affected services:
+Leave `RAGFLOW_CHAT_ID` empty for now.
+
+## 8. Edit the biography
+
+Before bootstrapping, edit:
 
 ```bash
-docker compose up -d --build chat-api portfolio reverse-proxy
+nano ~/portfolio/ragflow-documents/about-albert.md
 ```
 
-## 9. Test
+The other knowledge files are generated from:
 
-Test the protected Ollama endpoint:
+- `public/CV.pdf`
+- `src/content/projects/*.md`
+- `src/content/blog/*.md`
+
+Regenerate them after changing portfolio content:
 
 ```bash
-set -a; source .env; set +a
-curl -sS https://ollama.albertqueralto.dev/api/tags \
-  -H "Authorization: Bearer $OLLAMA_GATEWAY_TOKEN"
+./scripts/prepare-ragflow-documents.sh
 ```
 
-Test the website proxy:
+## 9. Create the dataset and assistant automatically
+
+After the models and API key are configured:
+
+```bash
+./scripts/bootstrap-ragflow-portfolio.sh
+```
+
+The script:
+
+1. Creates `Albert Portfolio Knowledge Base`.
+2. Uploads the CV, biography, project Markdown, and article Markdown.
+3. Starts document parsing.
+4. Creates `Albert Portfolio Assistant`.
+5. Writes the assistant ID to `RAGFLOW_CHAT_ID` in `.env`.
+6. Restarts `chat-api`.
+
+The generated IDs are recorded locally in:
+
+```text
+ragflow/bootstrap-state.json
+```
+
+Parsing can continue after the script returns. Check the Dataset page in RAGFlow and wait for the documents to reach 100%.
+
+## 10. Test each layer
+
+Test RAGFlow directly from the host:
+
+```bash
+set -a
+source .env
+set +a
+
+curl -sS \
+  "http://127.0.0.1:9380/api/v1/openai/$RAGFLOW_CHAT_ID/chat/completions" \
+  -H "Authorization: Bearer $RAGFLOW_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "model",
+    "stream": false,
+    "messages": [
+      {"role": "user", "content": "What projects has Albert built?"}
+    ]
+  }' | jq .
+```
+
+Test the public portfolio proxy:
 
 ```bash
 curl -sS https://albertqueralto.dev/api/chat \
-  -H 'Content-Type: application/json' \
-  -d '{"messages":[{"role":"user","content":"What machine-learning projects has Albert built?"}]}'
+  -H "Content-Type: application/json" \
+  -d '{
+    "messages": [
+      {"role": "user", "content": "What machine-learning experience does Albert have?"}
+    ]
+  }' | jq .
 ```
 
-Then open the portfolio and use the **Ask me** button.
+## Operations
 
-## 10. Add swap as an emergency buffer
-
-A small swap file can prevent an abrupt OOM kill. It will not make inference fast.
+Show status:
 
 ```bash
-sudo fallocate -l 4G /swapfile
-sudo chmod 600 /swapfile
-sudo mkswap /swapfile
-sudo swapon /swapfile
-echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
-echo 'vm.swappiness=10' | sudo tee /etc/sysctl.d/99-portfolio-ai.conf
-sudo sysctl --system
+docker compose ps
 ```
 
-Monitor real use after deployment:
+Follow important logs:
 
 ```bash
-free -h
-df -h
-docker stats
+docker compose logs -f ragflow
+docker compose logs -f ragflow-infinity
+docker compose logs -f ollama
+docker compose logs -f chat-api
 ```
 
-If responses regularly take too long or the server swaps heavily, move Ollama to a larger machine too. The clean upgrade path is a separate 4-core/16-GB-or-larger VPS for both RAGFlow and Ollama, while leaving this portfolio VPS unchanged.
+Restart the chatbot services:
+
+```bash
+docker compose restart ragflow ollama chat-api reverse-proxy
+```
+
+Update containers while retaining volumes:
+
+```bash
+docker compose pull
+docker compose up -d --build
+```
+
+Back up persistent data:
+
+```bash
+docker run --rm \
+  -v portfolio_ragflow-mysql-data:/source:ro \
+  -v "$PWD/backups:/backup" \
+  alpine tar czf /backup/ragflow-mysql-data.tgz -C /source .
+```
+
+Do not run `docker compose down -v` unless you intend to delete the RAGFlow database, uploaded files, vector index, and Ollama models.
+
+## Resetting the bootstrap
+
+The bootstrap script intentionally refuses to create duplicate resources when `ragflow/bootstrap-state.json` exists. To rebuild:
+
+1. Delete the old assistant and dataset in the RAGFlow UI.
+2. Delete `ragflow/bootstrap-state.json`.
+3. Run the bootstrap script again.
+
+## Included local tuning
+
+The Compose file uses one RAGFlow worker, one document per bulk batch, one embedding per batch, Infinity instead of Elasticsearch, and one Ollama model loaded at a time. These are deployment settings, not changes to RAGFlow's application behavior.

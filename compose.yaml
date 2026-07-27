@@ -20,10 +20,15 @@ services:
     build:
       context: ./chat-api
     restart: unless-stopped
+    depends_on:
+      ragflow:
+        condition: service_started
     env_file:
       - .env
+    environment:
+      RAGFLOW_BASE_URL: http://ragflow
     expose:
-      - "7070"
+      - "8080"
     mem_limit: 96m
     cpus: 0.25
     security_opt:
@@ -37,38 +42,211 @@ services:
     restart: unless-stopped
     environment:
       OLLAMA_HOST: 0.0.0.0:11434
-      OLLAMA_CONTEXT_LENGTH: 2048
-      OLLAMA_KEEP_ALIVE: 60s
-      OLLAMA_MAX_LOADED_MODELS: 1
-      OLLAMA_NUM_PARALLEL: 1
-      OLLAMA_MAX_QUEUE: 2
+      OLLAMA_CONTEXT_LENGTH: ${OLLAMA_CONTEXT_LENGTH:-2048}
+      OLLAMA_KEEP_ALIVE: ${OLLAMA_KEEP_ALIVE:-60s}
+      OLLAMA_MAX_LOADED_MODELS: ${OLLAMA_MAX_LOADED_MODELS:-1}
+      OLLAMA_NUM_PARALLEL: ${OLLAMA_NUM_PARALLEL:-1}
+      OLLAMA_MAX_QUEUE: ${OLLAMA_MAX_QUEUE:-2}
     volumes:
       - ollama-models:/root/.ollama
     expose:
       - "11434"
-    mem_limit: 2300m
-    cpus: 1.5
+    mem_limit: ${OLLAMA_MEMORY_LIMIT:-1700m}
+    cpus: ${OLLAMA_CPU_LIMIT:-1.5}
     security_opt:
       - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 10s
+      retries: 30
     networks:
       - web
 
-  ollama-auth:
-    container_name: albert-ollama-auth
-    build:
-      context: ./ollama-auth
-    restart: unless-stopped
+  ollama-init:
+    container_name: albert-ollama-init
+    image: ollama/ollama:latest
     depends_on:
-      - ollama
+      ollama:
+        condition: service_healthy
     environment:
-      OLLAMA_UPSTREAM: http://ollama:11434
-      OLLAMA_GATEWAY_TOKEN: ${OLLAMA_GATEWAY_TOKEN}
+      OLLAMA_HOST: http://ollama:11434
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - >-
+        ollama pull ${OLLAMA_CHAT_MODEL:-gemma3:1b} &&
+        ollama pull ${OLLAMA_EMBEDDING_MODEL:-embeddinggemma:300m-qat-q4_0}
+    restart: "no"
+    networks:
+      - web
+
+  ragflow-mysql:
+    container_name: albert-ragflow-mysql
+    image: mysql:8.0.39
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${RAGFLOW_MYSQL_PASSWORD}
+    command:
+      - --max_connections=100
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --default-authentication-plugin=mysql_native_password
+      - --max_allowed_packet=256M
+      - --innodb-buffer-pool-size=256M
+      - --innodb-log-buffer-size=16M
+      - --performance-schema=OFF
+      - --skip-log-bin
+      - --init-file=/data/application/init.sql
+    volumes:
+      - ragflow-mysql-data:/var/lib/mysql
+      - ./ragflow/init.sql:/data/application/init.sql:ro
     expose:
-      - "7071"
-    mem_limit: 64m
-    cpus: 0.20
+      - "3306"
+    mem_limit: ${RAGFLOW_MYSQL_MEMORY_LIMIT:-420m}
+    cpus: ${RAGFLOW_MYSQL_CPU_LIMIT:-0.50}
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 10s
+      timeout: 10s
+      retries: 60
+    networks:
+      - web
+
+  ragflow-minio:
+    container_name: albert-ragflow-minio
+    image: pgsty/minio:RELEASE.2026-03-25T00-00-00Z
+    restart: unless-stopped
+    command: ["server", "--console-address", ":9001", "/data"]
+    environment:
+      MINIO_ROOT_USER: ${RAGFLOW_MINIO_USER}
+      MINIO_ROOT_PASSWORD: ${RAGFLOW_MINIO_PASSWORD}
+    volumes:
+      - ragflow-minio-data:/data
+    expose:
+      - "9000"
+      - "9001"
+    mem_limit: ${RAGFLOW_MINIO_MEMORY_LIMIT:-256m}
+    cpus: ${RAGFLOW_MINIO_CPU_LIMIT:-0.35}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 10s
+      retries: 60
+    networks:
+      - web
+
+  ragflow-redis:
+    container_name: albert-ragflow-redis
+    image: valkey/valkey:8
+    restart: unless-stopped
+    command:
+      - valkey-server
+      - --requirepass
+      - ${RAGFLOW_REDIS_PASSWORD}
+      - --maxmemory
+      - 128mb
+      - --maxmemory-policy
+      - allkeys-lru
+    volumes:
+      - ragflow-redis-data:/data
+    expose:
+      - "6379"
+    mem_limit: ${RAGFLOW_REDIS_MEMORY_LIMIT:-160m}
+    cpus: ${RAGFLOW_REDIS_CPU_LIMIT:-0.20}
+    healthcheck:
+      test: ["CMD-SHELL", "valkey-cli -a '${RAGFLOW_REDIS_PASSWORD}' ping | grep PONG"]
+      interval: 10s
+      timeout: 10s
+      retries: 60
+    networks:
+      - web
+
+  ragflow-infinity:
+    container_name: albert-ragflow-infinity
+    image: infiniflow/infinity:v0.7.0
+    restart: unless-stopped
+    command: ["-f", "/infinity_conf.toml"]
+    volumes:
+      - ragflow-infinity-data:/var/infinity
+      - ./ragflow/infinity_conf.toml:/infinity_conf.toml:ro
+    expose:
+      - "23817"
+      - "23820"
+      - "5432"
+    mem_limit: ${RAGFLOW_INFINITY_MEMORY_LIMIT:-700m}
+    cpus: ${RAGFLOW_INFINITY_CPU_LIMIT:-0.75}
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:23820/admin/node/current"]
+      interval: 10s
+      timeout: 10s
+      retries: 90
+    networks:
+      - web
+
+  ragflow:
+    container_name: albert-ragflow
+    image: ${RAGFLOW_IMAGE:-infiniflow/ragflow:v0.25.6}
+    restart: unless-stopped
+    command:
+      - --enable-adminserver
+      - --workers=1
+    depends_on:
+      ragflow-mysql:
+        condition: service_healthy
+      ragflow-minio:
+        condition: service_healthy
+      ragflow-redis:
+        condition: service_healthy
+      ragflow-infinity:
+        condition: service_healthy
+      ollama:
+        condition: service_healthy
+    environment:
+      DOC_ENGINE: infinity
+      DEVICE: cpu
+      API_PROXY_SCHEME: python
+      TZ: ${TZ:-America/Guatemala}
+      MYSQL_HOST: ragflow-mysql
+      MYSQL_PORT: 3306
+      MYSQL_DBNAME: rag_flow
+      MYSQL_USER: root
+      MYSQL_PASSWORD: ${RAGFLOW_MYSQL_PASSWORD}
+      MYSQL_MAX_PACKET: 268435456
+      MINIO_HOST: ragflow-minio
+      MINIO_USER: ${RAGFLOW_MINIO_USER}
+      MINIO_PASSWORD: ${RAGFLOW_MINIO_PASSWORD}
+      REDIS_HOST: ragflow-redis
+      REDIS_PASSWORD: ${RAGFLOW_REDIS_PASSWORD}
+      INFINITY_HOST: ragflow-infinity
+      REGISTER_ENABLED: ${RAGFLOW_REGISTER_ENABLED:-1}
+      DOC_BULK_SIZE: ${RAGFLOW_DOC_BULK_SIZE:-1}
+      EMBEDDING_BATCH_SIZE: ${RAGFLOW_EMBEDDING_BATCH_SIZE:-1}
+      THREAD_POOL_MAX_WORKERS: ${RAGFLOW_THREAD_POOL_MAX_WORKERS:-8}
+      USE_DOCLING: "false"
+      DOTNET_SYSTEM_GLOBALIZATION_INVARIANT: "1"
+    volumes:
+      - ./ragflow/service_conf.yaml.template:/ragflow/conf/service_conf.yaml.template:ro
+      - ./ragflow/logs:/ragflow/logs
+    ports:
+      - "127.0.0.1:9380:9380"
+    expose:
+      - "80"
+      - "9380"
+      - "9381"
+    mem_limit: ${RAGFLOW_APP_MEMORY_LIMIT:-1800m}
+    cpus: ${RAGFLOW_APP_CPU_LIMIT:-1.50}
     security_opt:
       - no-new-privileges:true
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost/api/v1/system/healthz >/dev/null || curl -fsS http://localhost/ >/dev/null"]
+      interval: 20s
+      timeout: 10s
+      retries: 90
+      start_period: 60s
     networks:
       - web
 
@@ -81,7 +259,7 @@ services:
         condition: service_healthy
       chat-api:
         condition: service_started
-      ollama-auth:
+      ragflow:
         condition: service_started
     ports:
       - "80:80"
@@ -109,3 +287,7 @@ networks:
 
 volumes:
   ollama-models:
+  ragflow-mysql-data:
+  ragflow-minio-data:
+  ragflow-redis-data:
+  ragflow-infinity-data:

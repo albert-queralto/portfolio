@@ -22,3 +22,9 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# Local RAGFlow runtime data
+ragflow/logs/*
+!ragflow/logs/.gitkeep
+certbot/
+ragflow/bootstrap-state.json

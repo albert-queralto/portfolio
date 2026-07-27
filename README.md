@@ -62,3 +62,12 @@ The TLS configuration expects certificates under:
 ## Licence
 
 See [LICENSE](LICENSE).
+
+## Local RAGFlow chatbot
+
+The Docker deployment now includes a fully self-hosted RAGFlow and Ollama chatbot. See [`CHATBOT_SETUP.md`](./CHATBOT_SETUP.md) and start with:
+
+```bash
+./scripts/generate-local-env.sh
+./scripts/start-local-ragflow.sh
+```
