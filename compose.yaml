@@ -8,6 +8,65 @@ services:
     restart: unless-stopped
     expose:
       - "80"
+    mem_limit: 96m
+    cpus: 0.25
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - web
+
+  chat-api:
+    container_name: albert-chat-api
+    build:
+      context: ./chat-api
+    restart: unless-stopped
+    env_file:
+      - .env
+    expose:
+      - "7070"
+    mem_limit: 96m
+    cpus: 0.25
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - web
+
+  ollama:
+    container_name: albert-ollama
+    image: ollama/ollama:latest
+    restart: unless-stopped
+    environment:
+      OLLAMA_HOST: 0.0.0.0:11434
+      OLLAMA_CONTEXT_LENGTH: 2048
+      OLLAMA_KEEP_ALIVE: 60s
+      OLLAMA_MAX_LOADED_MODELS: 1
+      OLLAMA_NUM_PARALLEL: 1
+      OLLAMA_MAX_QUEUE: 2
+    volumes:
+      - ollama-models:/root/.ollama
+    expose:
+      - "11434"
+    mem_limit: 2300m
+    cpus: 1.5
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - web
+
+  ollama-auth:
+    container_name: albert-ollama-auth
+    build:
+      context: ./ollama-auth
+    restart: unless-stopped
+    depends_on:
+      - ollama
+    environment:
+      OLLAMA_UPSTREAM: http://ollama:11434
+      OLLAMA_GATEWAY_TOKEN: ${OLLAMA_GATEWAY_TOKEN}
+    expose:
+      - "7071"
+    mem_limit: 64m
+    cpus: 0.20
     security_opt:
       - no-new-privileges:true
     networks:
@@ -20,6 +79,10 @@ services:
     depends_on:
       portfolio:
         condition: service_healthy
+      chat-api:
+        condition: service_started
+      ollama-auth:
+        condition: service_started
     ports:
       - "80:80"
       - "443:443"
@@ -27,6 +90,8 @@ services:
       - ./nginx-host-albertqueralto.dev.conf:/etc/nginx/conf.d/default.conf:ro
       - ./certbot/www:/var/www/certbot:ro
       - ./certbot/conf:/etc/letsencrypt:ro
+    mem_limit: 64m
+    cpus: 0.20
     security_opt:
       - no-new-privileges:true
     networks:
@@ -41,3 +106,6 @@ services:
 networks:
   web:
     driver: bridge
+
+volumes:
+  ollama-models:
