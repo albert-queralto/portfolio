@@ -54,9 +54,11 @@ export default function ChatWidget() {
         throw new Error(payload.error || "The assistant is unavailable right now.");
       }
 
+      const answer = payload.answer;
+
       setMessages((current) => [
         ...current,
-        { role: "assistant", content: payload.answer },
+        { role: "assistant", content: answer },
       ]);
     } catch (caughtError) {
       setError(
