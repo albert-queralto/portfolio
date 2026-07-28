@@ -274,6 +274,7 @@ services:
       - no-new-privileges:true
     networks:
       - web
+      - duesignal-network
 
   certbot:
     image: certbot/certbot:latest
@@ -284,6 +285,9 @@ services:
 networks:
   web:
     driver: bridge
+  duesignal-network:
+    external: true
+    name: duesignal_default
 
 # volumes:
 #   ollama-models:
