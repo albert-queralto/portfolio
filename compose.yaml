@@ -274,7 +274,7 @@ services:
       - no-new-privileges:true
     networks:
       - web
-      - duesignal-network
+      - payrithm-network
 
   certbot:
     image: certbot/certbot:latest
@@ -285,9 +285,9 @@ services:
 networks:
   web:
     driver: bridge
-  duesignal-network:
+  payrithm-network:
     external: true
-    name: duesignal_default
+    name: payrithm_default
 
 # volumes:
 #   ollama-models:

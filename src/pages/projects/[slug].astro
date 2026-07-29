@@ -2,7 +2,7 @@
 import Layout from "@/layouts/Layout.astro";
 import Nav from "@/components/nav.astro";
 import Footer from "@/components/footer.astro";
-import DueSignalArchitecture from "@/components/DueSignalArchitecture.astro";
+import PayrithmArchitecture from "@/components/PayrithmArchitecture.astro";
 import { site } from "@/data/site";
 import "@/styles/prose.css";
 
@@ -46,8 +46,8 @@ const canonical = new URL(
   description={project.data.description}
   canonical={canonical}
   ogImage={
-    project.id === "duesignal"
-      ? "/og/duesignal.png"
+    project.id === "payrithm"
+      ? "/og/payrithm.png"
       : project.data.image
   }
 >
@@ -168,7 +168,7 @@ const canonical = new URL(
       )
     }
 
-    {project.id === "duesignal" && <DueSignalArchitecture />}
+    {project.id === "payrithm" && <PayrithmArchitecture />}
 
     <article class="article-prose prose mt-12 max-w-none">
       <Content />

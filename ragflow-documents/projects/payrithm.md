@@ -1,5 +1,5 @@
 ---
-title: "DueSignal"
+title: "Payrithm"
 description: "An accounts-receivable intelligence platform that predicts late payments, estimates payment timing, forecasts cash receipts, and prioritizes collection work."
 order: 1
 featured: true
@@ -7,8 +7,8 @@ draft: false
 status: "In progress"
 category: "Machine Learning"
 focus: "ML SaaS · Financial operations"
-image: "/projects/duesignal/duesignal.png"
-article: "/blog/duesignal"
+image: "/projects/payrithm/payrithm.png"
+article: "/blog/payrithm"
 source: "https://github.com/albert-queralto/invoice-late-predictor-enterprise"
 preview: "http://91.99.58.122:8080/"
 technologies:
@@ -35,12 +35,12 @@ metrics:
 Accounts-receivable teams may need to manage hundreds or thousands of open
 invoices without knowing which ones are most likely to be paid late.
 
-Treating every invoice equally wastes collection capacity. DueSignal is designed
+Treating every invoice equally wastes collection capacity. Payrithm is designed
 to identify risk early and convert that risk into a clear operational queue.
 
 ## My approach
 
-DueSignal uses two related machine-learning models:
+Payrithm uses two related machine-learning models:
 
 - A classifier estimates the probability that an invoice will be paid late.
 - A regressor estimates payment delay relative to the due date.

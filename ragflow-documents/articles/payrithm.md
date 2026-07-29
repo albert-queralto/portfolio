@@ -1,13 +1,13 @@
 ---
 
 title: "Building an Invoice Late-Payment Predictor with Python and Scikit-learn"
-description: "How I designed DueSignal’s machine-learning pipeline to predict late invoice payments without data leakage, evaluate probability quality, and turn model outputs into actionable collection priorities."
+description: "How I designed Payrithm’s machine-learning pipeline to predict late invoice payments without data leakage, evaluate probability quality, and turn model outputs into actionable collection priorities."
 date: 2026-07-25
 tags: ["Machine Learning", "Scikit-learn", "Python", "Fintech", "MLOps"]
 draft: false
 cover: "/og/invoice-late-payment-predictor.png"
 featured: true
-project: "duesignal"
+project: "payrithm"
 ------------
 
 Predicting whether an invoice will be paid late sounds like a straightforward binary-classification problem:
@@ -19,7 +19,7 @@ The difficult part is not training a classifier. The difficult part is building 
 
 A model can appear highly accurate while accidentally using payment information from the future. It can rank invoices by risk without producing trustworthy probabilities. It can also generate technically correct predictions that never translate into useful collection decisions.
 
-These were the problems I wanted to solve while building **DueSignal**, an accounts-receivable intelligence application that predicts late payments, estimates payment timing, prioritizes collections, and forecasts incoming cash.
+These were the problems I wanted to solve while building **Payrithm**, an accounts-receivable intelligence application that predicts late payments, estimates payment timing, prioritizes collections, and forecasts incoming cash.
 
 In this article, I will walk through the complete modeling journey:
 
@@ -50,7 +50,7 @@ The more useful questions are:
 * Which outstanding invoices deserve attention first?
 * How much cash is likely to arrive during the next few weeks?
 
-DueSignal approaches the problem with two related machine-learning models:
+Payrithm approaches the problem with two related machine-learning models:
 
 * A **classifier** that estimates the probability of late payment
 * A **regressor** that estimates payment delay relative to the due date
@@ -98,7 +98,7 @@ Unresolved invoices do not yet have a final outcome, so they cannot be used as s
 
 ## Preparing the Invoice Data
 
-DueSignal imports invoice data from CSV files.
+Payrithm imports invoice data from CSV files.
 
 The minimum required fields are:
 
@@ -240,7 +240,7 @@ These checks prevent data-quality errors from silently becoming model behavior.
 
 An invoice for `10,000 USD` should not be directly compared with one for `10,000 EUR`, `10,000 GBP`, or `10,000 MXN`.
 
-DueSignal therefore avoids aggregating or ranking raw invoice amounts across currencies.
+Payrithm therefore avoids aggregating or ranking raw invoice amounts across currencies.
 
 For collection prioritization, invoice value is converted into a percentile within its own currency:
 
@@ -295,7 +295,7 @@ If the answer is no, the feature does not belong in the issue-time prediction mo
 
 ## Prediction Features and Operational Features Are Different
 
-DueSignal separates two concepts that are often incorrectly mixed together.
+Payrithm separates two concepts that are often incorrectly mixed together.
 
 ### Issue-time prediction features
 
@@ -445,7 +445,7 @@ A new customer may have no resolved invoice history.
 
 This is a classic cold-start problem.
 
-Removing these invoices would make the model less useful because new customers are often exactly where risk is most uncertain. Instead, DueSignal includes a `history_available` indicator and lets the preprocessing pipeline impute missing historical values.
+Removing these invoices would make the model less useful because new customers are often exactly where risk is most uncertain. Instead, Payrithm includes a `history_available` indicator and lets the preprocessing pipeline impute missing historical values.
 
 For a new customer, the model can still use:
 
@@ -504,7 +504,7 @@ Historical behavior aggregates are generally more transferable.
 
 ## Building the Scikit-learn Pipeline
 
-DueSignal uses a `GradientBoostingClassifier` for late-payment probability.
+Payrithm uses a `GradientBoostingClassifier` for late-payment probability.
 
 Gradient-boosted decision trees are a strong baseline for structured business data because they can model:
 
@@ -635,7 +635,7 @@ Real deployment works in the opposite direction:
 
 The evaluation should reproduce that direction.
 
-DueSignal uses the latest approximately 20% of resolved invoices as the evaluation period.
+Payrithm uses the latest approximately 20% of resolved invoices as the evaluation period.
 
 ```python
 def chronological_split(
@@ -735,7 +735,7 @@ Accuracy also depends on selecting a classification threshold. Different collect
 * Cost of unnecessary intervention
 * Cost of missed late payments
 
-DueSignal therefore evaluates the probability output directly rather than relying only on thresholded classifications.
+Payrithm therefore evaluates the probability output directly rather than relying only on thresholded classifications.
 
 The main classifier metrics are:
 
@@ -780,7 +780,7 @@ Among invoices assigned a risk near 20%, approximately 20% should eventually be 
 
 Among invoices assigned a risk near 80%, approximately 80% should eventually be paid late.
 
-Calibration matters because DueSignal uses probabilities in downstream decisions. A score of `0.80` should represent more than “high risk.” It should approximate an 80% event likelihood.
+Calibration matters because Payrithm uses probabilities in downstream decisions. A score of `0.80` should represent more than “high risk.” It should approximate an 80% event likelihood.
 
 A calibration table can be generated with scikit-learn:
 
@@ -881,7 +881,7 @@ baseline_brier = brier_score_loss(
 
 The classifier should achieve a lower Brier score than this baseline on the chronological evaluation set.
 
-DueSignal records metrics such as:
+Payrithm records metrics such as:
 
 ```python
 training_metrics = {
@@ -905,7 +905,7 @@ It does not answer:
 
 > If it is late, how late might it be?
 
-DueSignal therefore trains a second model using `GradientBoostingRegressor`.
+Payrithm therefore trains a second model using `GradientBoostingRegressor`.
 
 Its target is `delay_days`, and its main evaluation metric is mean absolute error:
 
@@ -983,7 +983,7 @@ Consider two invoices:
 
 Invoice A is more likely to be late, but invoice B may deserve immediate attention because of its value and urgency.
 
-DueSignal therefore keeps the model prediction separate from the operational collection score.
+Payrithm therefore keeps the model prediction separate from the operational collection score.
 
 The priority score combines:
 
@@ -1098,7 +1098,7 @@ A successful historical evaluation does not guarantee permanent performance.
 
 Customer behavior, payment policies, markets, and invoice composition can change.
 
-DueSignal therefore treats model metrics as training records rather than one-time notebook outputs.
+Payrithm therefore treats model metrics as training records rather than one-time notebook outputs.
 
 Each training run can record:
 
@@ -1129,7 +1129,7 @@ Retraining should be driven by evidence, not by an arbitrary schedule alone.
 
 ## Lessons Learned
 
-Building the DueSignal predictor reinforced several lessons that apply far beyond invoice data.
+Building the Payrithm predictor reinforced several lessons that apply far beyond invoice data.
 
 ### Temporal validity matters more than impressive metrics
 
@@ -1157,7 +1157,7 @@ Not every explanation requires a complex attribution algorithm. Separating model
 
 ## Final Pipeline
 
-The complete DueSignal modeling flow can be summarized as:
+The complete Payrithm modeling flow can be summarized as:
 
 ```text
 CSV invoice import
