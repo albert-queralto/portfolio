@@ -80,24 +80,18 @@ RAGFlow is also bound locally on the server at `127.0.0.1:9380` for bootstrap sc
 
 ## 5. Expand the TLS certificate
 
-The existing certificate named `albertqueralto.dev` must include the RAGFlow subdomain:
+The existing certificate named `albertqueralto.dev` must include every domain
+listed in `nginx-host-albertqueralto.dev.conf`:
 
 ```bash
-docker compose run --rm certbot certonly \
-  --webroot \
-  --webroot-path /var/www/certbot \
-  --cert-name albertqueralto.dev \
-  --expand \
-  -d albertqueralto.dev \
-  -d www.albertqueralto.dev \
-  -d ragflow.albertqueralto.dev
+scripts/issue-letsencrypt-cert.sh webroot
 ```
 
-Reload Nginx:
+If this is the first certificate and nginx cannot start yet because the
+certificate files do not exist, use standalone mode instead:
 
 ```bash
-docker compose exec reverse-proxy nginx -t
-docker compose exec reverse-proxy nginx -s reload
+scripts/issue-letsencrypt-cert.sh standalone
 ```
 
 Open:

@@ -51,6 +51,20 @@ The TLS configuration expects certificates under:
 ./certbot/conf/live/albertqueralto.dev/
 ```
 
+Create or expand the shared Let's Encrypt certificate for the configured
+domains with:
+
+```bash
+scripts/issue-letsencrypt-cert.sh standalone
+```
+
+Use `standalone` for the first certificate. Once nginx can already start with an
+existing certificate, use:
+
+```bash
+scripts/issue-letsencrypt-cert.sh webroot
+```
+
 ## Content locations
 
 - Homepage sections: `src/components/`
