@@ -10,6 +10,7 @@ domains=(
   "www.albertqueralto.dev"
   "ragflow.albertqueralto.dev"
   "payrithm.albertqueralto.dev"
+  "catalonia-weather-app.albertqueralto.dev"
 )
 
 usage() {
