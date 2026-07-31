@@ -108,7 +108,7 @@ export default function ChatWidget() {
           <header className="portfolio-chat__header">
             <div>
               <strong>Ask about Albert</strong>
-              <span>Self-hosted Dify</span>
+              <span>Dify + Ollama</span>
             </div>
             <button
               type="button"

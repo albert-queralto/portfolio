@@ -24,18 +24,61 @@ services:
       - path: ./.env
         required: false
     environment:
-      DIFY_API_BASE_URL: ${DIFY_API_BASE_URL:-http://host.docker.internal:8081/v1}
+      DIFY_API_BASE_URL: ${DIFY_API_BASE_URL:-http://api:5001/v1}
       DIFY_RESPONSE_MODE: ${DIFY_RESPONSE_MODE:-streaming}
     expose:
       - "7070"
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     mem_limit: 96m
     cpus: 0.25
     security_opt:
       - no-new-privileges:true
     networks:
       - web
+      - local-ai
+
+  ollama:
+    container_name: albert-ollama
+    image: ollama/ollama:latest
+    restart: unless-stopped
+    environment:
+      OLLAMA_HOST: 0.0.0.0:11434
+      OLLAMA_CONTEXT_LENGTH: ${OLLAMA_CONTEXT_LENGTH:-2048}
+      OLLAMA_KEEP_ALIVE: ${OLLAMA_KEEP_ALIVE:-60s}
+      OLLAMA_MAX_LOADED_MODELS: ${OLLAMA_MAX_LOADED_MODELS:-1}
+      OLLAMA_NUM_PARALLEL: ${OLLAMA_NUM_PARALLEL:-1}
+      OLLAMA_MAX_QUEUE: ${OLLAMA_MAX_QUEUE:-2}
+    volumes:
+      - ollama-models:/root/.ollama
+    expose:
+      - "11434"
+    mem_limit: ${OLLAMA_MEMORY_LIMIT:-1700m}
+    cpus: ${OLLAMA_CPU_LIMIT:-1.5}
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+    networks:
+      - local-ai
+
+  ollama-init:
+    container_name: albert-ollama-init
+    image: ollama/ollama:latest
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - >-
+        ollama pull ${OLLAMA_CHAT_MODEL:-gemma3:1b} &&
+        ollama pull ${OLLAMA_EMBEDDING_MODEL:-embeddinggemma:300m-qat-q4_0}
+    restart: "no"
+    networks:
+      - local-ai
 
   reverse-proxy:
     container_name: albert-reverse-proxy
@@ -72,6 +115,12 @@ services:
 networks:
   web:
     driver: bridge
+  local-ai:
+    name: local-ai
+    driver: bridge
   payrithm-network:
     external: true
     name: payrithm_default
+
+volumes:
+  ollama-models:

@@ -19,7 +19,7 @@ fi
 mkdir -p certbot/www certbot/conf
 
 # Pull first so failures are visible before any service is replaced.
-docker compose pull reverse-proxy certbot
+docker compose pull ollama ollama-init reverse-proxy certbot
 
 docker compose up -d --build
 
@@ -28,4 +28,7 @@ echo "Portfolio chatbot containers started."
 echo "Follow the chat proxy with:"
 echo "  docker compose logs -f chat-api"
 echo
-echo "Self-hosted Dify must be running separately at DIFY_API_BASE_URL."
+echo "The Ollama model pull runs in the albert-ollama-init one-shot container."
+echo "Check it with: docker compose logs ollama-init"
+echo
+echo "Self-hosted Dify must be running separately and attached to the local-ai network."

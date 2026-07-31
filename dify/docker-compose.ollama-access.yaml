@@ -1,0 +1,21 @@
+services:
+  api:
+    networks:
+      - local-ai
+
+  worker:
+    networks:
+      - local-ai
+
+  plugin_daemon:
+    networks:
+      - local-ai
+
+  agent_backend:
+    networks:
+      - local-ai
+
+networks:
+  local-ai:
+    external: true
+    name: local-ai

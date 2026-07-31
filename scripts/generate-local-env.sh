@@ -11,12 +11,22 @@ fi
 
 cat > "$ENV_FILE" <<'ENV'
 # Portfolio chat proxy -> self-hosted Dify.
-# Keep Dify bound to localhost on the Docker host and expose it to this
-# container through host.docker.internal.
-DIFY_API_BASE_URL=http://host.docker.internal:8081/v1
+# The Dify api service is reachable when ~/dify/docker uses
+# dify/docker-compose.ollama-access.yaml from this repo.
+DIFY_API_BASE_URL=http://api:5001/v1
 DIFY_API_KEY=
 DIFY_RESPONSE_MODE=streaming
 DIFY_INPUTS_JSON={}
+
+OLLAMA_CHAT_MODEL=gemma3:1b
+OLLAMA_EMBEDDING_MODEL=embeddinggemma:300m-qat-q4_0
+OLLAMA_CONTEXT_LENGTH=2048
+OLLAMA_KEEP_ALIVE=60s
+OLLAMA_MAX_LOADED_MODELS=1
+OLLAMA_NUM_PARALLEL=1
+OLLAMA_MAX_QUEUE=2
+OLLAMA_MEMORY_LIMIT=1700m
+OLLAMA_CPU_LIMIT=1.5
 
 REQUEST_TIMEOUT_MS=180000
 MAX_CONCURRENT=1

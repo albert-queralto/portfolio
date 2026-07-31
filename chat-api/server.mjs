@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import http from "node:http";
 
 const PORT = Number(process.env.PORT || 7070);
-const DIFY_API_BASE_URL = (process.env.DIFY_API_BASE_URL || "http://host.docker.internal:8081/v1").replace(
+const DIFY_API_BASE_URL = (process.env.DIFY_API_BASE_URL || "http://api:5001/v1").replace(
   /\/$/,
   "",
 );
