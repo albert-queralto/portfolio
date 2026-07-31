@@ -1,219 +1,138 @@
-# Fully local portfolio chatbot: RAGFlow + Ollama + Docker
+# Self-hosted portfolio chatbot: Dify + Docker
 
-This project runs the complete chatbot stack on the same Docker host:
+This setup replaces the custom RAGFlow stack with self-hosted Dify Community Edition. The portfolio stays small: it runs the Astro site, a public chat proxy, Nginx, and Certbot. Dify runs from its official Docker Compose deployment and owns the assistant, knowledge base, model provider, and conversation state.
 
-- Astro portfolio
-- Public chat proxy
-- RAGFlow v0.25.6
-- Infinity document/vector engine
-- MySQL
-- MinIO
-- Valkey/Redis
-- Ollama
-- Nginx and Certbot
+The cost reduction comes from avoiding a custom RAG bootstrap layer and keeping Dify upgrades aligned with the upstream project.
 
-RAGFlow reaches Ollama through the internal Docker address `http://ollama:11434`. Ollama is not exposed publicly.
+## Architecture
 
-## 1. Replace the project on the server
+- `~/dify/docker`: official self-hosted Dify deployment.
+- `~/portfolio`: this portfolio, including `chat-api`.
+- `chat-api`: calls Dify at `DIFY_API_BASE_URL/chat-messages`.
+- Public Nginx: exposes only `https://albertqueralto.dev/api/chat`.
+- Dify console/API: bound to `127.0.0.1:8081` on the server by default.
 
-Back up the current deployment and extract this project into `~/portfolio`.
+## 1. Prepare the knowledge documents
+
+```bash
+cd ~/portfolio
+./scripts/prepare-chatbot-documents.sh
+```
+
+Upload the files from `chatbot-documents/` into Dify's knowledge base:
+
+- `CV.pdf`
+- `about-albert.md`
+- `projects/*.md`
+- `articles/*.md`
+
+Edit `chatbot-documents/about-albert.md` before upload if the assistant needs a more accurate biography.
+
+## 2. Install self-hosted Dify
+
+Install Dify outside this repo so it can be upgraded with the official release flow.
 
 ```bash
 cd ~
-mv portfolio portfolio.backup.$(date +%Y%m%d-%H%M%S)
-unzip portfolio-ragflow-local.zip
-mv portfolio-ragflow-local portfolio
-cd portfolio
+git clone --branch "$(curl -s https://api.github.com/repos/langgenius/dify/releases/latest | jq -r .tag_name)" https://github.com/langgenius/dify.git
+cd dify/docker
+cp .env.example .env
 ```
 
-## 2. Add the RAGFlow DNS record
+Edit `~/dify/docker/.env` and bind Dify to localhost so it does not publish an admin console directly to the internet:
 
-Create an `A` record with your DNS provider:
-
-```text
-ragflow.albertqueralto.dev -> your server IPv4 address
+```dotenv
+EXPOSE_NGINX_PORT=127.0.0.1:8081
+EXPOSE_NGINX_SSL_PORT=127.0.0.1:8444
+SERVICE_API_URL=http://127.0.0.1:8081/v1
+CONSOLE_WEB_URL=http://127.0.0.1:8081
+APP_WEB_URL=http://127.0.0.1:8081
+FILES_URL=http://127.0.0.1:8081
+TRIGGER_URL=http://127.0.0.1:8081
+NEXT_PUBLIC_SOCKET_URL=ws://127.0.0.1:8081
+INIT_PASSWORD=replace-with-a-temporary-install-password
 ```
 
-Check it:
+Then start Dify:
 
 ```bash
-dig +short ragflow.albertqueralto.dev
+docker compose up -d
+docker compose ps
 ```
 
-## 3. Generate local passwords
+Dify's default Compose setup starts the Dify app services plus PostgreSQL, Redis, Weaviate, sandboxing, plugin services, and its internal Nginx.
+
+## 3. Open Dify privately
+
+From your local machine, tunnel the server's localhost port:
+
+```bash
+ssh -L 8081:127.0.0.1:8081 your-user@your-server
+```
+
+Open:
+
+```text
+http://localhost:8081/install
+```
+
+Create the admin account, configure the model provider, create `Albert Portfolio Assistant`, attach the uploaded knowledge base, and publish the app.
+
+For fully local inference, configure Dify's Ollama provider to point at an Ollama endpoint reachable from the Dify `api` and `worker` containers. For lower operations cost, use any provider you are comfortable paying for and managing.
+
+## 4. Create the app API key
+
+In Dify:
+
+1. Open `Albert Portfolio Assistant`.
+2. Open the API access page for that app.
+3. Create an app API key.
+4. Copy it into the portfolio `.env`.
+
+Generate the portfolio `.env` if it does not exist:
 
 ```bash
 cd ~/portfolio
 ./scripts/generate-local-env.sh
 ```
 
-This creates `.env` with random MySQL, MinIO, and Redis passwords. Keep `.env` out of Git.
-
-## 4. Start the complete stack
-
-```bash
-./scripts/start-local-ragflow.sh
-```
-
-The `ollama-init` container automatically downloads:
-
-```text
-gemma3:1b
-embeddinggemma:300m-qat-q4_0
-```
-
-Monitor startup:
-
-```bash
-docker compose ps
-docker compose logs -f ragflow
-```
-
-Check the model download:
-
-```bash
-docker compose logs ollama-init
-docker compose exec ollama ollama list
-```
-
-RAGFlow is also bound locally on the server at `127.0.0.1:9380` for bootstrap scripts. It is not exposed to the internet on that port.
-
-## 5. Expand the TLS certificate
-
-The existing certificate named `albertqueralto.dev` must include every domain
-listed in `nginx-host-albertqueralto.dev.conf`:
-
-```bash
-scripts/issue-letsencrypt-cert.sh webroot
-```
-
-If this is the first certificate and nginx cannot start yet because the
-certificate files do not exist, use standalone mode instead:
-
-```bash
-scripts/issue-letsencrypt-cert.sh standalone
-```
-
-Open:
-
-```text
-https://ragflow.albertqueralto.dev
-```
-
-Create the first local account.
-
-## 6. Register the Ollama models in RAGFlow
-
-In RAGFlow, open your avatar and then **Model providers**. Add or configure the **Ollama** provider.
-
-Use:
-
-```text
-Base URL: http://ollama:11434
-API key: local-ollama
-```
-
-Do not use `localhost`: inside the RAGFlow container, `localhost` points back to RAGFlow itself.
-
-Register these exact model names:
-
-```text
-Chat model: gemma3:1b
-Embedding model: embeddinggemma:300m-qat-q4_0
-```
-
-Test both models in the RAGFlow UI. Their identifiers should appear as:
-
-```text
-gemma3:1b@Ollama
-embeddinggemma:300m-qat-q4_0@Ollama
-```
-
-## 7. Create a local API key
-
-In the self-hosted RAGFlow UI:
-
-1. Click your avatar.
-2. Open **API**.
-3. Create an API key.
-4. Copy it into `.env`:
-
-```bash
-nano ~/portfolio/.env
-```
-
 Set:
 
 ```dotenv
-RAGFLOW_API_KEY=ragflow-your-local-api-key
+DIFY_API_BASE_URL=http://host.docker.internal:8081/v1
+DIFY_API_KEY=app-your-dify-app-api-key
+DIFY_RESPONSE_MODE=streaming
+DIFY_INPUTS_JSON={}
 ```
 
-Leave `RAGFLOW_CHAT_ID` empty for now.
+Use `DIFY_INPUTS_JSON` only if the Dify app defines required input variables.
 
-## 8. Edit the biography
-
-Before bootstrapping, edit:
+## 5. Start the portfolio chatbot
 
 ```bash
-nano ~/portfolio/ragflow-documents/about-albert.md
+cd ~/portfolio
+./scripts/start-portfolio-chatbot.sh
 ```
 
-The other knowledge files are generated from:
+The portfolio reverse proxy exposes `/api/chat`, and the browser never sees the Dify API key.
 
-- `public/CV.pdf`
-- `src/content/projects/*.md`
-- `src/content/blog/*.md`
+## 6. Test each layer
 
-Regenerate them after changing portfolio content:
-
-```bash
-./scripts/prepare-ragflow-documents.sh
-```
-
-## 9. Create the dataset and assistant automatically
-
-After the models and API key are configured:
-
-```bash
-./scripts/bootstrap-ragflow-portfolio.sh
-```
-
-The script:
-
-1. Creates `Albert Portfolio Knowledge Base`.
-2. Uploads the CV, biography, project Markdown, and article Markdown.
-3. Starts document parsing.
-4. Creates `Albert Portfolio Assistant`.
-5. Writes the assistant ID to `RAGFLOW_CHAT_ID` in `.env`.
-6. Restarts `chat-api`.
-
-The generated IDs are recorded locally in:
-
-```text
-ragflow/bootstrap-state.json
-```
-
-Parsing can continue after the script returns. Check the Dataset page in RAGFlow and wait for the documents to reach 100%.
-
-## 10. Test each layer
-
-Test RAGFlow directly from the host:
+Test Dify directly from the server:
 
 ```bash
 set -a
-source .env
+source ~/portfolio/.env
 set +a
 
-curl -sS \
-  "http://127.0.0.1:9380/api/v1/openai/$RAGFLOW_CHAT_ID/chat/completions" \
-  -H "Authorization: Bearer $RAGFLOW_API_KEY" \
+curl -sS "$DIFY_API_BASE_URL/chat-messages" \
+  -H "Authorization: Bearer $DIFY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "model",
-    "stream": false,
-    "messages": [
-      {"role": "user", "content": "What projects has Albert built?"}
-    ]
+    "inputs": {},
+    "query": "What projects has Albert built?",
+    "response_mode": "blocking",
+    "user": "server-test"
   }' | jq .
 ```
 
@@ -225,59 +144,51 @@ curl -sS https://albertqueralto.dev/api/chat \
   -d '{
     "messages": [
       {"role": "user", "content": "What machine-learning experience does Albert have?"}
-    ]
+    ],
+    "clientId": "server-test"
   }' | jq .
 ```
 
 ## Operations
 
-Show status:
+Show portfolio status:
 
 ```bash
+cd ~/portfolio
 docker compose ps
 ```
 
-Follow important logs:
+Follow logs:
 
 ```bash
-docker compose logs -f ragflow
-docker compose logs -f ragflow-infinity
-docker compose logs -f ollama
 docker compose logs -f chat-api
+docker compose logs -f reverse-proxy
 ```
 
-Restart the chatbot services:
+Restart after changing `.env`:
 
 ```bash
-docker compose restart ragflow ollama chat-api reverse-proxy
+docker compose up -d --build chat-api reverse-proxy
 ```
 
-Update containers while retaining volumes:
+Show Dify status:
 
 ```bash
-docker compose pull
-docker compose up -d --build
+cd ~/dify/docker
+docker compose ps
 ```
 
-Back up persistent data:
+Upgrade Dify by following the release notes for the target version, then rerun:
 
 ```bash
-docker run --rm \
-  -v portfolio_ragflow-mysql-data:/source:ro \
-  -v "$PWD/backups:/backup" \
-  alpine tar czf /backup/ragflow-mysql-data.tgz -C /source .
+cd ~/dify/docker
+docker compose up -d
 ```
 
-Do not run `docker compose down -v` unless you intend to delete the RAGFlow database, uploaded files, vector index, and Ollama models.
+## Rollback
 
-## Resetting the bootstrap
+The previous RAGFlow implementation has been archived in:
 
-The bootstrap script intentionally refuses to create duplicate resources when `ragflow/bootstrap-state.json` exists. To rebuild:
-
-1. Delete the old assistant and dataset in the RAGFlow UI.
-2. Delete `ragflow/bootstrap-state.json`.
-3. Run the bootstrap script again.
-
-## Included local tuning
-
-The Compose file uses one RAGFlow worker, one document per bulk batch, one embedding per batch, Infinity instead of Elasticsearch, and one Ollama model loaded at a time. These are deployment settings, not changes to RAGFlow's application behavior.
+```text
+backups/ragflow-implementation-20260801-portfolio.tgz
+```

@@ -77,11 +77,11 @@ scripts/issue-letsencrypt-cert.sh webroot
 
 See [LICENSE](LICENSE).
 
-## Local RAGFlow chatbot
+## Self-hosted Dify chatbot
 
-The Docker deployment now includes a fully self-hosted RAGFlow and Ollama chatbot. See [`CHATBOT_SETUP.md`](./CHATBOT_SETUP.md) and start with:
+The Docker deployment includes a small public chat proxy that talks to a self-hosted Dify app. See [`CHATBOT_SETUP.md`](./CHATBOT_SETUP.md) and start with:
 
 ```bash
 ./scripts/generate-local-env.sh
-./scripts/start-local-ragflow.sh
+./scripts/start-portfolio-chatbot.sh
 ```

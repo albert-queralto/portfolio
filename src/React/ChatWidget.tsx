@@ -12,9 +12,27 @@ const INITIAL_MESSAGE: ChatMessage = {
     "Hi — I can answer questions about Albert's experience, projects, and skills.",
 };
 
+const CHAT_CLIENT_ID_KEY = "portfolio-chat-client-id";
+
+function getChatClientId() {
+  try {
+    const existing = window.localStorage.getItem(CHAT_CLIENT_ID_KEY);
+    if (existing) return existing;
+
+    const generated =
+      window.crypto?.randomUUID?.() ||
+      `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+    window.localStorage.setItem(CHAT_CLIENT_ID_KEY, generated);
+    return generated;
+  } catch {
+    return "browser-session";
+  }
+}
+
 export default function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([INITIAL_MESSAGE]);
+  const [conversationId, setConversationId] = useState("");
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -42,11 +60,16 @@ export default function ChatWidget() {
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: nextMessages }),
+        body: JSON.stringify({
+          messages: nextMessages,
+          conversationId,
+          clientId: getChatClientId(),
+        }),
       });
 
       const payload = (await response.json()) as {
         answer?: string;
+        conversationId?: string;
         error?: string;
       };
 
@@ -55,6 +78,9 @@ export default function ChatWidget() {
       }
 
       const answer = payload.answer;
+      if (payload.conversationId) {
+        setConversationId(payload.conversationId);
+      }
 
       setMessages((current) => [
         ...current,
@@ -82,7 +108,7 @@ export default function ChatWidget() {
           <header className="portfolio-chat__header">
             <div>
               <strong>Ask about Albert</strong>
-              <span>RAGFlow + Ollama</span>
+              <span>Self-hosted Dify</span>
             </div>
             <button
               type="button"

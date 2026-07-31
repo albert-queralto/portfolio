@@ -8,7 +8,6 @@ email="${CERTBOT_EMAIL:-albert@albertqueralto.dev}"
 domains=(
   "albertqueralto.dev"
   "www.albertqueralto.dev"
-  "ragflow.albertqueralto.dev"
   "payrithm.albertqueralto.dev"
   "catalonia-weather-app.albertqueralto.dev"
 )

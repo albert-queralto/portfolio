@@ -10,7 +10,7 @@ focus: "ML SaaS · Financial operations"
 image: "/projects/payrithm/payrithm.png"
 article: "/blog/payrithm"
 source: "https://github.com/albert-queralto/invoice-late-predictor-enterprise"
-preview: "http://91.99.58.122:8080/"
+preview: "https://payrithm.albertqueralto.dev/"
 technologies:
   - Python
   - FastAPI
