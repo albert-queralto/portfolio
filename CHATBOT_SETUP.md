@@ -126,19 +126,20 @@ Copy the Dify override from this repo into the Dify Docker directory:
 cp ~/portfolio/dify/docker-compose.ollama-access.yaml ~/dify/docker/
 ```
 
-Start Dify with the official Compose file plus the local-network override:
+Start Dify from inside `~/dify/docker`:
 
 ```bash
-docker compose \
-  -f docker-compose.yaml \
-  -f docker-compose.ollama-access.yaml \
-  up -d
-
-docker compose \
-  -f docker-compose.yaml \
-  -f docker-compose.ollama-access.yaml \
-  ps
+cd ~/dify/docker
+docker compose -f docker-compose.yaml -f docker-compose.ollama-access.yaml up -d
+docker compose -f docker-compose.yaml -f docker-compose.ollama-access.yaml ps
 ```
+
+This uses two Compose files at the same time:
+
+- `docker-compose.yaml`: Dify's official services.
+- `docker-compose.ollama-access.yaml`: this repo's small override that lets Dify reach Ollama on the private `local-ai` network.
+
+Docker Compose merges those files before starting the containers. Use the same `-f docker-compose.yaml -f docker-compose.ollama-access.yaml` pair whenever you run Dify commands such as `up`, `ps`, `logs`, or `down`.
 
 Dify's default Compose setup starts the Dify app services plus PostgreSQL, Redis, Weaviate, sandboxing, plugin services, and its internal Nginx. The override only adds the private `local-ai` network to the services that need to reach Ollama.
 
@@ -280,6 +281,13 @@ Show Dify status:
 ```bash
 cd ~/dify/docker
 docker compose -f docker-compose.yaml -f docker-compose.ollama-access.yaml ps
+```
+
+Follow Dify logs:
+
+```bash
+cd ~/dify/docker
+docker compose -f docker-compose.yaml -f docker-compose.ollama-access.yaml logs -f api worker
 ```
 
 Upgrade Dify by following the release notes for the target version. Keep `docker-compose.ollama-access.yaml` in place and include it whenever you run Dify Compose commands.
