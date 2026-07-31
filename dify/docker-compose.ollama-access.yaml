@@ -1,25 +1,41 @@
 services:
   api:
     networks:
+      - ssrf_proxy_network
+      - default
       - local-ai
 
   worker:
     networks:
+      - ssrf_proxy_network
+      - default
       - local-ai
 
   worker_beat:
     networks:
+      - ssrf_proxy_network
+      - default
       - local-ai
 
   plugin_daemon:
     networks:
+      - ssrf_proxy_network
+      - default
       - local-ai
 
   agent_backend:
     networks:
+      - default
+      - agent_sandbox_network
       - local-ai
 
 networks:
+  ssrf_proxy_network:
+    driver: bridge
+    internal: true
+  agent_sandbox_network:
+    driver: bridge
+    internal: true
   local-ai:
     external: true
     name: local-ai
