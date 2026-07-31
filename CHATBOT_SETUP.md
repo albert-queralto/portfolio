@@ -6,13 +6,16 @@ The lower technical cost comes from removing the custom RAGFlow bootstrap/databa
 
 ## Architecture
 
-- `~/portfolio`: Astro site, public chat proxy, Nginx, Certbot, and Ollama.
-- `~/dify/docker`: official self-hosted Dify deployment.
+- VM public DNS: `albertqueralto.dev`.
+- `~/portfolio` on the VM: Astro site, public chat proxy, Nginx, Certbot, and Ollama.
+- `~/dify/docker` on the VM: official self-hosted Dify deployment.
 - `local-ai`: private Docker network shared by Dify, Ollama, and `chat-api`.
 - Dify model provider URL: `http://ollama:11434`.
 - Portfolio chat proxy URL: `http://api:5001/v1`.
 - Public Nginx: exposes only `https://albertqueralto.dev/api/chat`.
-- Dify console: bound to `127.0.0.1:8081` and accessed through SSH tunnel.
+- Dify console: bound to `127.0.0.1:8081` on the VM and accessed through an SSH tunnel to `albertqueralto.dev`.
+
+Do not point public DNS directly at Dify. Visitors only reach the portfolio domain; the browser calls `https://albertqueralto.dev/api/chat`, and the VM-local `chat-api` container calls Dify privately through Docker networking.
 
 ## 1. Generate portfolio env
 
@@ -72,24 +75,50 @@ Install Dify outside this repo so it can be upgraded with the official release f
 
 ```bash
 cd ~
-git clone --branch "$(curl -s https://api.github.com/repos/langgenius/dify/releases/latest | jq -r .tag_name)" https://github.com/langgenius/dify.git
-cd dify/docker
+git clone https://github.com/langgenius/dify.git
+cd dify
+git fetch --tags
+DIFY_VERSION="$(git tag --sort=-version:refname | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1)"
+test -n "$DIFY_VERSION"
+echo "Installing Dify $DIFY_VERSION"
+git checkout "$DIFY_VERSION"
+cd docker
 cp .env.example .env
 ```
 
-Edit `~/dify/docker/.env` and bind Dify's console to localhost:
+This avoids the `fatal: Remote branch  not found in upstream origin` error, which happens when the GitHub API release lookup returns an empty value.
+
+The file you pasted is Dify's `.env.example` style configuration, not the service Compose YAML. Use it as `~/dify/docker/.env` only after you have the matching Dify release checked out. The safer default is to copy the release's own `.env.example`, then patch the values needed for this portfolio:
+
+```bash
+cd ~/portfolio
+./scripts/configure-dify-env.sh ~/dify/docker/.env
+```
+
+That script backs up `~/dify/docker/.env` and sets the Dify URL/bind variables for local, private access:
 
 ```dotenv
-EXPOSE_NGINX_PORT=127.0.0.1:8081
-EXPOSE_NGINX_SSL_PORT=127.0.0.1:8444
-SERVICE_API_URL=http://127.0.0.1:8081/v1
+CONSOLE_API_URL=http://127.0.0.1:8081
 CONSOLE_WEB_URL=http://127.0.0.1:8081
+SERVICE_API_URL=http://127.0.0.1:8081
+APP_API_URL=http://127.0.0.1:8081
 APP_WEB_URL=http://127.0.0.1:8081
 FILES_URL=http://127.0.0.1:8081
 TRIGGER_URL=http://127.0.0.1:8081
+ENDPOINT_URL_TEMPLATE=http://127.0.0.1:8081/e/{hook_id}
 NEXT_PUBLIC_SOCKET_URL=ws://127.0.0.1:8081
+EXPOSE_NGINX_PORT=127.0.0.1:8081
+EXPOSE_NGINX_SSL_PORT=127.0.0.1:8444
+NGINX_HTTPS_ENABLED=false
+```
+
+Before first start, edit `~/dify/docker/.env` and set:
+
+```dotenv
 INIT_PASSWORD=replace-with-a-temporary-install-password
 ```
+
+The pasted defaults also include development passwords and tokens such as `DB_PASSWORD`, `REDIS_PASSWORD`, `WEAVIATE_API_KEY`, `PLUGIN_DAEMON_KEY`, `PLUGIN_DIFY_INNER_API_KEY`, and `DIFY_AGENT_API_TOKEN`. For a real server, replace those before exposing the portfolio assistant publicly.
 
 Copy the Dify override from this repo into the Dify Docker directory:
 
@@ -113,12 +142,18 @@ docker compose \
 
 Dify's default Compose setup starts the Dify app services plus PostgreSQL, Redis, Weaviate, sandboxing, plugin services, and its internal Nginx. The override only adds the private `local-ai` network to the services that need to reach Ollama.
 
+If Dify says the external `local-ai` network does not exist, start the portfolio stack first or create it manually:
+
+```bash
+docker network create local-ai
+```
+
 ## 4. Open Dify privately
 
 From your local machine, tunnel the server's localhost port:
 
 ```bash
-ssh -L 8081:127.0.0.1:8081 your-user@your-server
+ssh -L 8081:127.0.0.1:8081 your-user@albertqueralto.dev
 ```
 
 Open:

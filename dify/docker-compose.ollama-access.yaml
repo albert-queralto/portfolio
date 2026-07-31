@@ -7,6 +7,10 @@ services:
     networks:
       - local-ai
 
+  worker_beat:
+    networks:
+      - local-ai
+
   plugin_daemon:
     networks:
       - local-ai
