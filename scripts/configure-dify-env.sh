@@ -2,6 +2,11 @@
 set -euo pipefail
 
 DIFY_ENV="${1:-$HOME/dify/docker/.env}"
+DIFY_CONSOLE_HOST="${DIFY_CONSOLE_HOST:-127.0.0.1}"
+DIFY_CONSOLE_PORT="${DIFY_CONSOLE_PORT:-18081}"
+DIFY_CONSOLE_SSL_PORT="${DIFY_CONSOLE_SSL_PORT:-18444}"
+DIFY_CONSOLE_ORIGIN="http://$DIFY_CONSOLE_HOST:$DIFY_CONSOLE_PORT"
+DIFY_CONSOLE_SOCKET_ORIGIN="ws://$DIFY_CONSOLE_HOST:$DIFY_CONSOLE_PORT"
 
 if [[ ! -f "$DIFY_ENV" ]]; then
   echo "Dify env file not found: $DIFY_ENV" >&2
@@ -33,20 +38,21 @@ upsert_env() {
   mv "$tmp" "$DIFY_ENV"
 }
 
-upsert_env CONSOLE_API_URL "http://127.0.0.1:8081"
-upsert_env CONSOLE_WEB_URL "http://127.0.0.1:8081"
-upsert_env SERVICE_API_URL "http://127.0.0.1:8081"
-upsert_env APP_API_URL "http://127.0.0.1:8081"
-upsert_env APP_WEB_URL "http://127.0.0.1:8081"
-upsert_env FILES_URL "http://127.0.0.1:8081"
-upsert_env TRIGGER_URL "http://127.0.0.1:8081"
-upsert_env ENDPOINT_URL_TEMPLATE "http://127.0.0.1:8081/e/{hook_id}"
-upsert_env NEXT_PUBLIC_SOCKET_URL "ws://127.0.0.1:8081"
-upsert_env EXPOSE_NGINX_PORT "127.0.0.1:8081"
-upsert_env EXPOSE_NGINX_SSL_PORT "127.0.0.1:8444"
+upsert_env CONSOLE_API_URL "$DIFY_CONSOLE_ORIGIN"
+upsert_env CONSOLE_WEB_URL "$DIFY_CONSOLE_ORIGIN"
+upsert_env SERVICE_API_URL "$DIFY_CONSOLE_ORIGIN"
+upsert_env APP_API_URL "$DIFY_CONSOLE_ORIGIN"
+upsert_env APP_WEB_URL "$DIFY_CONSOLE_ORIGIN"
+upsert_env FILES_URL "$DIFY_CONSOLE_ORIGIN"
+upsert_env TRIGGER_URL "$DIFY_CONSOLE_ORIGIN"
+upsert_env ENDPOINT_URL_TEMPLATE "$DIFY_CONSOLE_ORIGIN/e/{hook_id}"
+upsert_env NEXT_PUBLIC_SOCKET_URL "$DIFY_CONSOLE_SOCKET_ORIGIN"
+upsert_env EXPOSE_NGINX_PORT "$DIFY_CONSOLE_HOST:$DIFY_CONSOLE_PORT"
+upsert_env EXPOSE_NGINX_SSL_PORT "$DIFY_CONSOLE_HOST:$DIFY_CONSOLE_SSL_PORT"
 upsert_env NGINX_HTTPS_ENABLED "false"
 
 echo "Updated $DIFY_ENV for the portfolio Dify + Ollama setup."
 echo "Backup saved at $backup"
+echo "Dify console URL on the VM: $DIFY_CONSOLE_ORIGIN"
 echo
 echo "Set INIT_PASSWORD in $DIFY_ENV before first start if it is still empty."

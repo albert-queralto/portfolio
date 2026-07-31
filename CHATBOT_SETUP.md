@@ -13,7 +13,7 @@ The lower technical cost comes from removing the custom RAGFlow bootstrap/databa
 - Dify model provider URL: `http://ollama:11434`.
 - Portfolio chat proxy URL: `http://api:5001/v1`.
 - Public Nginx: exposes only `https://albertqueralto.dev/api/chat`.
-- Dify console: bound to `127.0.0.1:8081` on the VM and accessed through an SSH tunnel to `albertqueralto.dev`.
+- Dify console: bound to `127.0.0.1:18081` on the VM and accessed through an SSH tunnel to `albertqueralto.dev`.
 
 Do not point public DNS directly at Dify. Visitors only reach the portfolio domain; the browser calls `https://albertqueralto.dev/api/chat`, and the VM-local `chat-api` container calls Dify privately through Docker networking.
 
@@ -98,17 +98,17 @@ cd ~/portfolio
 That script backs up `~/dify/docker/.env` and sets the Dify URL/bind variables for local, private access:
 
 ```dotenv
-CONSOLE_API_URL=http://127.0.0.1:8081
-CONSOLE_WEB_URL=http://127.0.0.1:8081
-SERVICE_API_URL=http://127.0.0.1:8081
-APP_API_URL=http://127.0.0.1:8081
-APP_WEB_URL=http://127.0.0.1:8081
-FILES_URL=http://127.0.0.1:8081
-TRIGGER_URL=http://127.0.0.1:8081
-ENDPOINT_URL_TEMPLATE=http://127.0.0.1:8081/e/{hook_id}
-NEXT_PUBLIC_SOCKET_URL=ws://127.0.0.1:8081
-EXPOSE_NGINX_PORT=127.0.0.1:8081
-EXPOSE_NGINX_SSL_PORT=127.0.0.1:8444
+CONSOLE_API_URL=http://127.0.0.1:18081
+CONSOLE_WEB_URL=http://127.0.0.1:18081
+SERVICE_API_URL=http://127.0.0.1:18081
+APP_API_URL=http://127.0.0.1:18081
+APP_WEB_URL=http://127.0.0.1:18081
+FILES_URL=http://127.0.0.1:18081
+TRIGGER_URL=http://127.0.0.1:18081
+ENDPOINT_URL_TEMPLATE=http://127.0.0.1:18081/e/{hook_id}
+NEXT_PUBLIC_SOCKET_URL=ws://127.0.0.1:18081
+EXPOSE_NGINX_PORT=127.0.0.1:18081
+EXPOSE_NGINX_SSL_PORT=127.0.0.1:18444
 NGINX_HTTPS_ENABLED=false
 ```
 
