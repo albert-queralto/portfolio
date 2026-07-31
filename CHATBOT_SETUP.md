@@ -95,6 +95,13 @@ cd ~/portfolio
 ./scripts/configure-dify-env.sh ~/dify/docker/.env
 ```
 
+The helper uses VM port `18081` by default because `8081` is already occupied on this server. If `18081` is also busy, choose another free VM-local port:
+
+```bash
+cd ~/portfolio
+DIFY_CONSOLE_PORT=28081 DIFY_CONSOLE_SSL_PORT=28444 ./scripts/configure-dify-env.sh ~/dify/docker/.env
+```
+
 That script backs up `~/dify/docker/.env` and sets the Dify URL/bind variables for local, private access:
 
 ```dotenv
@@ -126,6 +133,23 @@ Copy the Dify override from this repo into the Dify Docker directory:
 cp ~/portfolio/dify/docker-compose.ollama-access.yaml ~/dify/docker/
 ```
 
+Before starting Dify, make sure Compose is not still seeing the old `8081` value:
+
+```bash
+cd ~/dify/docker
+env | grep '^EXPOSE_NGINX_PORT=' || true
+grep -n '^EXPOSE_NGINX_PORT=' .env
+docker compose -f docker-compose.yaml -f docker-compose.ollama-access.yaml config | grep -A4 'published: "18081"'
+```
+
+If `env` prints `EXPOSE_NGINX_PORT=8081`, clear the exported shell variable and run the env helper again:
+
+```bash
+unset EXPOSE_NGINX_PORT EXPOSE_NGINX_SSL_PORT
+cd ~/portfolio
+./scripts/configure-dify-env.sh ~/dify/docker/.env
+```
+
 Start Dify from inside `~/dify/docker`:
 
 ```bash
@@ -149,6 +173,23 @@ If Dify says the external `local-ai` network does not exist, start the portfolio
 docker network create local-ai
 ```
 
+If Docker still says `Bind for 0.0.0.0:8081 failed: port is already allocated`, Compose is still reading the old port. Run this exact reset:
+
+```bash
+cd ~/dify/docker
+unset EXPOSE_NGINX_PORT EXPOSE_NGINX_SSL_PORT
+grep -n '^EXPOSE_NGINX_PORT=' .env
+
+cd ~/portfolio
+./scripts/configure-dify-env.sh ~/dify/docker/.env
+
+cd ~/dify/docker
+grep -n '^EXPOSE_NGINX_PORT=' .env
+docker compose -f docker-compose.yaml -f docker-compose.ollama-access.yaml down
+docker compose -f docker-compose.yaml -f docker-compose.ollama-access.yaml up -d --force-recreate nginx
+docker compose -f docker-compose.yaml -f docker-compose.ollama-access.yaml up -d
+```
+
 If Dify's `nginx` container restarts with `host not found in upstream "api"`, the Ollama override has replaced one of Dify's internal networks instead of adding to it. Copy the current override from this repo again, then recreate Dify:
 
 ```bash
@@ -164,16 +205,16 @@ After the fix, `nginx` should be `Up`, not `Restarting`.
 
 ## 4. Open Dify privately
 
-Dify is bound to `127.0.0.1:8081` on the Ubuntu VM, so it is not directly visible on the public internet. First, confirm it responds on the VM:
+Dify is bound to `127.0.0.1:18081` on the Ubuntu VM, so it is not directly visible on the public internet. First, confirm it responds on the VM:
 
 ```bash
-curl -I http://127.0.0.1:8081/install
+curl -I http://127.0.0.1:18081/install
 ```
 
-The response should look like HTML or an HTTP redirect. If you see JSON such as `{"detail":"Not Found"}`, port `8081` is not reaching Dify's web UI. Check what is listening on the VM:
+The response should look like HTML or an HTTP redirect. If you see JSON such as `{"detail":"Not Found"}`, port `18081` is not reaching Dify's web UI. Check what is listening on the VM:
 
 ```bash
-sudo ss -ltnp | grep ':8081'
+sudo ss -ltnp | grep ':18081'
 cd ~/dify/docker
 docker compose -f docker-compose.yaml -f docker-compose.ollama-access.yaml ps
 docker compose -f docker-compose.yaml -f docker-compose.ollama-access.yaml logs --tail=80 nginx web api
@@ -195,28 +236,28 @@ If the Dify `api` logs show `Worker ... was sent SIGKILL! Perhaps out of memory?
 Then leave the VM terminal alone and open a new terminal on your own computer. From your computer, create an SSH tunnel to the VM:
 
 ```bash
-ssh -L 8081:127.0.0.1:8081 your-user@albertqueralto.dev
+ssh -L 18081:127.0.0.1:18081 your-user@albertqueralto.dev
 ```
 
-If SSH says local port `8081` is already in use, choose a different local port:
+If SSH says local port `18081` is already in use on your own computer, choose a different local port:
 
 ```bash
-ssh -L 18081:127.0.0.1:8081 your-user@albertqueralto.dev
+ssh -L 28081:127.0.0.1:18081 your-user@albertqueralto.dev
 ```
 
 Keep that SSH session open. Then open this URL in the browser on your own computer, not on the Ubuntu server:
 
 ```text
-http://localhost:8081/install
+http://localhost:18081/install
 ```
 
 If you used the alternate tunnel, open:
 
 ```text
-http://localhost:18081/install
+http://localhost:28081/install
 ```
 
-In this URL, `localhost` means your computer. The SSH tunnel forwards it to `127.0.0.1:8081` on the VM.
+In this URL, `localhost` means your computer. The SSH tunnel forwards it to `127.0.0.1:18081` on the VM.
 
 Create the admin account.
 

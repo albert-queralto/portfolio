@@ -25,9 +25,15 @@ upsert_env() {
   tmp="$(mktemp)"
   awk -v key="$key" -v value="$value" '
     BEGIN { updated = 0 }
-    $0 ~ "^" key "=" {
-      print key "=" value
-      updated = 1
+    {
+      line = $0
+      sub(/\r$/, "", line)
+    }
+    line ~ "^[[:space:]]*(export[[:space:]]+)?" key "[[:space:]]*=" {
+      if (!updated) {
+        print key "=" value
+        updated = 1
+      }
       next
     }
     { print }
