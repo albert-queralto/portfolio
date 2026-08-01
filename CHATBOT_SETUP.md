@@ -117,6 +117,12 @@ NEXT_PUBLIC_SOCKET_URL=ws://127.0.0.1:18081
 EXPOSE_NGINX_PORT=127.0.0.1:18081
 EXPOSE_NGINX_SSL_PORT=127.0.0.1:18444
 NGINX_HTTPS_ENABLED=false
+SERVER_WORKER_AMOUNT=1
+API_WEBSOCKET_WORKER_AMOUNT=1
+CELERY_WORKER_AMOUNT=1
+CELERY_AUTO_SCALE=false
+ENABLE_COLLABORATION_MODE=false
+COMPOSE_PROFILES=weaviate,postgresql
 ```
 
 Before first start, edit `~/dify/docker/.env` and set:
@@ -248,16 +254,54 @@ ssh -L 28081:127.0.0.1:18081 your-user@albertqueralto.dev
 Keep that SSH session open. Then open this URL in the browser on your own computer, not on the Ubuntu server:
 
 ```text
-http://localhost:18081/install
+http://127.0.0.1:18081/install
 ```
 
 If you used the alternate tunnel, open:
 
 ```text
-http://localhost:28081/install
+http://127.0.0.1:28081/install
 ```
 
-In this URL, `localhost` means your computer. The SSH tunnel forwards it to `127.0.0.1:18081` on the VM.
+In this URL, `127.0.0.1` means your computer. The SSH tunnel forwards it to `127.0.0.1:18081` on the VM.
+
+Use `127.0.0.1`, not `localhost`, because Dify's frontend is configured with `CONSOLE_API_URL=http://127.0.0.1:18081`. Mixing `localhost` and `127.0.0.1` makes the browser treat the page and API as different origins and can trigger CORS errors.
+
+If the page still hangs and the browser console shows status `502`, check whether Dify's API is healthy on the VM:
+
+```bash
+cd ~/dify/docker
+docker compose -f docker-compose.yaml -f docker-compose.ollama-access.yaml ps
+docker compose -f docker-compose.yaml -f docker-compose.ollama-access.yaml logs --tail=120 nginx api worker
+```
+
+If the API logs show `Worker ... was sent SIGKILL! Perhaps out of memory?`, the VM is out of memory. Stop Ollama temporarily during Dify setup, apply the low-memory env patch, and recreate Dify:
+
+```bash
+cd ~/portfolio
+docker compose stop ollama ollama-init
+./scripts/configure-dify-env.sh ~/dify/docker/.env
+
+cd ~/dify/docker
+docker compose -f docker-compose.yaml -f docker-compose.ollama-access.yaml down
+docker compose -f docker-compose.yaml -f docker-compose.ollama-access.yaml up -d
+docker compose -f docker-compose.yaml -f docker-compose.ollama-access.yaml ps
+```
+
+Then retry:
+
+```text
+http://127.0.0.1:18081/install
+```
+
+If it still returns `502`, check for kernel OOM events:
+
+```bash
+sudo dmesg -T | grep -Ei 'killed process|out of memory|oom'
+free -h
+```
+
+On a 4 GB VM, Dify plus Weaviate plus Ollama can still be too tight while Dify is initializing or indexing documents. Add swap or move to a larger VM if the API keeps getting killed.
 
 Create the admin account.
 
