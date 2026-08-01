@@ -76,12 +76,3 @@ scripts/issue-letsencrypt-cert.sh webroot
 ## Licence
 
 See [LICENSE](LICENSE).
-
-## Self-hosted Dify + Ollama chatbot
-
-The Docker deployment includes local Ollama models and a small public chat proxy that talks to a self-hosted Dify app. See [`CHATBOT_SETUP.md`](./CHATBOT_SETUP.md) and start with:
-
-```bash
-./scripts/generate-local-env.sh
-./scripts/start-portfolio-chatbot.sh
-```
