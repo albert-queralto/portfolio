@@ -48,6 +48,7 @@ services:
 networks:
   web:
     driver: bridge
+    name: portfolio_web
   payrithm-network:
     external: true
     name: payrithm_default

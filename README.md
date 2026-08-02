@@ -43,7 +43,7 @@ docker compose build --pull
 docker compose up -d
 ```
 
-The `portfolio` container serves the generated site internally. The `reverse-proxy` container is the only service that publishes ports 80 and 443.
+The `portfolio` container serves the generated site internally. The `reverse-proxy` container is the only service that publishes ports 80 and 443. It also routes `revigil.albertqueralto.dev` to the Revigil stack through the shared `portfolio_web` Docker network at `http://revigil-nginx:5073`.
 
 The TLS configuration expects certificates under:
 
