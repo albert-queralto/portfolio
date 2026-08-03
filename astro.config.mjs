@@ -10,6 +10,7 @@ const srcDirectory = fileURLToPath(new URL("./src", import.meta.url));
 
 // https://astro.build/config
 export default defineConfig({
+  trailingSlash: "always",
   integrations: [tailwind(), react()],
   markdown: {
     remarkPlugins: [remarkMath],
@@ -26,6 +27,7 @@ export default defineConfig({
   site: "https://albertqueralto.dev",
   output: "static",
   build: {
+    format: "directory",
     inlineStylesheets: "auto",
   },
   server: {

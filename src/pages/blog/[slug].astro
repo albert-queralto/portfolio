@@ -3,6 +3,7 @@ import Layout from "@/layouts/Layout.astro";
 import Nav from "@/components/nav.astro";
 import Footer from "@/components/footer.astro";
 import { site } from "@/data/site";
+import { toCanonicalUrl } from "@/utils/urls";
 import { getCollection, getEntry, render, type CollectionEntry } from "astro:content";
 import "katex/dist/katex.min.css";
 import "@/styles/prose.css"
@@ -27,7 +28,10 @@ const relatedProject = post.data.project
 const { Content, headings } = await render(post);
 const postBody = post.body ?? "";
 const readingTime = Math.max(1, Math.ceil(postBody.trim().split(/\s+/).length / 220));
-const canonical = new URL(`/blog/${post.id}`, Astro.site ?? site.url).toString();
+const canonical = toCanonicalUrl(
+  `/blog/${post.id}/`,
+  Astro.site ?? site.url,
+);
 const articleData = {
   "@context": "https://schema.org",
   "@type": "TechArticle",
@@ -64,7 +68,7 @@ const articleData = {
         <article class="min-w-0">
     <article>
       <a
-        href="/blog"
+        href="/blog/"
         class="inline-flex min-h-10 items-center gap-2 rounded-lg text-sm font-medium text-[var(--white-icon)] transition-colors hover:text-[var(--white)]"
       >
         <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" class="size-4">
@@ -117,7 +121,7 @@ const articleData = {
             </p>
 
             <a
-              href={`/projects/${relatedProject.id}`}
+              href={`/projects/${relatedProject.id}/`}
               class="mt-4 inline-flex text-sm font-semibold text-[var(--sec-strong)] hover:underline"
             >
               View the complete case study →

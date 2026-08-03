@@ -36,7 +36,7 @@ const posts = (await getCollection("blog", ({ data }) => !data.draft))
       {
         posts.map((post) => (
           <article class="group rounded-2xl border border-[var(--border)] bg-[var(--card-bg)] transition-[border-color,transform] hover:-translate-y-0.5 hover:border-[var(--sec)]">
-            <a href={`/blog/${post.id}`} class="flex h-full flex-col p-6">
+            <a href={`/blog/${post.id}/`} class="flex h-full flex-col p-6">
               <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[var(--white-icon)]">
                 <time datetime={post.data.date.toISOString()}>
                   {post.data.date.toLocaleDateString("en-GB", {

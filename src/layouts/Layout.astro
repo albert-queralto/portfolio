@@ -1,6 +1,7 @@
 ---
 import { ClientRouter } from "astro:transitions";
 import { site } from "@/data/site";
+import { toCanonicalUrl } from "@/utils/urls";
 
 interface Props {
   title?: string;
@@ -14,7 +15,7 @@ interface Props {
 const {
   title = site.title,
   description = site.description,
-  canonical = new URL(Astro.url.pathname, Astro.site ?? site.url).toString(),
+  canonical = toCanonicalUrl(Astro.url.pathname, Astro.site ?? site.url),
   type = "website",
   noindex = false,
   ogImage = "/og/default.png",

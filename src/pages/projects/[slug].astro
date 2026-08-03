@@ -4,6 +4,7 @@ import Nav from "@/components/nav.astro";
 import Footer from "@/components/footer.astro";
 import PayrithmArchitecture from "@/components/PayrithmArchitecture.astro";
 import { site } from "@/data/site";
+import { toCanonicalUrl } from "@/utils/urls";
 import "@/styles/prose.css";
 
 import {
@@ -35,10 +36,10 @@ interface Props {
 const { project } = Astro.props;
 const { Content } = await render(project);
 
-const canonical = new URL(
-  `/projects/${project.id}`,
+const canonical = toCanonicalUrl(
+  `/projects/${project.id}/`,
   Astro.site ?? site.url,
-).toString();
+);
 ---
 
 <Layout
