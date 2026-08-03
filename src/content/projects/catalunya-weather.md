@@ -1,75 +1,81 @@
 ---
-title: "Catalunya Weather App"
-description: "A full-stack application that collects and visualises current weather data for Catalan cities through an API-backed React interface."
+title: "Catalunya Weather Portal"
+description: "An authenticated React portal for Catalonia weather planning, combining Meteocat station history, map-based alerts, air-quality signals, and activity recommendations."
 order: 3
 featured: false
 draft: false
-status: "In progress"
+status: "Deployed"
 category: "Web"
-focus: "Full-stack data product"
+focus: "Weather planning portal"
 image: "/catalunya_weather_app.png"
 source: "https://github.com/albert-queralto/catalunya_weather_app"
 preview: "https://catalonia-weather-app.albertqueralto.dev"
 technologies:
+  - TypeScript
+  - React
   - Python
   - FastAPI
-  - React
+  - Leaflet
   - Recharts
 metrics:
-  - label: "Architecture"
-    value: "React + FastAPI"
-  - label: "Data type"
-    value: "Current weather observations"
-  - label: "Geographic focus"
-    value: "Catalan cities"
+  - label: "Product type"
+    value: "Authenticated planning portal"
+  - label: "Data signals"
+    value: "Meteocat, forecasts, air quality"
+  - label: "Interfaces"
+    value: "Maps, charts, recommender"
 ---
 
 ## Problem
 
-Weather information is widely available, but generic applications often make it difficult to compare conditions across a focused regional set of locations. This project provides a dedicated interface for exploring current weather conditions in cities across Catalunya.
+Weather decisions in Catalonia often depend on more than a single forecast. A useful planning tool needs to combine Meteocat station observations, regional warnings, local air-quality signals, and practical activity context in one place.
 
-The application is intended as a practical full-stack data product: a Python backend gathers and exposes weather information, while a React frontend presents the results through accessible charts and summary views.
+This project turns those fragmented signals into a weather-planning portal. The public page introduces the product as a calm desk for regional forecasts, air quality, Meteocat warnings, and weather-aware activity choices across Catalonia.
 
 ## Constraints
 
-Weather data depends on an external provider, so the application must account for unavailable locations, incomplete responses, request failures, and provider rate limits.
+The application depends on several live and historical data sources, so it has to handle missing station values, unavailable hourly air-quality observations, empty alert periods, upstream failures, and Meteocat rate limits.
 
-Location names can be ambiguous or formatted inconsistently. The frontend also needs to remain useful across desktop and mobile screens while displaying several measurements without overwhelming the user.
+Map-based workflows add geographic complexity: coordinates, station metadata, comarca boundaries, nearby-station comparisons, and user-selected locations all need to stay synchronized across charts, controls, and recommendation results.
 
-Because the project is still in progress, deployment, caching, and long-term historical storage are not yet treated as final production features.
+Authentication also matters. The portal includes login, registration, profiles, protected user workflows, and admin-oriented screens, so API calls must preserve token state while keeping errors visible and recoverable.
 
 ## Approach
 
-The application uses FastAPI as an API layer between the frontend and the external weather source. The backend normalizes responses into a stable internal format so the React interface does not depend directly on a third-party schema.
+The deployed frontend is a Vite React and TypeScript application using React Router, Material UI, Leaflet/react-leaflet, and Recharts. A shared API client talks to a `/api/v1` backend so feature screens can request JSON data through consistent fetch and error-handling paths.
 
-The frontend provides city selection, current-condition summaries, and Recharts visualizations. Keeping the weather retrieval logic on the server protects provider credentials and gives the project one place to implement validation, caching, and error handling.
+The authenticated home flow centers on an activity recommender. Users can select a location manually or through browser geolocation, tune radius, forecast horizon, planning window, result limit, and air-quality sensitivity, then view nearby recommendations on a Leaflet map.
 
-The system is structured so historical observations and forecasting features can be added without redesigning the entire user interface.
+The station tools expose Meteocat data through both a station explorer and a Catalunya map. Users can select stations, variables, and date ranges, inspect trends, daily min/average/max charts, missing-data indicators, nearby station comparisons, microclimate insights, and forecast accuracy summaries.
+
+The portal also includes an air-quality map for PM2.5, PM10, CO, CO2, NO2, SO2, ozone, and UV index, plus a Meteocat SMP episodes view that colors comarques by warning danger level for today and tomorrow.
 
 ## Validation
 
-Backend endpoints can be checked with representative Catalan locations, invalid locations, missing provider responses, and simulated upstream failures. Response schemas should remain stable even when optional weather fields are unavailable.
+Validation covers route access, token persistence, login and registration flows, protected user screens, and selected admin operations. API responses should fail clearly when upstream weather services return empty data, invalid payloads, or quota errors.
 
-Frontend validation focuses on correct rendering, loading states, empty states, responsive behavior, and consistency between API values and displayed charts.
+Weather-specific checks include representative Meteocat stations, station variables, date ranges, missing intervals, air-quality pollutants, open SMP alert periods, map overlays, and recommendation runs with different radii and planning windows.
 
-Automated tests are a planned improvement; the current stage relies primarily on endpoint checks and manual interface verification.
+Frontend validation focuses on loading states, empty states, chart formatting, map marker placement, comarca coloring, recommendation grouping, and whether user feedback events are sent with the weather and ranking context needed for later analysis.
 
 ## Engineering decisions
 
-FastAPI provides typed request and response models and automatically generated API documentation. React separates the user interface into reusable components, while Recharts handles responsive chart rendering.
+React Router separates the portal into public, authenticated, and admin-oriented workflows. Material UI provides consistent forms, buttons, chips, modals, and navigation controls across a large surface area.
 
-The backend acts as an anti-corruption layer around the external weather API. This reduces coupling and makes it possible to replace the data provider later without rewriting the frontend.
+Leaflet is used for interactive maps because station selection, user location, comarca overlays, and pollutant markers are core interactions rather than decorative elements. Recharts handles station histories, air-quality hourly series, missing-data summaries, and forecast accuracy comparisons.
 
-Environment variables should be used for provider keys and deployment-specific configuration rather than embedding secrets in source code.
+The backend API remains the anti-corruption layer around Meteocat, air-quality, recommendation, user, and model endpoints. Keeping those integrations server-side makes it easier to normalize schemas, protect provider configuration, and cache or replace upstream services later.
 
 ## Tradeoffs
 
-The current version prioritizes present conditions and a clear regional experience over advanced meteorological analysis. It does not yet maintain a complete historical archive or perform local forecasting.
+The current version prioritizes an integrated planning experience over deep meteorological modeling. It brings together useful signals for daily decisions, but it should not be treated as an official warning system or a substitute for primary Meteocat guidance.
 
-Using an external provider reduces implementation time but introduces availability and rate-limit dependencies. Adding a database and caching layer would improve resilience but also increase operational complexity.
+Fetching live maps, station metadata, historical values, alerts, and air-quality observations gives the interface breadth, but it also creates latency and rate-limit pressure. Stronger caching and precomputed summaries would improve resilience.
+
+The recommendation loop captures user actions such as views, saves, completions, dismissals, and ratings, but the quality of personalization depends on continued event volume and careful evaluation of ranking behavior.
 
 ## Next steps
 
-The next version should add automated API and browser tests, response caching, stronger loading and error states, and deployment documentation.
+The next version should add automated API and browser tests, stronger route protection for every admin-only screen, response caching, deployment documentation, and monitoring for upstream provider failures.
 
-Further improvements could include historical trends, forecast comparisons, geospatial maps, saved locations, severe-weather notifications, and a PostgreSQL or time-series database for regional observation history.
+Further improvements could include saved locations, notification preferences, richer accessibility checks for maps and charts, improved forecast-snapshot collection, more explicit data-source methodology, and a production analytics loop for recommendation quality.
