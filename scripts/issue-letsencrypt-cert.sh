@@ -10,7 +10,7 @@ domains=(
   "www.albertqueralto.dev"
   "payrithm.albertqueralto.dev"
   "catalonia-weather-app.albertqueralto.dev"
-  "revigil.albertqueralto.dev"
+  "tenderwise.albertqueralto.dev"
 )
 
 usage() {

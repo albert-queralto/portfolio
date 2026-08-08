@@ -8,7 +8,7 @@ status: "In progress"
 category: "Machine Learning"
 focus: "ML SaaS · Financial operations"
 image: "/projects/payrithm/payrithm.png"
-article: "/blog/payrithm"
+article: "/blog/payrithm/"
 source: "https://github.com/albert-queralto/invoice-late-predictor-enterprise"
 preview: "https://payrithm.albertqueralto.dev/"
 technologies:

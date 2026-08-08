@@ -1,5 +1,5 @@
 import { getCollection } from "astro:content";
-import { site } from "@/data/site";
+import { toCanonicalUrl } from "@/utils/urls";
 
 export const prerender = true;
 
@@ -25,16 +25,16 @@ export async function GET() {
   );
 
   const urls = [
-    { location: site.url, priority: "1.0" },
-    { location: `${site.url}/blog`, priority: "0.8" },
+    { location: toCanonicalUrl("/"), priority: "1.0" },
+    { location: toCanonicalUrl("/blog/"), priority: "0.8" },
 
     ...projects.map((project) => ({
-      location: `${site.url}/projects/${project.id}`,
+      location: toCanonicalUrl(`/projects/${project.id}/`),
       priority: project.data.featured ? "0.9" : "0.7",
     })),
 
     ...posts.map((post) => ({
-      location: `${site.url}/blog/${post.id}`,
+      location: toCanonicalUrl(`/blog/${post.id}/`),
       lastModified: (
         post.data.updatedDate ?? post.data.date
       ).toISOString(),
