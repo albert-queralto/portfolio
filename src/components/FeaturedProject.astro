@@ -1,16 +1,118 @@
 ---
-const sourceUrl: string | undefined = "https://github.com/albert-queralto/invoice-late-predictor-enterprise";
-const liveUrl: string | undefined = "https://payrithm.albertqueralto.dev";
+interface FlagshipLink {
+  href: string;
+  label: string;
+  primary?: boolean;
+  external?: boolean;
+}
 
-const technologies = [
-  "Python",
-  "FastAPI",
-  "scikit-learn",
-  "React",
-  "PostgreSQL",
-  "Celery",
-  "Redis",
-  "Docker",
+interface FlagshipProject {
+  id: string;
+  eyebrow: string;
+  heading: string;
+  summary: string;
+  highlights: string[];
+  technologies: string[];
+  image: string;
+  imageAlt: string;
+  calloutLabel: string;
+  calloutText: string;
+  reversed?: boolean;
+  links: FlagshipLink[];
+}
+
+const flagships: FlagshipProject[] = [
+  {
+    id: "payrithm",
+    eyebrow: "Flagship project · Machine learning SaaS",
+    heading: "Payrithm turns invoice history into collection decisions.",
+    summary:
+      "An accounts-receivable intelligence platform that predicts late payments, estimates payment timing, forecasts incoming cash, and converts model outputs into prioritized collection workflows.",
+    highlights: [
+      "Uses chronological model validation to prevent future information from leaking into training.",
+      "Evaluates probability quality with ROC-AUC, calibration, and the Brier score.",
+      "Combines risk, invoice value, urgency, and reminder activity into an explainable collection-priority score.",
+    ],
+    technologies: [
+      "Python",
+      "FastAPI",
+      "scikit-learn",
+      "React",
+      "PostgreSQL",
+      "Celery",
+      "Redis",
+      "Docker",
+    ],
+    image: "/projects/payrithm/payrithm.png",
+    imageAlt:
+      "Payrithm accounts-receivable dashboard showing invoice risk and collection priorities",
+    calloutLabel: "End-to-end ML product",
+    calloutText:
+      "Data ingestion, asynchronous processing, model training, prediction APIs, monitoring, and a decision-focused frontend.",
+    links: [
+      { href: "/projects/payrithm/", label: "View case study", primary: true },
+      {
+        href: "https://payrithm.albertqueralto.dev",
+        label: "Open application",
+        external: true,
+      },
+      {
+        href: "https://github.com/albert-queralto/invoice-late-predictor-enterprise",
+        label: "Source code",
+        external: true,
+      },
+    ],
+  },
+  {
+    id: "tenderwise",
+    eyebrow: "Flagship project · Procurement SaaS",
+    heading:
+      "TenderWise turns public-procurement noise into bid/no-bid action.",
+    summary:
+      "A multilingual SaaS for European public procurement that ingests TED notices, scores opportunities against company profiles, separates strategic relevance from qualification readiness, and coordinates bid preparation.",
+    highlights: [
+      "Stores canonical TED notice history so source changes and failed-ingestion retries remain traceable.",
+      "Keeps relevance and qualification as separate decision axes before returning BID, REVIEW, or NO_BID.",
+      "Adds a team bid workspace with stages, internal deadlines, assignments, seeded checklists, comments, and notifications.",
+      "Runs as a Dockerized SaaS with workspaces, roles, billing limits, audit logs, backups, and optional queued AI briefs.",
+    ],
+    technologies: [
+      "React",
+      "TypeScript",
+      "FastAPI",
+      "PostgreSQL",
+      "pgvector",
+      "Celery",
+      "Redis",
+      "Docker",
+      "Stripe",
+      "Ollama",
+    ],
+    image: "/projects/tenderwise/tenderwise.png",
+    imageAlt:
+      "TenderWise procurement dashboard showing TED opportunity scores, qualification evidence, and bid workspace progress",
+    calloutLabel: "Production procurement SaaS",
+    calloutText:
+      "React/Vite frontend, FastAPI API, PostgreSQL with pgvector, Redis/Celery workers, scheduled TED ingestion, billing, audit, backups, and optional AI briefs.",
+    reversed: true,
+    links: [
+      {
+        href: "/projects/tenderwise/",
+        label: "View case study",
+        primary: true,
+      },
+      {
+        href: "https://tenderwise.albertqueralto.dev/",
+        label: "Open application",
+        external: true,
+      },
+      {
+        href: "https://github.com/albert-queralto/tender-wise",
+        label: "Source code",
+        external: true,
+      },
+    ],
+  },
 ];
 ---
 
@@ -20,133 +122,120 @@ const technologies = [
   class="border-t border-[var(--border)] py-16 text-[var(--white)] md:py-24"
 >
   <div class="mx-auto max-w-5xl">
-    <div class="grid items-center gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:gap-14">
-      <div>
-        <p
-          class="text-sm font-semibold uppercase tracking-[0.15em] text-[var(--sec)]"
-        >
-          Flagship project
-        </p>
-
-        <h2
-          id="featured-project-title"
-          class="mt-3 text-4xl font-semibold tracking-tight md:text-5xl"
-        >
-          Payrithm turns invoice history into collection decisions.
-        </h2>
-
-        <p class="mt-5 text-base leading-relaxed text-[var(--white-icon)] md:text-lg">
-          An accounts-receivable intelligence platform that predicts late
-          payments, estimates payment timing, forecasts incoming cash, and
-          converts model outputs into prioritized collection workflows.
-        </p>
-
-        <ul class="mt-7 space-y-3 text-sm leading-relaxed text-[var(--white-icon)]">
-          <li class="flex gap-3">
-            <span
-              class="mt-2 size-1.5 shrink-0 rounded-full bg-[var(--sec)]"
-            ></span>
-            <span>
-              Uses chronological model validation to prevent future information
-              from leaking into training.
-            </span>
-          </li>
-
-          <li class="flex gap-3">
-            <span
-              class="mt-2 size-1.5 shrink-0 rounded-full bg-[var(--sec)]"
-            ></span>
-            <span>
-              Evaluates probability quality with ROC-AUC, calibration, and the
-              Brier score.
-            </span>
-          </li>
-
-          <li class="flex gap-3">
-            <span
-              class="mt-2 size-1.5 shrink-0 rounded-full bg-[var(--sec)]"
-            ></span>
-            <span>
-              Combines risk, invoice value, urgency, and reminder activity into
-              an explainable collection-priority score.
-            </span>
-          </li>
-        </ul>
-
-        <ul
-          class="mt-7 flex flex-wrap gap-2"
-          aria-label="Payrithm technologies"
-        >
-          {
-            technologies.map((technology) => (
-              <li class="rounded-md bg-[var(--white-icon-tr)] px-2.5 py-1 text-xs text-[var(--sec-strong)]">
-                {technology}
-              </li>
-            ))
-          }
-        </ul>
-
-        <div class="mt-8 flex flex-wrap gap-3">
-          <a
-            href="/blog/payrithm/"
-            class="inline-flex min-h-12 items-center justify-center rounded-xl bg-[var(--sec)] px-5 py-3 text-sm font-semibold text-[var(--background)] transition-transform hover:-translate-y-0.5"
-          >
-            Read the ML article
-          </a>
-
-          {
-            liveUrl && (
-              <a
-                href={liveUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="inline-flex min-h-12 items-center justify-center rounded-xl border border-[var(--border)] px-5 py-3 text-sm font-medium transition-colors hover:border-[var(--sec)]"
-              >
-                Open application
-              </a>
-            )
-          }
-
-          {
-            sourceUrl && (
-              <a
-                href={sourceUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="inline-flex min-h-12 items-center justify-center rounded-xl border border-[var(--border)] px-5 py-3 text-sm font-medium transition-colors hover:border-[var(--sec)]"
-              >
-                Source code
-              </a>
-            )
-          }
-        </div>
-      </div>
-
-      <div
-        class="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card-bg)]"
+    <div class="max-w-3xl">
+      <p
+        class="text-sm font-semibold uppercase tracking-[0.15em] text-[var(--sec)]"
       >
-        <img
-          src="/projects/payrithm/payrithm.png"
-          alt="Payrithm accounts-receivable dashboard showing invoice risk and collection priorities"
-          width="1600"
-          height="1000"
-          loading="lazy"
-          decoding="async"
-          class="aspect-[16/10] w-full object-cover"
-        />
+        Flagship projects
+      </p>
 
-        <div class="border-t border-[var(--border)] p-5">
-          <p
-            class="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--sec)]"
+      <h2
+        id="featured-project-title"
+        class="mt-3 text-4xl font-semibold tracking-tight md:text-5xl"
+      >
+        Production-minded SaaS for high-stakes business decisions.
+      </h2>
+
+      <p class="mt-4 text-[var(--white-icon)] md:text-lg">
+        Two larger systems that show the full path from data modelling and
+        domain rules to APIs, background jobs, deployment, and decision-focused
+        product design.
+      </p>
+    </div>
+
+    <div class="mt-10 space-y-12 md:mt-14 md:space-y-16">
+      {
+        flagships.map((project) => (
+          <article
+            id={`flagship-${project.id}`}
+            aria-labelledby={`flagship-${project.id}-title`}
+            class="grid items-center gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:gap-14"
           >
-            End-to-end ML product
-          </p>
-          <p class="mt-2 text-sm leading-relaxed text-[var(--white-icon)]">
-            Data ingestion, asynchronous processing, model training, prediction
-            APIs, monitoring, and a decision-focused frontend.
-          </p>
-        </div>
-      </div>
+            <div class:list={[project.reversed && "lg:order-2"]}>
+              <p class="text-sm font-semibold uppercase tracking-[0.15em] text-[var(--sec)]">
+                {project.eyebrow}
+              </p>
+
+              <h3
+                id={`flagship-${project.id}-title`}
+                class="mt-3 text-3xl font-semibold tracking-tight md:text-4xl"
+              >
+                {project.heading}
+              </h3>
+
+              <p class="mt-5 text-base leading-relaxed text-[var(--white-icon)] md:text-lg">
+                {project.summary}
+              </p>
+
+              <ul class="mt-7 space-y-3 text-sm leading-relaxed text-[var(--white-icon)]">
+                {project.highlights.map((highlight) => (
+                  <li class="flex gap-3">
+                    <span class="mt-2 size-1.5 shrink-0 rounded-full bg-[var(--sec)]" />
+                    <span>{highlight}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <ul
+                class="mt-7 flex flex-wrap gap-2"
+                aria-label={`${project.id} technologies`}
+              >
+                {project.technologies.map((technology) => (
+                  <li class="rounded-md bg-[var(--white-icon-tr)] px-2.5 py-1 text-xs text-[var(--sec-strong)]">
+                    {technology}
+                  </li>
+                ))}
+              </ul>
+
+              <div class="mt-8 flex flex-wrap gap-3">
+                {project.links.map((link) => (
+                  <a
+                    href={link.href}
+                    target={link.external ? "_blank" : undefined}
+                    rel={link.external ? "noopener noreferrer" : undefined}
+                    class:list={[
+                      "inline-flex min-h-12 items-center justify-center rounded-xl px-5 py-3 text-sm font-medium transition-colors",
+                      link.primary
+                        ? "bg-[var(--sec)] font-semibold text-[var(--background)] transition-transform hover:-translate-y-0.5"
+                        : "border border-[var(--border)] hover:border-[var(--sec)]",
+                    ]}
+                  >
+                    {link.label}
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            <div
+              class:list={[
+                "overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card-bg)]",
+                project.reversed && "lg:order-1",
+              ]}
+            >
+              <a href={`/projects/${project.id}/`} class="block">
+                <img
+                  src={project.image}
+                  alt={project.imageAlt}
+                  width="1600"
+                  height="1000"
+                  loading="lazy"
+                  decoding="async"
+                  class="aspect-[16/10] w-full object-cover"
+                />
+              </a>
+
+              <div class="border-t border-[var(--border)] p-5">
+                <p class="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--sec)]">
+                  {project.calloutLabel}
+                </p>
+                <p class="mt-2 text-sm leading-relaxed text-[var(--white-icon)]">
+                  {project.calloutText}
+                </p>
+              </div>
+            </div>
+          </article>
+        ))
+      }
     </div>
   </div>
 </section>

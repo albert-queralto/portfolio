@@ -3,21 +3,15 @@ import Layout from "@/layouts/Layout.astro";
 import Nav from "@/components/nav.astro";
 import Footer from "@/components/footer.astro";
 import PayrithmArchitecture from "@/components/PayrithmArchitecture.astro";
+import TenderWiseArchitecture from "@/components/TenderWiseArchitecture.astro";
 import { site } from "@/data/site";
 import { toCanonicalUrl } from "@/utils/urls";
 import "@/styles/prose.css";
 
-import {
-  getCollection,
-  render,
-  type CollectionEntry,
-} from "astro:content";
+import { getCollection, render, type CollectionEntry } from "astro:content";
 
 export async function getStaticPaths() {
-  const projects = await getCollection(
-    "projects",
-    ({ data }) => !data.draft,
-  );
+  const projects = await getCollection("projects", ({ data }) => !data.draft);
 
   return projects.map((project) => ({
     params: {
@@ -40,17 +34,20 @@ const canonical = toCanonicalUrl(
   `/projects/${project.id}/`,
   Astro.site ?? site.url,
 );
+
+const ogImage =
+  project.id === "payrithm"
+    ? "/og/payrithm.png"
+    : project.id === "tenderwise"
+      ? "/projects/tenderwise/tenderwise.png"
+      : project.data.image;
 ---
 
 <Layout
   title={`${project.data.title} — ${site.name}`}
   description={project.data.description}
   canonical={canonical}
-  ogImage={
-    project.id === "payrithm"
-      ? "/og/payrithm.png"
-      : project.data.image
-  }
+  ogImage={ogImage}
 >
   <Nav />
 
@@ -170,6 +167,7 @@ const canonical = toCanonicalUrl(
     }
 
     {project.id === "payrithm" && <PayrithmArchitecture />}
+    {project.id === "tenderwise" && <TenderWiseArchitecture />}
 
     <article class="article-prose prose mt-12 max-w-none">
       <Content />

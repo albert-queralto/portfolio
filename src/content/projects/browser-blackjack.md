@@ -1,7 +1,7 @@
 ---
 title: "Browser Blackjack"
 description: "A responsive browser implementation of Blackjack with game-state management and a compact interactive interface."
-order: 8
+order: 9
 featured: false
 draft: false
 status: "Deployed"

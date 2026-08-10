@@ -1,7 +1,7 @@
 ---
 title: "Sensor Error Detection and Localisation with RNNs"
 description: "A recurrent-neural-network pipeline using LSTM and GRU models to detect and localise faults in multivariate sensor streams."
-order: 2
+order: 3
 featured: false
 draft: false
 status: "Completed"

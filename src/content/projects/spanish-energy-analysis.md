@@ -1,7 +1,7 @@
 ---
 title: "Spanish Energy Price Analysis"
 description: "Exploratory and statistical analysis of Spanish electricity-market prices, seasonal behavior, and potential price drivers."
-order: 7
+order: 8
 featured: false
 draft: false
 status: "Completed"

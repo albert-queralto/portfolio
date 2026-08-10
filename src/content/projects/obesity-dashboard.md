@@ -1,7 +1,7 @@
 ---
 title: "Obesity Dashboard"
 description: "An interactive dashboard for exploring global obesity patterns and demographic differences with a Python analytics stack."
-order: 4
+order: 5
 featured: false
 draft: false
 status: "Deployed"

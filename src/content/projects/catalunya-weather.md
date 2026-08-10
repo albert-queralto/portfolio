@@ -1,7 +1,7 @@
 ---
 title: "Catalunya Weather Portal"
 description: "An authenticated React portal for Catalonia weather planning, combining Meteocat station history, map-based alerts, air-quality signals, and activity recommendations."
-order: 3
+order: 4
 featured: false
 draft: false
 status: "Deployed"

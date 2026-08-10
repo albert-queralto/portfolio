@@ -1,0 +1,360 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="1600"
+  height="1000"
+  viewBox="0 0 1600 1000"
+  role="img"
+  aria-labelledby="title desc"
+>
+  <title id="title">TenderWise procurement dashboard preview</title>
+  <desc id="desc">
+    A dark procurement SaaS dashboard with tender scores, TED opportunity
+    filters, AI brief status, and a bid workspace progress track.
+  </desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#111318" />
+      <stop offset="0.52" stop-color="#15191d" />
+      <stop offset="1" stop-color="#101318" />
+    </linearGradient>
+    <linearGradient id="panel" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#20262d" />
+      <stop offset="1" stop-color="#14191f" />
+    </linearGradient>
+    <linearGradient id="hero" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#145d68" />
+      <stop offset="0.52" stop-color="#1d3947" />
+      <stop offset="1" stop-color="#1a222c" />
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#78e4c4" />
+      <stop offset="1" stop-color="#75b9ff" />
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow
+        dx="0"
+        dy="24"
+        stdDeviation="28"
+        flood-color="#000000"
+        flood-opacity="0.28"
+      />
+    </filter>
+    <style>
+      .small {
+        font:
+          500 22px Inter,
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+      }
+      .tiny {
+        font:
+          600 18px Inter,
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+      }
+      .label {
+        font:
+          700 17px Inter,
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+        letter-spacing: 1.8px;
+      }
+      .body {
+        font:
+          500 24px Inter,
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+      }
+      .strong {
+        font:
+          750 30px Inter,
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+      }
+      .title {
+        font:
+          780 42px Inter,
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+      }
+      .metric {
+        font:
+          800 50px Inter,
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+      }
+    </style>
+  </defs>
+
+  <rect width="1600" height="1000" rx="48" fill="url(#bg)" />
+  <rect
+    x="34"
+    y="34"
+    width="1532"
+    height="932"
+    rx="38"
+    fill="#0e1116"
+    stroke="#ffffff18"
+    stroke-width="2"
+  />
+
+  <g>
+    <rect
+      x="70"
+      y="78"
+      width="258"
+      height="844"
+      rx="28"
+      fill="#14191f"
+      stroke="#ffffff14"
+      stroke-width="2"
+    />
+    <circle cx="116" cy="124" r="22" fill="url(#accent)" />
+    <text x="151" y="133" fill="#f5f8fa" class="strong">TenderWise</text>
+    <text x="102" y="184" fill="#7ddfcb" class="label">PROCUREMENT</text>
+
+    <g fill="#ffffffba" class="small">
+      <rect x="96" y="219" width="206" height="54" rx="18" fill="#223844" />
+      <circle cx="123" cy="246" r="8" fill="#78e4c4" />
+      <text x="146" y="254">Dashboard</text>
+      <circle cx="123" cy="319" r="8" fill="#6f7d89" />
+      <text x="146" y="327" fill="#9eaab5">Profiles</text>
+      <circle cx="123" cy="391" r="8" fill="#6f7d89" />
+      <text x="146" y="399" fill="#9eaab5">Opportunities</text>
+      <circle cx="123" cy="463" r="8" fill="#6f7d89" />
+      <text x="146" y="471" fill="#9eaab5">Bid workspace</text>
+      <circle cx="123" cy="535" r="8" fill="#6f7d89" />
+      <text x="146" y="543" fill="#9eaab5">Billing</text>
+      <circle cx="123" cy="607" r="8" fill="#6f7d89" />
+      <text x="146" y="615" fill="#9eaab5">Audit log</text>
+    </g>
+
+    <rect
+      x="96"
+      y="744"
+      width="206"
+      height="132"
+      rx="22"
+      fill="#0f1318"
+      stroke="#ffffff12"
+    />
+    <text x="119" y="786" fill="#78e4c4" class="label">WORKSPACE</text>
+    <text x="119" y="824" fill="#f2f5f7" class="small">Acme Infra EU</text>
+    <text x="119" y="856" fill="#9ba7b3" class="tiny">
+      Team plan · 68% quota
+    </text>
+  </g>
+
+  <g>
+    <rect
+      x="360"
+      y="78"
+      width="1170"
+      height="844"
+      rx="34"
+      fill="#12161c"
+      stroke="#ffffff14"
+      filter="url(#shadow)"
+    />
+
+    <rect
+      x="398"
+      y="116"
+      width="1094"
+      height="184"
+      rx="30"
+      fill="url(#hero)"
+      stroke="#ffffff18"
+    />
+    <text x="438" y="170" fill="#9ff1d7" class="label">
+      TED OPPORTUNITY INTELLIGENCE
+    </text>
+    <text x="438" y="222" fill="#f5f8fa" class="title">
+      Bid/no-bid intelligence for EU tenders
+    </text>
+    <text x="438" y="263" fill="#c4d0d8" class="body">
+      Scoring, evidence, TED history, and bid workspaces.
+    </text>
+    <rect
+      x="1195"
+      y="143"
+      width="252"
+      height="48"
+      rx="24"
+      fill="#0d1418"
+      stroke="#78e4c470"
+    />
+    <circle cx="1224" cy="167" r="7" fill="#83d8a2" />
+    <text x="1242" y="175" fill="#d8f7ec" class="small">Worker healthy</text>
+    <rect x="1195" y="210" width="252" height="50" rx="25" fill="#ffffff12" />
+    <text x="1225" y="243" fill="#f2f5f7" class="small">EN · ES · DE</text>
+
+    <g transform="translate(398 332)">
+      <rect
+        width="1094"
+        height="116"
+        rx="24"
+        fill="#171d24"
+        stroke="#ffffff14"
+      />
+      <g transform="translate(28 24)">
+        <text x="0" y="22" fill="#9ba7b3" class="tiny">Open opportunities</text>
+        <text x="0" y="76" fill="#f6f9fb" class="metric">128</text>
+      </g>
+      <g transform="translate(270 24)">
+        <text x="0" y="22" fill="#9ba7b3" class="tiny">Recommended bid</text>
+        <text x="0" y="76" fill="#86e2ad" class="metric">42</text>
+      </g>
+      <g transform="translate(528 24)">
+        <text x="0" y="22" fill="#9ba7b3" class="tiny">Needs review</text>
+        <text x="0" y="76" fill="#ffd27a" class="metric">67</text>
+      </g>
+      <g transform="translate(770 24)">
+        <text x="0" y="22" fill="#9ba7b3" class="tiny">No-bid</text>
+        <text x="0" y="76" fill="#ff9b9b" class="metric">19</text>
+      </g>
+      <rect x="955" y="30" width="104" height="56" rx="18" fill="#223844" />
+      <text x="980" y="67" fill="#9ff1d7" class="small">TED</text>
+    </g>
+
+    <g transform="translate(398 478)">
+      <rect
+        width="700"
+        height="354"
+        rx="26"
+        fill="url(#panel)"
+        stroke="#ffffff14"
+      />
+      <text x="30" y="48" fill="#f5f8fa" class="strong">Opportunity feed</text>
+      <text x="30" y="84" fill="#9ba7b3" class="small">
+        Profile: Data infrastructure · Source: TED · Deadline: 30 days
+      </text>
+
+      <g transform="translate(30 118)">
+        <rect
+          width="640"
+          height="82"
+          rx="20"
+          fill="#10151b"
+          stroke="#7de7c533"
+        />
+        <rect x="18" y="21" width="74" height="36" rx="18" fill="#143c33" />
+        <text x="37" y="47" fill="#91e9c9" class="tiny">BID</text>
+        <text x="112" y="35" fill="#f4f7f9" class="small">
+          Cloud data platform modernization
+        </text>
+        <text x="112" y="65" fill="#9ba7b3" class="tiny">
+          ES · €680k · 17 days left
+        </text>
+        <text x="498" y="35" fill="#91e9c9" class="tiny">92 relevance</text>
+        <text x="498" y="65" fill="#75b9ff" class="tiny">87 qualified</text>
+      </g>
+
+      <g transform="translate(30 214)">
+        <rect
+          width="640"
+          height="82"
+          rx="20"
+          fill="#10151b"
+          stroke="#ffffff10"
+        />
+        <rect x="18" y="21" width="102" height="36" rx="18" fill="#3b3017" />
+        <text x="37" y="47" fill="#ffd27a" class="tiny">REVIEW</text>
+        <text x="140" y="35" fill="#f4f7f9" class="small">
+          Sensor network maintenance
+        </text>
+        <text x="140" y="65" fill="#9ba7b3" class="tiny">
+          DE · €240k · 9 days left
+        </text>
+        <text x="506" y="35" fill="#ffd27a" class="tiny">78 relevance</text>
+        <text x="506" y="65" fill="#75b9ff" class="tiny">61 qualified</text>
+      </g>
+    </g>
+
+    <g transform="translate(1124 478)">
+      <rect
+        width="368"
+        height="354"
+        rx="26"
+        fill="url(#panel)"
+        stroke="#ffffff14"
+      />
+      <text x="28" y="48" fill="#f5f8fa" class="strong">Decision support</text>
+      <rect
+        x="28"
+        y="76"
+        width="312"
+        height="86"
+        rx="20"
+        fill="#10151b"
+        stroke="#75b9ff38"
+      />
+      <text x="52" y="111" fill="#75b9ff" class="label">AI BRIEF QUEUED</text>
+      <text x="52" y="146" fill="#c7d0d8" class="tiny">
+        Executive summary and risks run in Celery.
+      </text>
+
+      <text x="28" y="206" fill="#f5f8fa" class="small">
+        Requirement evidence
+      </text>
+      <rect x="28" y="226" width="312" height="16" rx="8" fill="#0d1116" />
+      <rect x="28" y="226" width="248" height="16" rx="8" fill="#86e2ad" />
+      <text x="28" y="270" fill="#f5f8fa" class="small">
+        Qualification blockers
+      </text>
+      <rect x="28" y="290" width="312" height="16" rx="8" fill="#0d1116" />
+      <rect x="28" y="290" width="88" height="16" rx="8" fill="#ff9b9b" />
+    </g>
+
+    <text x="410" y="849" fill="#d7e1e8" class="tiny">
+      Bid workspace: Qualification -> Planning -> Preparation -> Review -> Ready
+      to submit
+    </text>
+    <g transform="translate(398 858)">
+      <rect
+        width="1094"
+        height="42"
+        rx="21"
+        fill="#10151b"
+        stroke="#ffffff14"
+      />
+      <circle cx="45" cy="21" r="12" fill="#86e2ad" />
+      <rect x="63" y="18" width="190" height="6" rx="3" fill="#86e2ad" />
+      <circle cx="284" cy="21" r="12" fill="#86e2ad" />
+      <rect x="302" y="18" width="190" height="6" rx="3" fill="#86e2ad" />
+      <circle cx="523" cy="21" r="12" fill="#75b9ff" />
+      <rect x="541" y="18" width="190" height="6" rx="3" fill="#2b475c" />
+      <circle cx="762" cy="21" r="12" fill="#2b475c" />
+      <rect x="780" y="18" width="190" height="6" rx="3" fill="#2b475c" />
+      <circle cx="1001" cy="21" r="12" fill="#2b475c" />
+    </g>
+  </g>
+</svg>

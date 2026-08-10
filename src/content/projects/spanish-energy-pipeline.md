@@ -1,7 +1,7 @@
 ---
 title: "Spanish Energy Data Pipeline"
 description: "An automated pipeline that gathers Spanish electricity-price and renewable-generation data and stores structured results for analysis."
-order: 5
+order: 6
 featured: false
 draft: false
 status: "Completed"

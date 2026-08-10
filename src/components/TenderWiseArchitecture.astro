@@ -1,0 +1,119 @@
+<section
+  aria-labelledby="tenderwise-architecture-title"
+  class="my-12 rounded-2xl border border-[var(--border)] bg-[var(--card-bg)] p-5 md:p-8"
+>
+  <div class="max-w-2xl">
+    <p
+      class="text-xs font-semibold uppercase tracking-[0.15em] text-[var(--sec)]"
+    >
+      System design
+    </p>
+    <h2 id="tenderwise-architecture-title" class="mt-2 text-2xl font-semibold">
+      TenderWise architecture
+    </h2>
+  </div>
+
+  <div
+    class="mt-8 grid items-center gap-3 md:grid-cols-[1fr_auto_1fr_auto_1fr]"
+  >
+    <div class="tenderwise-architecture-box">
+      <strong>Shared Nginx edge</strong>
+      <span>HTTPS, Certbot, public host routing, and reverse proxy headers</span
+      >
+    </div>
+
+    <span class="tenderwise-architecture-arrow" aria-hidden="true">-&gt;</span>
+
+    <div class="tenderwise-architecture-box">
+      <strong>React/Vite web</strong>
+      <span
+        >Multilingual application shell, dashboard, profiles, billing, and bid
+        workspaces</span
+      >
+    </div>
+
+    <span class="tenderwise-architecture-arrow" aria-hidden="true">-&gt;</span>
+
+    <div class="tenderwise-architecture-box">
+      <strong>FastAPI API</strong>
+      <span
+        >Auth, workspaces, TED data, scoring, decisions, audit, and billing
+        webhooks</span
+      >
+    </div>
+  </div>
+
+  <div class="my-3 flex justify-center" aria-hidden="true">
+    <span class="text-xl text-[var(--sec)]">v</span>
+  </div>
+
+  <div class="grid items-center gap-3 md:grid-cols-[1fr_auto_1fr_auto_1fr]">
+    <div class="tenderwise-architecture-box">
+      <strong>PostgreSQL + pgvector</strong>
+      <span
+        >Workspaces, notices, canonical TED versions, scoring results, usage,
+        and audit state</span
+      >
+    </div>
+
+    <span class="tenderwise-architecture-arrow" aria-hidden="true"
+      >&lt;-&gt;</span
+    >
+
+    <div class="tenderwise-architecture-box">
+      <strong>Redis + Celery</strong>
+      <span
+        >Job queue, retries, worker heartbeat, digests, email, and AI generation
+        tasks</span
+      >
+    </div>
+
+    <span class="tenderwise-architecture-arrow" aria-hidden="true"
+      >&lt;-&gt;</span
+    >
+
+    <div class="tenderwise-architecture-box">
+      <strong>TED and AI providers</strong>
+      <span
+        >TED Search ingestion plus optional Ollama or OpenAI-compatible tender
+        briefs</span
+      >
+    </div>
+  </div>
+</section>
+
+<style>
+  .tenderwise-architecture-box {
+    display: flex;
+    min-height: 9rem;
+    flex-direction: column;
+    justify-content: center;
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+    background: var(--background);
+    padding: 1.25rem;
+  }
+
+  .tenderwise-architecture-box strong {
+    color: var(--white);
+  }
+
+  .tenderwise-architecture-box span {
+    margin-top: 0.5rem;
+    color: var(--white-icon);
+    font-size: 0.875rem;
+    line-height: 1.6;
+  }
+
+  .tenderwise-architecture-arrow {
+    text-align: center;
+    color: var(--sec);
+    font-size: 1.2rem;
+  }
+
+  @media (max-width: 767px) {
+    .tenderwise-architecture-arrow {
+      transform: rotate(90deg);
+    }
+  }
+</style>
