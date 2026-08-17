@@ -2,6 +2,7 @@
 import { ClientRouter } from "astro:transitions";
 import { site } from "@/data/site";
 import { toCanonicalUrl } from "@/utils/urls";
+import AnalyticsConsent from "@/components/AnalyticsConsent.astro";
 
 interface Props {
   title?: string;
@@ -109,6 +110,7 @@ const structuredData = {
   <body class="bg-[var(--background)] px-5 text-[var(--white)] sm:px-8 lg:px-10">
     <a class="skip-link" href="#main-content">Skip to main content</a>
     <slot />
+    <AnalyticsConsent />
   </body>
 </html>
 

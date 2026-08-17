@@ -1,0 +1,228 @@
+---
+const GOOGLE_ANALYTICS_ID = "G-2R960Q7K9C";
+---
+
+<section
+  id="analytics-consent-banner"
+  data-google-analytics-id={GOOGLE_ANALYTICS_ID}
+  class="fixed inset-x-0 bottom-0 z-[1000] px-4 pb-4 sm:px-6 sm:pb-6"
+  hidden
+  role="dialog"
+  aria-modal="false"
+  aria-labelledby="analytics-consent-title"
+  aria-describedby="analytics-consent-description"
+>
+  <div
+    class="mx-auto flex max-w-4xl flex-col gap-5 rounded-2xl border border-[var(--border)] bg-[var(--component-bg)] p-5 shadow-2xl shadow-black/30 sm:p-6"
+  >
+    <div>
+      <h2 id="analytics-consent-title" class="text-lg font-semibold text-[var(--white)]">
+        Analytics cookies
+      </h2>
+      <p
+        id="analytics-consent-description"
+        class="mt-2 max-w-3xl text-sm leading-6 text-[var(--white-icon)]"
+      >
+        I use Google Analytics to understand how visitors use this portfolio and improve it.
+        Analytics remains disabled unless you accept. You can change your choice later from
+        the footer.
+      </p>
+    </div>
+
+    <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+      <button
+        type="button"
+        data-analytics-consent="denied"
+        class="min-h-11 rounded-xl border border-[var(--border)] px-5 py-2.5 text-sm font-semibold text-[var(--white)] transition-colors hover:border-[var(--sec)]"
+      >
+        Reject optional cookies
+      </button>
+      <button
+        type="button"
+        data-analytics-consent="granted"
+        class="min-h-11 rounded-xl bg-[var(--sec)] px-5 py-2.5 text-sm font-semibold text-[var(--background)] transition-opacity hover:opacity-90"
+      >
+        Accept analytics
+      </button>
+    </div>
+  </div>
+</section>
+
+<script is:inline>
+  (() => {
+    const STORAGE_KEY = "portfolio.analytics-consent";
+    const GRANTED = "granted";
+    const DENIED = "denied";
+
+    const getBanner = () => document.getElementById("analytics-consent-banner");
+    const getMeasurementId = () => getBanner()?.dataset.googleAnalyticsId ?? "";
+
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = window.gtag || function gtag() {
+      window.dataLayer.push(arguments);
+    };
+
+    const consentState = (analyticsStorage) => ({
+      ad_storage: DENIED,
+      ad_user_data: DENIED,
+      ad_personalization: DENIED,
+      analytics_storage: analyticsStorage,
+      functionality_storage: GRANTED,
+      security_storage: GRANTED,
+    });
+
+    const readChoice = () => {
+      const currentChoice = window.__portfolioAnalyticsConsentChoice;
+      if (currentChoice === GRANTED || currentChoice === DENIED) return currentChoice;
+
+      try {
+        const storedChoice = localStorage.getItem(STORAGE_KEY);
+        if (storedChoice === GRANTED || storedChoice === DENIED) {
+          window.__portfolioAnalyticsConsentChoice = storedChoice;
+          return storedChoice;
+        }
+      } catch {
+        // Continue without persistence when localStorage is unavailable.
+      }
+
+      return null;
+    };
+
+    const saveChoice = (choice) => {
+      window.__portfolioAnalyticsConsentChoice = choice;
+      try {
+        localStorage.setItem(STORAGE_KEY, choice);
+      } catch {
+        // Consent still applies for the current page when storage is unavailable.
+      }
+    };
+
+    const deleteAnalyticsCookies = () => {
+      const cookieNames = document.cookie
+        .split(";")
+        .map((cookie) => cookie.trim().split("=")[0])
+        .filter((name) => name === "_ga" || name.startsWith("_ga_"));
+
+      const hostParts = window.location.hostname.split(".");
+      const domains = new Set([window.location.hostname, `.${window.location.hostname}`]);
+
+      if (hostParts.length > 2) {
+        const parentDomain = hostParts.slice(-2).join(".");
+        domains.add(parentDomain);
+        domains.add(`.${parentDomain}`);
+      }
+
+      for (const name of cookieNames) {
+        document.cookie = `${name}=; Max-Age=0; path=/; SameSite=Lax`;
+        for (const domain of domains) {
+          document.cookie = `${name}=; Max-Age=0; path=/; domain=${domain}; SameSite=Lax`;
+        }
+      }
+    };
+
+    const loadGoogleAnalytics = () => {
+      const measurementId = getMeasurementId();
+      if (!measurementId) return;
+
+      if (document.querySelector(`script[data-google-analytics-id="${measurementId}"]`)) {
+        return;
+      }
+
+      window.gtag("js", new Date());
+      window.gtag("config", measurementId, {
+        send_page_view: false,
+      });
+
+      const script = document.createElement("script");
+      script.async = true;
+      script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(measurementId)}`;
+      script.dataset.googleAnalyticsId = measurementId;
+      document.head.append(script);
+    };
+
+    const trackPageView = () => {
+      if (readChoice() !== GRANTED) return;
+
+      const measurementId = getMeasurementId();
+      if (!measurementId) return;
+
+      loadGoogleAnalytics();
+
+      const pagePath = `${window.location.pathname}${window.location.search}`;
+      if (window.__portfolioLastAnalyticsPage === pagePath) return;
+      window.__portfolioLastAnalyticsPage = pagePath;
+
+      window.gtag("event", "page_view", {
+        page_title: document.title,
+        page_location: window.location.href,
+        page_path: pagePath,
+      });
+    };
+
+    const setBannerVisibility = (visible) => {
+      const banner = getBanner();
+      if (!banner) return;
+      banner.hidden = !visible;
+    };
+
+    const applyChoice = (choice) => {
+      saveChoice(choice);
+      window.gtag("consent", "update", consentState(choice));
+
+      if (choice === GRANTED) {
+        loadGoogleAnalytics();
+        trackPageView();
+      } else {
+        window.__portfolioLastAnalyticsPage = undefined;
+        deleteAnalyticsCookies();
+      }
+
+      setBannerVisibility(false);
+    };
+
+    if (!window.__portfolioAnalyticsConsentInitialized) {
+      window.__portfolioAnalyticsConsentInitialized = true;
+
+      window.gtag("consent", "default", {
+        ...consentState(DENIED),
+        wait_for_update: 500,
+      });
+
+      const existingChoice = readChoice();
+      if (existingChoice) {
+        window.gtag("consent", "update", consentState(existingChoice));
+        if (existingChoice === GRANTED) loadGoogleAnalytics();
+      }
+
+      document.addEventListener("click", (event) => {
+        const target = event.target;
+        if (!(target instanceof Element)) return;
+
+        const choiceButton = target.closest("[data-analytics-consent]");
+        if (choiceButton instanceof HTMLElement) {
+          const choice = choiceButton.dataset.analyticsConsent;
+          if (choice === GRANTED || choice === DENIED) applyChoice(choice);
+          return;
+        }
+
+        if (target.closest("[data-open-analytics-settings]")) {
+          setBannerVisibility(true);
+        }
+      });
+
+      document.addEventListener("astro:page-load", () => {
+        setBannerVisibility(readChoice() === null);
+        trackPageView();
+      });
+    }
+
+    setBannerVisibility(readChoice() === null);
+    trackPageView();
+  })();
+</script>
+
+<style>
+  [hidden] {
+    display: none !important;
+  }
+</style>

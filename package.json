@@ -5,12 +5,13 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
-    "check": "astro check",
+    "check": "npm run consent:check && astro check",
     "build": "npm run check && astro build",
     "preview": "astro preview",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "astro": "astro"
+    "astro": "astro",
+    "consent:check": "node scripts/check-consent.mjs"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.4",
