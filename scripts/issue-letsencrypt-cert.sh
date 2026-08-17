@@ -11,6 +11,7 @@ domains=(
   "payrithm.albertqueralto.dev"
   "catalonia-weather-app.albertqueralto.dev"
   "tenderwise.albertqueralto.dev"
+  "wfpp.albertqueralto.dev"
 )
 
 usage() {
