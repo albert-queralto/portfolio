@@ -22,6 +22,8 @@ const {
   ogImage = "/og/default.png",
 } = Astro.props;
 
+const GOOGLE_ANALYTICS_ID = "G-2R960Q7K9C";
+
 const absoluteOgImage = new URL(
   ogImage,
   Astro.site ?? site.url,
@@ -104,13 +106,63 @@ const structuredData = {
       })();
     </script>
 
+    <script is:inline>
+      (() => {
+        if (window.__portfolioGoogleAnalyticsConfigured) return;
+        window.__portfolioGoogleAnalyticsConfigured = true;
+
+        const STORAGE_KEY = "portfolio.analytics-consent";
+        const GRANTED = "granted";
+        const DENIED = "denied";
+
+        window.dataLayer = window.dataLayer || [];
+        window.gtag = window.gtag || function gtag() {
+          window.dataLayer.push(arguments);
+        };
+
+        const consentState = (analyticsStorage) => ({
+          ad_storage: DENIED,
+          ad_user_data: DENIED,
+          ad_personalization: DENIED,
+          analytics_storage: analyticsStorage,
+          functionality_storage: GRANTED,
+          security_storage: GRANTED,
+        });
+
+        window.gtag("consent", "default", {
+          ...consentState(DENIED),
+          wait_for_update: 500,
+        });
+
+        try {
+          const storedChoice = localStorage.getItem(STORAGE_KEY);
+          if (storedChoice === GRANTED || storedChoice === DENIED) {
+            window.__portfolioAnalyticsConsentChoice = storedChoice;
+            window.gtag("consent", "update", consentState(storedChoice));
+          }
+        } catch {
+          // Keep analytics consent denied when localStorage is unavailable.
+        }
+
+        window.gtag("js", new Date());
+        window.gtag("config", "G-2R960Q7K9C", {
+          send_page_view: false,
+        });
+      })();
+    </script>
+    <script
+      is:inline
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-2R960Q7K9C"
+    ></script>
+
     <ClientRouter />
     <slot name="head" />
   </head>
   <body class="bg-[var(--background)] px-5 text-[var(--white)] sm:px-8 lg:px-10">
     <a class="skip-link" href="#main-content">Skip to main content</a>
     <slot />
-    <AnalyticsConsent />
+    <AnalyticsConsent measurementId={GOOGLE_ANALYTICS_ID} />
   </body>
 </html>
 

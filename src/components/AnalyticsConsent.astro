@@ -1,10 +1,14 @@
 ---
-const GOOGLE_ANALYTICS_ID = "G-2R960Q7K9C";
+interface Props {
+  measurementId: string;
+}
+
+const { measurementId } = Astro.props;
 ---
 
 <section
   id="analytics-consent-banner"
-  data-google-analytics-id={GOOGLE_ANALYTICS_ID}
+  data-google-analytics-id={measurementId}
   class="fixed inset-x-0 bottom-0 z-[1000] px-4 pb-4 sm:px-6 sm:pb-6"
   hidden
   role="dialog"
@@ -24,8 +28,8 @@ const GOOGLE_ANALYTICS_ID = "G-2R960Q7K9C";
         class="mt-2 max-w-3xl text-sm leading-6 text-[var(--white-icon)]"
       >
         I use Google Analytics to understand how visitors use this portfolio and improve it.
-        Analytics remains disabled unless you accept. You can change your choice later from
-        the footer.
+        Analytics cookies and page-view tracking remain disabled unless you accept. You can
+        change your choice later from the footer.
       </p>
     </div>
 
@@ -120,39 +124,18 @@ const GOOGLE_ANALYTICS_ID = "G-2R960Q7K9C";
       }
     };
 
-    const loadGoogleAnalytics = () => {
-      const measurementId = getMeasurementId();
-      if (!measurementId) return;
-
-      if (document.querySelector(`script[data-google-analytics-id="${measurementId}"]`)) {
-        return;
-      }
-
-      window.gtag("js", new Date());
-      window.gtag("config", measurementId, {
-        send_page_view: false,
-      });
-
-      const script = document.createElement("script");
-      script.async = true;
-      script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(measurementId)}`;
-      script.dataset.googleAnalyticsId = measurementId;
-      document.head.append(script);
-    };
-
     const trackPageView = () => {
       if (readChoice() !== GRANTED) return;
 
       const measurementId = getMeasurementId();
       if (!measurementId) return;
 
-      loadGoogleAnalytics();
-
       const pagePath = `${window.location.pathname}${window.location.search}`;
       if (window.__portfolioLastAnalyticsPage === pagePath) return;
       window.__portfolioLastAnalyticsPage = pagePath;
 
       window.gtag("event", "page_view", {
+        send_to: measurementId,
         page_title: document.title,
         page_location: window.location.href,
         page_path: pagePath,
@@ -170,7 +153,6 @@ const GOOGLE_ANALYTICS_ID = "G-2R960Q7K9C";
       window.gtag("consent", "update", consentState(choice));
 
       if (choice === GRANTED) {
-        loadGoogleAnalytics();
         trackPageView();
       } else {
         window.__portfolioLastAnalyticsPage = undefined;
@@ -183,15 +165,9 @@ const GOOGLE_ANALYTICS_ID = "G-2R960Q7K9C";
     if (!window.__portfolioAnalyticsConsentInitialized) {
       window.__portfolioAnalyticsConsentInitialized = true;
 
-      window.gtag("consent", "default", {
-        ...consentState(DENIED),
-        wait_for_update: 500,
-      });
-
       const existingChoice = readChoice();
       if (existingChoice) {
         window.gtag("consent", "update", consentState(existingChoice));
-        if (existingChoice === GRANTED) loadGoogleAnalytics();
       }
 
       document.addEventListener("click", (event) => {
