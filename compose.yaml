@@ -37,7 +37,7 @@ services:
       - no-new-privileges:true
     networks:
       - web
-      - payrithm-network
+      - external-network
 
   certbot:
     image: certbot/certbot:latest
@@ -49,6 +49,6 @@ networks:
   web:
     driver: bridge
     name: portfolio_web
-  payrithm-network:
+  external-network:
     external: true
-    name: payrithm_default
+    name: portfolio_default
