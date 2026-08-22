@@ -12,6 +12,7 @@ domains=(
   "catalonia-weather-app.albertqueralto.dev"
   "tenderwise.albertqueralto.dev"
   "wfpp.albertqueralto.dev"
+  "traceleaf.albertqueralto.dev"
 )
 
 usage() {
