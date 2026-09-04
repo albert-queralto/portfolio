@@ -4,7 +4,7 @@ description: "An accounts-receivable intelligence platform that predicts late pa
 order: 1
 featured: true
 draft: false
-status: "In progress"
+status: "Deployed"
 category: "Machine Learning"
 focus: "ML SaaS · Financial operations"
 image: "/projects/payrithm/payrithm.png"
