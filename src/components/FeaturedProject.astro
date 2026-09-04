@@ -8,6 +8,7 @@ interface FlagshipLink {
 
 interface FlagshipProject {
   id: string;
+  title: string;
   eyebrow: string;
   heading: string;
   summary: string;
@@ -24,6 +25,7 @@ interface FlagshipProject {
 const flagships: FlagshipProject[] = [
   {
     id: "payrithm",
+    title: "Payrithm",
     eyebrow: "Flagship project · Machine learning SaaS",
     heading: "Payrithm turns invoice history into collection decisions.",
     summary:
@@ -66,6 +68,7 @@ const flagships: FlagshipProject[] = [
   },
   {
     id: "tenderwise",
+    title: "TenderWise",
     eyebrow: "Flagship project · Procurement SaaS",
     heading:
       "TenderWise turns public-procurement noise into bid/no-bid action.",
@@ -151,6 +154,8 @@ const flagships: FlagshipProject[] = [
           <article
             id={`flagship-${project.id}`}
             aria-labelledby={`flagship-${project.id}-title`}
+            data-analytics-project-id={project.id}
+            data-analytics-project-title={project.title}
             class="grid items-center gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:gap-14"
           >
             <div class:list={[project.reversed && "lg:order-2"]}>
@@ -193,6 +198,8 @@ const flagships: FlagshipProject[] = [
                 {project.links.map((link) => (
                   <a
                     href={link.href}
+                    data-analytics-event={link.label === "Open application" ? "project_live_demo_click" : undefined}
+                    data-analytics-link-location={link.label === "Open application" ? "featured_project" : undefined}
                     target={link.external ? "_blank" : undefined}
                     rel={link.external ? "noopener noreferrer" : undefined}
                     class:list={[

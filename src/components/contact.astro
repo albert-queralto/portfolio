@@ -139,6 +139,7 @@ import { site } from "@/data/site";
         if (!response.ok) throw new Error(`Form submission failed with ${response.status}`);
 
         form.reset();
+        document.dispatchEvent(new CustomEvent("portfolio:contact-submit-success"));
         message.textContent = "Thanks — your message has been sent. I’ll get back to you soon.";
         message.style.color = "var(--success)";
       } catch (error) {

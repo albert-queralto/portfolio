@@ -4,6 +4,7 @@ import { site } from "@/data/site";
 import { toCanonicalUrl } from "@/utils/urls";
 import { getBaseStructuredData, serializeJsonLd, type JsonLdNode } from "@/utils/seo";
 import AnalyticsConsent from "@/components/AnalyticsConsent.astro";
+import AnalyticsEvents from "@/components/AnalyticsEvents.astro";
 
 interface Props {
   title?: string;
@@ -152,6 +153,7 @@ const jsonLd = {
     <a class="skip-link" href="#main-content">Skip to main content</a>
     <slot />
     <AnalyticsConsent measurementId={GOOGLE_ANALYTICS_ID} />
+    <AnalyticsEvents />
   </body>
 </html>
 

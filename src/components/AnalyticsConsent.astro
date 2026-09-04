@@ -159,6 +159,12 @@ const { measurementId } = Astro.props;
         deleteAnalyticsCookies();
       }
 
+      document.dispatchEvent(
+        new CustomEvent("portfolio:analytics-consent-changed", {
+          detail: { choice },
+        }),
+      );
+
       setBannerVisibility(false);
     };
 

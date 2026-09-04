@@ -90,6 +90,8 @@ const additionalProjectCount = Math.max(
             data-category={project.data.category}
             data-additional={String(index >= initialProjectCount)}
             hidden={index >= initialProjectCount}
+            data-analytics-project-id={project.id}
+            data-analytics-project-title={project.data.title}
           >
             <a
               href={`/projects/${project.id}/`}
@@ -165,6 +167,8 @@ const additionalProjectCount = Math.max(
                   project.data.preview && (
                     <a
                       href={project.data.preview}
+                      data-analytics-event="project_live_demo_click"
+                      data-analytics-link-location="project_card"
                       target="_blank"
                       rel="noopener noreferrer"
                       class="inline-flex min-h-10 items-center rounded-xl border border-[var(--border)] px-3 py-2 text-sm font-medium text-[var(--white-icon)] hover:border-[var(--sec)] hover:text-[var(--white)]"

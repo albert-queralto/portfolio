@@ -74,6 +74,9 @@ const structuredData = [
   <Nav />
     <main
       id="main-content"
+      data-analytics-blog-page
+      data-analytics-blog-id={post.id}
+      data-analytics-blog-title={post.data.title}
       class="mx-auto max-w-6xl py-24 text-[var(--white)] md:py-36"
     >
       <div class="grid gap-12 lg:grid-cols-[minmax(0,1fr)_240px]">
@@ -142,7 +145,10 @@ const structuredData = [
         )
       }
 
-      <div class="article-prose prose mt-10 max-w-none prose-headings:scroll-mt-28 prose-headings:font-semibold prose-a:no-underline hover:prose-a:underline prose-code:before:content-none prose-code:after:content-none">
+      <div
+        data-analytics-blog-content
+        class="article-prose prose mt-10 max-w-none prose-headings:scroll-mt-28 prose-headings:font-semibold prose-a:no-underline hover:prose-a:underline prose-code:before:content-none prose-code:after:content-none"
+      >
         <Content />
       </div>
     </article>

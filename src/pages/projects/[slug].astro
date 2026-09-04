@@ -76,6 +76,9 @@ if (project.id === "payrithm" || project.id === "tenderwise") {
 
   <main
     id="main-content"
+    data-analytics-project-page
+    data-analytics-project-id={project.id}
+    data-analytics-project-title={project.data.title}
     class="mx-auto max-w-5xl py-24 text-[var(--white)] md:py-36"
   >
     <a
@@ -118,6 +121,8 @@ if (project.id === "payrithm" || project.id === "tenderwise") {
           project.data.preview && (
             <a
               href={project.data.preview}
+              data-analytics-event="project_live_demo_click"
+              data-analytics-link-location="project_detail_header"
               target="_blank"
               rel="noopener noreferrer"
               class="inline-flex min-h-12 items-center rounded-xl bg-[var(--sec)] px-5 py-3 text-sm font-semibold text-[var(--background)]"

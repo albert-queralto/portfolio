@@ -1,0 +1,289 @@
+<script is:inline>
+  (() => {
+    if (window.__portfolioAnalyticsEventsInitialized) return;
+    window.__portfolioAnalyticsEventsInitialized = true;
+
+    const STORAGE_KEY = "portfolio.analytics-consent";
+    const GRANTED = "granted";
+    const TRACKED_EVENTS = new Set([
+      "project_view",
+      "project_live_demo_click",
+      "github_click",
+      "linkedin_click",
+      "cv_download",
+      "contact_start",
+      "contact_submit",
+      "blog_view",
+      "blog_75_percent",
+      "email_click",
+    ]);
+
+    const getMeasurementId = () =>
+      document.getElementById("analytics-consent-banner")?.dataset.googleAnalyticsId ?? "";
+
+    const hasAnalyticsConsent = () => {
+      if (window.__portfolioAnalyticsConsentChoice === GRANTED) return true;
+
+      try {
+        return localStorage.getItem(STORAGE_KEY) === GRANTED;
+      } catch {
+        return false;
+      }
+    };
+
+    const cleanParameters = (parameters) =>
+      Object.fromEntries(
+        Object.entries(parameters).filter(([, value]) => value !== undefined && value !== null && value !== ""),
+      );
+
+    const track = (eventName, parameters = {}) => {
+      if (!TRACKED_EVENTS.has(eventName)) return false;
+      if (!hasAnalyticsConsent() || typeof window.gtag !== "function") return false;
+
+      const measurementId = getMeasurementId();
+      if (!measurementId) return false;
+
+      window.gtag("event", eventName, {
+        send_to: measurementId,
+        ...cleanParameters(parameters),
+      });
+
+      return true;
+    };
+
+    window.portfolioAnalytics = { track };
+
+    const pathOnly = () => window.location.pathname;
+
+    const initialPreviousPath = () => {
+      if (!document.referrer) return "(direct)";
+
+      try {
+        const referrer = new URL(document.referrer);
+        return referrer.origin === window.location.origin ? referrer.pathname : "(external)";
+      } catch {
+        return "(external)";
+      }
+    };
+
+    const getProjectContext = (element) => {
+      const root = element?.closest?.("[data-analytics-project-id]") ??
+        document.querySelector("[data-analytics-project-page]");
+
+      if (!(root instanceof HTMLElement)) return {};
+
+      return {
+        content_type: "project",
+        content_id: root.dataset.analyticsProjectId,
+        content_title: root.dataset.analyticsProjectTitle,
+      };
+    };
+
+    const getBlogContext = (element) => {
+      const root = element?.closest?.("[data-analytics-blog-id]") ??
+        document.querySelector("[data-analytics-blog-page]");
+
+      if (!(root instanceof HTMLElement)) return {};
+
+      return {
+        content_type: "blog_post",
+        content_id: root.dataset.analyticsBlogId,
+        content_title: root.dataset.analyticsBlogTitle,
+      };
+    };
+
+    const getPageContext = (element) => {
+      const projectContext = getProjectContext(element);
+      if (projectContext.content_id) return projectContext;
+
+      const blogContext = getBlogContext(element);
+      if (blogContext.content_id) return blogContext;
+
+      return {};
+    };
+
+    const getLinkLocation = (anchor) => {
+      if (anchor.dataset.analyticsLinkLocation) return anchor.dataset.analyticsLinkLocation;
+      if (anchor.closest("#contact")) return "contact";
+      if (anchor.closest("footer")) return "footer";
+      if (anchor.closest("#home")) return "hero";
+      if (anchor.closest("#featured-project")) return "featured_project";
+      if (anchor.closest(".project-card")) return "project_card";
+      if (anchor.closest("[data-analytics-project-page]")) return "project_detail";
+      if (anchor.closest("[data-analytics-blog-page]")) return "blog_article";
+      return "page";
+    };
+
+    let currentPath = null;
+    let previousPath = initialPreviousPath();
+    let readingController;
+    let blogProgressTracked = false;
+
+    const trackContentView = () => {
+      const projectPage = document.querySelector("[data-analytics-project-page]");
+      if (projectPage instanceof HTMLElement) {
+        track("project_view", {
+          ...getProjectContext(projectPage),
+          previous_path: previousPath,
+        });
+        return;
+      }
+
+      const blogPage = document.querySelector("[data-analytics-blog-page]");
+      if (blogPage instanceof HTMLElement) {
+        track("blog_view", {
+          ...getBlogContext(blogPage),
+          previous_path: previousPath,
+        });
+      }
+    };
+
+    const checkBlogProgress = () => {
+      if (blogProgressTracked) return;
+
+      const content = document.querySelector("[data-analytics-blog-content]");
+      if (!(content instanceof HTMLElement)) return;
+
+      const rect = content.getBoundingClientRect();
+      const contentTop = window.scrollY + rect.top;
+      const contentHeight = Math.max(content.offsetHeight, 1);
+      const viewportBottom = window.scrollY + window.innerHeight;
+      const progress = (viewportBottom - contentTop) / contentHeight;
+
+      if (progress < 0.75) return;
+
+      const sent = track("blog_75_percent", {
+        ...getBlogContext(content),
+        scroll_percent: 75,
+        previous_path: previousPath,
+      });
+
+      if (sent) blogProgressTracked = true;
+    };
+
+    const setupBlogProgress = () => {
+      readingController?.abort();
+      readingController = new AbortController();
+      blogProgressTracked = false;
+
+      const content = document.querySelector("[data-analytics-blog-content]");
+      if (!(content instanceof HTMLElement)) return;
+
+      const { signal } = readingController;
+      window.addEventListener("scroll", checkBlogProgress, { passive: true, signal });
+      window.addEventListener("resize", checkBlogProgress, { passive: true, signal });
+      requestAnimationFrame(checkBlogProgress);
+    };
+
+    const initialisePageAnalytics = () => {
+      const nextPath = pathOnly();
+      if (currentPath === nextPath) {
+        setupBlogProgress();
+        return;
+      }
+
+      if (currentPath !== null) previousPath = currentPath;
+      currentPath = nextPath;
+
+      trackContentView();
+      setupBlogProgress();
+    };
+
+    document.addEventListener("click", (event) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+
+      const anchor = target.closest("a[href]");
+      if (!(anchor instanceof HTMLAnchorElement)) return;
+
+      const linkLocation = getLinkLocation(anchor);
+      const context = getPageContext(anchor);
+
+      if (anchor.dataset.analyticsEvent === "project_live_demo_click") {
+        track("project_live_demo_click", {
+          ...context,
+          link_location: linkLocation,
+        });
+        return;
+      }
+
+      const rawHref = anchor.getAttribute("href") ?? "";
+      if (rawHref.toLowerCase().startsWith("mailto:")) {
+        track("email_click", {
+          ...context,
+          link_location: linkLocation,
+        });
+        return;
+      }
+
+      let url;
+      try {
+        url = new URL(anchor.href, window.location.href);
+      } catch {
+        return;
+      }
+
+      const hostname = url.hostname.toLowerCase();
+      if (hostname === "github.com" || hostname.endsWith(".github.com")) {
+        track("github_click", {
+          ...context,
+          link_location: linkLocation,
+        });
+        return;
+      }
+
+      if (hostname === "linkedin.com" || hostname.endsWith(".linkedin.com")) {
+        track("linkedin_click", {
+          ...context,
+          link_location: linkLocation,
+        });
+        return;
+      }
+
+      if (
+        url.origin === window.location.origin &&
+        url.pathname.toLowerCase().endsWith("/cv.pdf")
+      ) {
+        track("cv_download", {
+          ...context,
+          link_location: linkLocation,
+        });
+      }
+    });
+
+    document.addEventListener("input", (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement)) return;
+
+      const form = target.closest("#contact-form");
+      if (!(form instanceof HTMLFormElement)) return;
+      if (target.type === "hidden" || target.name === "_gotcha") return;
+      if (form.dataset.analyticsContactStarted === "true") return;
+
+      const sent = track("contact_start", {
+        content_type: "contact_form",
+        content_id: "contact",
+        link_location: "contact_form",
+      });
+
+      if (sent) form.dataset.analyticsContactStarted = "true";
+    });
+
+    document.addEventListener("portfolio:contact-submit-success", () => {
+      track("contact_submit", {
+        content_type: "contact_form",
+        content_id: "contact",
+        link_location: "contact_form",
+      });
+    });
+
+    document.addEventListener("portfolio:analytics-consent-changed", (event) => {
+      if (event?.detail?.choice !== GRANTED) return;
+      trackContentView();
+      checkBlogProgress();
+    });
+
+    document.addEventListener("astro:page-load", initialisePageAnalytics);
+    initialisePageAnalytics();
+  })();
+</script>
