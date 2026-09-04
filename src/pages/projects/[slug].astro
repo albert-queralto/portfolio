@@ -6,6 +6,7 @@ import PayrithmArchitecture from "@/components/PayrithmArchitecture.astro";
 import TenderWiseArchitecture from "@/components/TenderWiseArchitecture.astro";
 import { site } from "@/data/site";
 import { toCanonicalUrl } from "@/utils/urls";
+import { buildBreadcrumbList, buildSoftwareApplication, type JsonLdNode } from "@/utils/seo";
 import "@/styles/prose.css";
 
 import { getCollection, render, type CollectionEntry } from "astro:content";
@@ -35,12 +36,32 @@ const canonical = toCanonicalUrl(
   Astro.site ?? site.url,
 );
 
-const ogImage =
-  project.id === "payrithm"
-    ? "/og/payrithm.png"
-    : project.id === "tenderwise"
-      ? "/og/tenderwise.png"
-      : project.data.image;
+const ogImage = project.data.ogImage ?? "/og/default.png";
+
+const structuredData: JsonLdNode[] = [
+  buildBreadcrumbList([
+    { name: "Home", url: toCanonicalUrl("/", Astro.site ?? site.url) },
+    { name: project.data.title, url: canonical },
+  ]),
+];
+
+if (project.id === "payrithm" || project.id === "tenderwise") {
+  structuredData.push(
+    buildSoftwareApplication({
+      canonical,
+      name: project.data.title,
+      description: project.data.description,
+      screenshot: project.data.image,
+      technologies: project.data.technologies,
+      applicationCategory:
+        project.id === "payrithm"
+          ? "FinanceApplication"
+          : "BusinessApplication",
+      liveUrl: project.data.preview,
+      sourceUrl: project.data.source,
+    }),
+  );
+}
 ---
 
 <Layout
@@ -48,6 +69,8 @@ const ogImage =
   description={project.data.description}
   canonical={canonical}
   ogImage={ogImage}
+  ogImageAlt={`${project.data.title} — ${project.data.description}`}
+  structuredData={structuredData}
 >
   <Nav />
 

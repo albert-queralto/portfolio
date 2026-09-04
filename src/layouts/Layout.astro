@@ -2,6 +2,7 @@
 import { ClientRouter } from "astro:transitions";
 import { site } from "@/data/site";
 import { toCanonicalUrl } from "@/utils/urls";
+import { getBaseStructuredData, serializeJsonLd, type JsonLdNode } from "@/utils/seo";
 import AnalyticsConsent from "@/components/AnalyticsConsent.astro";
 
 interface Props {
@@ -11,6 +12,8 @@ interface Props {
   type?: "website" | "article";
   noindex?: boolean;
   ogImage?: string;
+  ogImageAlt?: string;
+  structuredData?: JsonLdNode[];
 }
 
 const {
@@ -20,6 +23,8 @@ const {
   type = "website",
   noindex = false,
   ogImage = "/og/default.png",
+  ogImageAlt = title,
+  structuredData = [],
 } = Astro.props;
 
 const GOOGLE_ANALYTICS_ID = "G-2R960Q7K9C";
@@ -29,29 +34,9 @@ const absoluteOgImage = new URL(
   Astro.site ?? site.url,
 ).toString();
 
-const structuredData = {
+const jsonLd = {
   "@context": "https://schema.org",
-  "@type": "Person",
-  name: site.name,
-  url: site.url,
-  jobTitle: site.role,
-  description: site.description,
-  address: {
-    "@type": "PostalAddress",
-    addressLocality: "Barcelona",
-    addressCountry: "ES",
-  },
-  alumniOf: [
-    {
-      "@type": "CollegeOrUniversity",
-      name: "Universitat Autònoma de Barcelona",
-    },
-    {
-      "@type": "CollegeOrUniversity",
-      name: "Universitat Oberta de Catalunya",
-    },
-  ],
-  sameAs: [site.github, site.linkedin],
+  "@graph": [...getBaseStructuredData(), ...structuredData],
 };
 ---
 
@@ -86,16 +71,20 @@ const structuredData = {
     <meta property="og:image" content={absoluteOgImage} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content={title} />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:secure_url" content={absoluteOgImage} />
+    <meta property="og:image:alt" content={ogImageAlt} />
 
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content={canonical} />
     <meta name="twitter:image" content={absoluteOgImage} />
+    <meta name="twitter:image:alt" content={ogImageAlt} />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
 
     <title>{title}</title>
 
-    <script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData)} />
+    <script is:inline type="application/ld+json" set:html={serializeJsonLd(jsonLd)} />
     <script is:inline>
       (() => {
         const savedTheme = localStorage.getItem("theme");

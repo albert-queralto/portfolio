@@ -3,6 +3,9 @@ import Layout from "@/layouts/Layout.astro";
 import Nav from "@/components/nav.astro";
 import Footer from "@/components/footer.astro";
 import { getCollection } from "astro:content";
+import { site } from "@/data/site";
+import { toCanonicalUrl } from "@/utils/urls";
+import { buildBreadcrumbList } from "@/utils/seo";
 
 const posts = (await getCollection("blog", ({ data }) => !data.draft))
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
@@ -13,11 +16,21 @@ const posts = (await getCollection("blog", ({ data }) => !data.draft))
       readingTime: Math.max(1, Math.ceil(postBody.trim().split(/\s+/).length / 220)),
     };
   });
+
+const canonical = toCanonicalUrl("/blog/", Astro.site ?? site.url);
+const structuredData = [
+  buildBreadcrumbList([
+    { name: "Home", url: toCanonicalUrl("/", Astro.site ?? site.url) },
+    { name: "Blog", url: canonical },
+  ]),
+];
 ---
 
 <Layout
   title="Machine Learning & Data Science Blog — Albert Queraltó"
   description="Practical explanations of machine learning, deep learning, data science, and the engineering decisions behind reliable models."
+  canonical={canonical}
+  structuredData={structuredData}
 >
   <Nav />
   <main id="main-content" class="mx-auto max-w-5xl py-24 text-[var(--white)] md:py-36">

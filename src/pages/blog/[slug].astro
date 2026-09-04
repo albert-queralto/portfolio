@@ -4,6 +4,7 @@ import Nav from "@/components/nav.astro";
 import Footer from "@/components/footer.astro";
 import { site } from "@/data/site";
 import { toCanonicalUrl } from "@/utils/urls";
+import { buildBlogPosting, buildBreadcrumbList } from "@/utils/seo";
 import { getCollection, getEntry, render, type CollectionEntry } from "astro:content";
 import "katex/dist/katex.min.css";
 import "@/styles/prose.css"
@@ -32,20 +33,27 @@ const canonical = toCanonicalUrl(
   `/blog/${post.id}/`,
   Astro.site ?? site.url,
 );
-const articleData = {
-  "@context": "https://schema.org",
-  "@type": "TechArticle",
-  headline: post.data.title,
-  description: post.data.description,
-  datePublished: post.data.date.toISOString(),
-  author: {
-    "@type": "Person",
-    name: site.name,
-    url: site.url,
-  },
-  mainEntityOfPage: canonical,
-  keywords: post.data.tags.join(", "),
-};
+const words = postBody.trim() ? postBody.trim().split(/\s+/).length : 0;
+const ogImage = post.data.cover ?? "/og/default.png";
+const structuredData = [
+  buildBlogPosting({
+    canonical,
+    title: post.data.title,
+    description: post.data.description,
+    published: post.data.date,
+    modified: post.data.updatedDate,
+    image: ogImage,
+    tags: post.data.tags,
+    readingTimeMinutes: readingTime,
+    wordCount: words,
+    section: post.data.series,
+  }),
+  buildBreadcrumbList([
+    { name: "Home", url: toCanonicalUrl("/", Astro.site ?? site.url) },
+    { name: "Blog", url: toCanonicalUrl("/blog/", Astro.site ?? site.url) },
+    { name: post.data.title, url: canonical },
+  ]),
+];
 ---
 
 <Layout
@@ -53,11 +61,15 @@ const articleData = {
   description={post.data.description}
   canonical={canonical}
   type="article"
-  ogImage={post.data.cover ?? "/og/default.png"}
+  ogImage={ogImage}
+  ogImageAlt={`${post.data.title} — article by ${site.name}`}
+  structuredData={structuredData}
 >
   <meta slot="head" property="article:published_time" content={post.data.date.toISOString()} />
+  {post.data.updatedDate && (
+    <meta slot="head" property="article:modified_time" content={post.data.updatedDate.toISOString()} />
+  )}
   {post.data.tags.map((tag) => <meta slot="head" property="article:tag" content={tag} />)}
-  <script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify(articleData)} />
 
   <Nav />
     <main

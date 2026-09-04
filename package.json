@@ -6,12 +6,13 @@
     "dev": "astro dev",
     "start": "astro dev",
     "check": "npm run consent:check && astro check",
-    "build": "npm run check && astro build",
+    "build": "npm run check && astro build && npm run seo:check",
     "preview": "astro preview",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "astro": "astro",
-    "consent:check": "node scripts/check-consent.mjs"
+    "consent:check": "node scripts/check-consent.mjs",
+    "seo:check": "node scripts/check-seo.mjs"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.4",
@@ -37,7 +38,7 @@
     "tailwindcss": "^3.4.17"
   },
   "private": true,
-  "description": "Portfolio of Albert Queraltó, PhD — data scientist and software developer.",
+  "description": "Portfolio of Albert Queralt\u00f3, PhD \u2014 data scientist and software developer.",
   "engines": {
     "node": ">=22"
   }

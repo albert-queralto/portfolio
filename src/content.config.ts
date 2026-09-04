@@ -37,6 +37,7 @@ const projects = defineCollection({
     focus: z.string(),
 
     image: z.string(),
+    ogImage: z.string().optional(),
     source: z.string().url().optional(),
     preview: z.string().url().optional(),
     article: z.string().optional(),
