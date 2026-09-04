@@ -11,6 +11,12 @@ const categories = [
     new Set(projects.map((project) => project.data.category)),
   ),
 ];
+
+const initialProjectCount = 4;
+const additionalProjectCount = Math.max(
+  projects.length - initialProjectCount,
+  0,
+);
 ---
 
 <section
@@ -64,7 +70,7 @@ const categories = [
         class="text-sm text-[var(--white-icon)]"
         aria-live="polite"
       >
-        {projects.length} projects
+        {Math.min(initialProjectCount, projects.length)} of {projects.length} projects
       </p>
     </div>
 
@@ -73,7 +79,7 @@ const categories = [
       class="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2"
     >
       {
-        projects.map((project) => (
+        projects.map((project, index) => (
           <article
             class:list={[
               "project-card group flex flex-col overflow-hidden rounded-2xl border bg-[var(--card-bg)] transition-[border-color,transform] duration-300 hover:-translate-y-1 hover:border-[var(--sec)]",
@@ -82,6 +88,8 @@ const categories = [
                 : "border-[var(--border)]",
             ]}
             data-category={project.data.category}
+            data-additional={String(index >= initialProjectCount)}
+            hidden={index >= initialProjectCount}
           >
             <a
               href={`/projects/${project.id}/`}
@@ -171,6 +179,27 @@ const categories = [
         ))
       }
     </div>
+
+    {
+      additionalProjectCount > 0 && (
+        <div
+          id="project-expander-container"
+          class="mt-8 flex justify-center"
+        >
+          <button
+            id="project-expander"
+            type="button"
+            aria-expanded="false"
+            aria-controls="projects-grid"
+            data-more-label={`View ${additionalProjectCount} more projects →`}
+            data-less-label="Show fewer projects ↑"
+            class="inline-flex min-h-11 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--card-bg)] px-5 py-2.5 text-sm font-semibold text-[var(--white-icon)] transition-colors hover:border-[var(--sec)] hover:text-[var(--white)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sec)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background)]"
+          >
+            View {additionalProjectCount} more projects →
+          </button>
+        </div>
+      )
+    }
   </div>
 </section>
 
@@ -192,6 +221,11 @@ const categories = [
       document.getElementById("project-filters");
     const grid = document.getElementById("projects-grid");
     const count = document.getElementById("project-count");
+    const expander =
+      document.getElementById("project-expander") as HTMLButtonElement | null;
+    const expanderContainer = document.getElementById(
+      "project-expander-container",
+    );
 
     if (
       !filterContainer ||
@@ -215,27 +249,25 @@ const categories = [
       ),
     );
 
-    filterContainer.addEventListener("click", (event) => {
-      const button = (event.target as Element).closest<HTMLButtonElement>(
-        "button[data-filter]",
-      );
+    let selectedFilter = "All";
+    let expanded = false;
 
-      if (!button) return;
-
-      const selected = button.dataset.filter ?? "All";
+    const renderProjects = () => {
       let visibleCount = 0;
 
-      filters.forEach((filter) => {
-        filter.setAttribute(
-          "aria-pressed",
-          String(filter === button),
-        );
-      });
-
       cards.forEach((card) => {
+        const matchesFilter =
+          selectedFilter === "All" ||
+          card.dataset.category === selectedFilter;
+        const isAdditional =
+          card.dataset.additional === "true";
+
+        // Keep the landing view focused on the four strongest projects.
+        // Choosing a category is an intentional browse action, so show all
+        // matching projects regardless of whether they are in the older set.
         const visible =
-          selected === "All" ||
-          card.dataset.category === selected;
+          matchesFilter &&
+          (selectedFilter !== "All" || expanded || !isAdditional);
 
         card.hidden = !visible;
 
@@ -245,11 +277,56 @@ const categories = [
       });
 
       if (count) {
-        count.textContent = `${visibleCount} ${
-          visibleCount === 1 ? "project" : "projects"
-        }`;
+        if (selectedFilter === "All" && !expanded) {
+          count.textContent = `${visibleCount} of ${cards.length} projects`;
+        } else {
+          count.textContent = `${visibleCount} ${
+            visibleCount === 1 ? "project" : "projects"
+          }`;
+        }
+      }
+
+      if (expander && expanderContainer) {
+        const onAllProjects = selectedFilter === "All";
+        expanderContainer.hidden = !onAllProjects;
+        expander.setAttribute("aria-expanded", String(expanded));
+        expander.textContent = expanded
+          ? expander.dataset.lessLabel ?? "Show fewer projects ↑"
+          : expander.dataset.moreLabel ?? "View more projects →";
+      }
+    };
+
+    filterContainer.addEventListener("click", (event) => {
+      const button = (event.target as Element).closest<HTMLButtonElement>(
+        "button[data-filter]",
+      );
+
+      if (!button) return;
+
+      selectedFilter = button.dataset.filter ?? "All";
+
+      filters.forEach((filter) => {
+        filter.setAttribute(
+          "aria-pressed",
+          String(filter === button),
+        );
+      });
+
+      renderProjects();
+    });
+
+    expander?.addEventListener("click", () => {
+      expanded = !expanded;
+      renderProjects();
+
+      if (!expanded) {
+        document
+          .getElementById("projects-title")
+          ?.scrollIntoView({ behavior: "smooth", block: "start" });
       }
     });
+
+    renderProjects();
   }
 
   document.addEventListener(
