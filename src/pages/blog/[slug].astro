@@ -119,6 +119,16 @@ const structuredData = [
             </li>
           ))}
         </ul>
+
+        <img
+          src={ogImage}
+          alt={`${post.data.title} cover image`}
+          width="1200"
+          height="630"
+          loading="eager"
+          decoding="async"
+          class="mt-8 aspect-[1200/630] w-full rounded-2xl border border-[var(--border)] object-cover"
+        />
       </header>
       {
         relatedProject && (
