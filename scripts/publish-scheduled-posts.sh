@@ -16,4 +16,4 @@ echo "Deploying portfolio..."
 docker compose up -d
 
 echo "Scheduling next publication..."
-node scripts/schedule-next-post.mjs
+node /home/albert/portfolio/scripts/schedule-next-post.mjs
