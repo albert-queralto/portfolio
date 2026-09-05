@@ -4,7 +4,7 @@ description: "What worker saturation taught me about Celery concurrency, heterog
 date: 2026-11-08
 publishAt: 2026-11-08T08:00:00+02:00
 tags: ["Celery", "Redis", "FastAPI", "PostgreSQL", "Performance", "SaaS"]
-draft: true
+draft: false
 cover: "/og/scaling-celery-workers-production-saas.png"
 featured: false
 project: "tenderwise"
