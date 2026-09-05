@@ -67,3 +67,14 @@ const next = futurePosts[0];
 console.log(
   `Next publication: ${next.file} at ${next.publishAt.toISOString()}`,
 );
+
+execFileSync(
+  "sudo",
+  [
+    "/usr/local/sbin/schedule-portfolio-publication",
+    next.publishAt.toISOString(),
+  ],
+  {
+    stdio: "inherit",
+  },
+);

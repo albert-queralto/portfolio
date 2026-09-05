@@ -1,111 +1,152 @@
-# Scheduled Blog Publishing with Astro, Docker, and systemd
+# Exact Next-Post Scheduling for an Astro Blog
 
-This guide explains how to publish future-dated Astro blog posts automatically on a VPS without rebuilding the site every hour.
+This setup publishes future-dated Astro posts with **one systemd timer for exactly the next post**.
 
-The setup uses:
+It does not rebuild hourly or weekly.
 
-- Astro content frontmatter with `publishAt`
-- a deployment script that rebuilds the static site
-- a `systemd` service that runs the deployment script
-- a recurring `systemd` timer that launches the service on your publishing schedule
+After every successful publication:
 
-The recommended setup is to publish on a predictable schedule, for example every Tuesday at 08:00, and run the rebuild a few minutes later.
+1. the deployment script rebuilds the portfolio;
+2. `schedule-next-post.py` scans the blog frontmatter;
+3. it finds the earliest future `publishAt`;
+4. it schedules the systemd timer for `publishAt + 5 minutes`;
+5. when that timer fires, the service rebuilds the site;
+6. the scheduler then programs the following post;
+7. when no future posts remain, the timer is disabled.
 
-## 1. How the publishing flow works
+The VPS does **not** need Node.js for this implementation. The scheduler uses Python 3.
+
+---
+
+## 1. Architecture
 
 ```text
-Write article
-    ↓
-Set draft: false
-    ↓
-Set publishAt to a future date/time
-    ↓
-Commit and push the article
-    ↓
-Astro excludes the article from the current static build
-    ↓
-Scheduled publication time arrives
-    ↓
-systemd timer starts the publication service
-    ↓
-publication service runs the deployment script
-    ↓
-Astro rebuilds
-    ↓
-publishAt <= current time
-    ↓
-article is included in the generated site
+Future Markdown posts already committed to Git
+                  │
+                  ▼
+      portfolio-publish.timer
+       one exact future trigger
+                  │
+                  ▼
+     portfolio-publish.service
+                  │
+                  ▼
+ scripts/publish-scheduled-posts.sh
+                  │
+          ┌───────┴────────┐
+          ▼                ▼
+      git pull       Docker/Astro build
+                           │
+                           ▼
+                 due post becomes public
+                           │
+                           ▼
+             schedule-next-post.py
+                           │
+                 finds next publishAt
+                           │
+                           ▼
+ sudo /usr/local/sbin/portfolio-publish-timer-set
+                           │
+                           ▼
+       rewrites portfolio-publish.timer
+                           │
+                           ▼
+                  next exact trigger
 ```
 
-This keeps the site fully static while still allowing scheduled publishing.
+The privileged helper has one narrow job: write the portfolio timer and reload/restart it.
 
-## 2. Prerequisites
+---
 
-This guide assumes:
+## 2. Paths used in this guide
 
-- the portfolio is already deployed on a Linux VPS;
-- Docker and Docker Compose are installed;
-- the portfolio is served from a Git checkout on the VPS;
-- the application can already be deployed manually with Docker Compose;
-- the blog uses Astro content collections;
-- future posts are filtered by `publishAt`;
-- the server uses `systemd`.
+```text
+Linux user:
+  albert
 
-Check systemd:
+Portfolio:
+  /home/albert/portfolio
 
-```bash
-systemctl --version
+Blog:
+  /home/albert/portfolio/src/content/blog
+
+Deployment script:
+  /home/albert/portfolio/scripts/publish-scheduled-posts.sh
+
+Scheduler:
+  /home/albert/portfolio/scripts/schedule-next-post.py
+
+Service:
+  /etc/systemd/system/portfolio-publish.service
+
+Generated timer:
+  /etc/systemd/system/portfolio-publish.timer
+
+Privileged helper:
+  /usr/local/sbin/portfolio-publish-timer-set
+
+Sudoers rule:
+  /etc/sudoers.d/portfolio-publish
 ```
 
-Check Docker:
+If your repository is somewhere else, replace `/home/albert/portfolio` everywhere.
 
-```bash
-docker --version
-docker compose version
-```
+Always use absolute paths in systemd. Do not use `~/portfolio`.
 
-## 3. Use `publishAt` in blog frontmatter
+---
 
-A scheduled post should look like this:
+## 3. Blog frontmatter
+
+A scheduled article should include an explicit timezone:
 
 ```yaml
 ---
-title: "Operating PostgreSQL, Redis and Celery on an 8 GB VPS"
-description: "What running PostgreSQL, Redis, Celery workers and multiple SaaS applications on an 8 GB VPS taught me."
-date: 2026-09-15
-publishAt: 2026-09-15T08:00:00+02:00
-tags: ["DevOps", "PostgreSQL", "Redis", "Celery", "Docker"]
+title: "Scaling Celery Workers in a Production SaaS"
+description: "..."
+date: 2026-11-24
+publishAt: 2026-11-24T08:00:00+01:00
+tags: ["Celery", "Redis", "FastAPI"]
 draft: false
-cover: "/og/operating-postgresql-redis-celery-8gb-vps.png"
+cover: "/og/scaling-celery-workers-production-saas.png"
 featured: false
 ---
 ```
 
-Use `draft: true` while the article is still being edited.
-
-Use `draft: false` only when the article is approved and ready to be published automatically.
-
-The `publishAt` value should include a timezone offset.
-
-For Central European Summer Time:
+Rules:
 
 ```yaml
-publishAt: 2026-09-15T08:00:00+02:00
+draft: true
 ```
 
-For Central European Time:
+means do not publish.
 
 ```yaml
+draft: false
+publishAt: 2026-11-24T08:00:00+01:00
+```
+
+means approved and scheduled.
+
+Always include a timezone offset:
+
+```yaml
+# Spain in summer
+publishAt: 2026-09-15T08:00:00+02:00
+
+# Spain in winter
 publishAt: 2026-12-15T08:00:00+01:00
 ```
 
-Using an explicit offset avoids depending on the timezone of the build machine.
+---
 
-## 4. Astro must filter future posts
+## 4. Astro must still filter future posts
 
-Your Astro blog code must exclude posts whose `publishAt` timestamp is still in the future.
+The systemd scheduler controls **when a rebuild happens**.
 
-For example:
+Astro controls **whether the future article is included in that build**.
+
+Use the future-date filter anywhere blog posts are exposed:
 
 ```ts
 const now = new Date();
@@ -123,7 +164,7 @@ const posts = await getCollection("blog", ({ data }) => {
 });
 ```
 
-Apply the same rule anywhere published posts are generated, especially:
+Check at least:
 
 ```text
 src/pages/blog/index.astro
@@ -131,24 +172,49 @@ src/pages/blog/[slug].astro
 src/pages/rss.xml.ts
 ```
 
-Also check homepage or other components that display recent blog posts.
+Also search for any other blog collection queries:
 
-## 5. Create the deployment script
+```bash
+grep -R 'getCollection("blog"' -n src
+```
 
-Inside the portfolio repository, create:
+Future posts should not leak through direct article URLs, RSS, the homepage, tag pages, or other article lists.
+
+---
+
+## 5. Repository files to add
+
+Add these files to the portfolio repository:
 
 ```text
 scripts/publish-scheduled-posts.sh
+scripts/schedule-next-post.py
+scripts/portfolio-publish-timer-set
+systemd/portfolio-publish.service
+systemd/portfolio-publish.sudoers
 ```
 
-Recommended version:
+Commit them so the VPS checkout stays clean:
+
+```bash
+git add scripts systemd
+git commit -m "Add exact scheduled blog publishing"
+git push
+```
+
+The supplied implementation bundle already contains these files.
+
+---
+
+## 6. `publish-scheduled-posts.sh`
+
+The deployment script should be:
 
 ```bash
 #!/usr/bin/env bash
-
 set -euo pipefail
 
-APP_DIR="/srv/portfolio"
+APP_DIR="/home/albert/portfolio"
 LOCK_FILE="/tmp/portfolio-publish.lock"
 
 exec 9>"$LOCK_FILE"
@@ -180,76 +246,248 @@ docker compose up -d
 echo "[portfolio-publish] Current containers"
 docker compose ps
 
+echo "[portfolio-publish] Scheduling next publication"
+python3 "$APP_DIR/scripts/schedule-next-post.py"
+
 echo "[portfolio-publish] Completed at $(date --iso-8601=seconds)"
 ```
 
-Replace:
+Make it executable:
+
+```bash
+chmod +x /home/albert/portfolio/scripts/publish-scheduled-posts.sh
+```
+
+This replaces the old incomplete call:
+
+```bash
+node scripts/schedule-next-post.mjs
+```
+
+Node.js is not required on the host.
+
+---
+
+## 7. `schedule-next-post.py`
+
+Install the supplied file at:
 
 ```text
-/srv/portfolio
+/home/albert/portfolio/scripts/schedule-next-post.py
 ```
 
-with the real absolute path of your repository.
-
-If your normal deployment command is more specific, for example:
+Make it executable:
 
 ```bash
-docker compose build portfolio
-docker compose up -d --no-deps portfolio
+chmod +x /home/albert/portfolio/scripts/schedule-next-post.py
 ```
 
-use that instead. Scheduled publishing should use the same deployment procedure you already trust.
+It performs the following checks:
 
-## 6. Make the script executable
+- scans `.md` and `.mdx` recursively;
+- ignores `draft: true`;
+- ignores posts without `publishAt`;
+- rejects invalid timestamps;
+- rejects timezone-less timestamps;
+- converts `publishAt` to UTC;
+- sorts all future posts;
+- selects only the nearest future post;
+- adds a five-minute publication buffer;
+- calls the timer helper;
+- disables the timer if no future posts remain.
+
+The delay is controlled by:
+
+```python
+PUBLISH_DELAY_MINUTES = 5
+```
+
+For:
+
+```yaml
+publishAt: 2026-09-15T08:00:00+02:00
+```
+
+it schedules:
+
+```text
+2026-09-15 06:05:00 UTC
+```
+
+which is 08:05 in Spain that day.
+
+---
+
+## 8. Why a root helper is needed
+
+The systemd service runs as:
+
+```ini
+User=albert
+```
+
+but this file must remain root-owned:
+
+```text
+/etc/systemd/system/portfolio-publish.timer
+```
+
+Do not make `/etc/systemd/system` writable by `albert`.
+
+Instead, only this helper runs with sudo:
+
+```text
+/usr/local/sbin/portfolio-publish-timer-set
+```
+
+It accepts only:
+
+```text
+YYYY-MM-DDTHH:MM:SSZ
+```
+
+or:
+
+```text
+--disable
+```
+
+and it controls only `portfolio-publish.timer`.
+
+---
+
+## 9. Install the root-owned timer helper
+
+From the repository:
 
 ```bash
-chmod +x /srv/portfolio/scripts/publish-scheduled-posts.sh
+sudo cp \
+  /home/albert/portfolio/scripts/portfolio-publish-timer-set \
+  /usr/local/sbin/portfolio-publish-timer-set
+```
+
+Set secure ownership and permissions:
+
+```bash
+sudo chown root:root \
+  /usr/local/sbin/portfolio-publish-timer-set
+
+sudo chmod 0755 \
+  /usr/local/sbin/portfolio-publish-timer-set
 ```
 
 Verify:
 
 ```bash
-ls -l /srv/portfolio/scripts/publish-scheduled-posts.sh
+ls -l /usr/local/sbin/portfolio-publish-timer-set
 ```
 
-You should see executable permissions such as:
+Expected ownership:
 
 ```text
--rwxr-xr-x
+root root
 ```
 
-## 7. Test the script manually first
+Do not allow `albert` to modify this installed helper.
 
-Before using systemd:
+---
+
+## 10. Install the narrow sudoers rule
+
+Copy:
 
 ```bash
-cd /srv/portfolio
-./scripts/publish-scheduled-posts.sh
+sudo cp \
+  /home/albert/portfolio/systemd/portfolio-publish.sudoers \
+  /etc/sudoers.d/portfolio-publish
 ```
 
-Then verify:
+Set permissions:
 
 ```bash
-docker compose ps
+sudo chown root:root /etc/sudoers.d/portfolio-publish
+sudo chmod 0440 /etc/sudoers.d/portfolio-publish
 ```
 
-If this script does not work manually, fix it before configuring the systemd timer.
-
-## 8. Create the systemd service
-
-Create:
+The rule is:
 
 ```text
-/etc/systemd/system/portfolio-publish.service
+albert ALL=(root) NOPASSWD: /usr/local/sbin/portfolio-publish-timer-set *
 ```
 
-For example:
+Validate it before continuing:
 
 ```bash
-sudo nano /etc/systemd/system/portfolio-publish.service
+sudo visudo -cf /etc/sudoers.d/portfolio-publish
 ```
 
-Use:
+Expected:
+
+```text
+/etc/sudoers.d/portfolio-publish: parsed OK
+```
+
+---
+
+## 11. Test the helper privilege
+
+Use a harmless far-future timestamp:
+
+```bash
+sudo -u albert -H \
+  sudo -n /usr/local/sbin/portfolio-publish-timer-set \
+  2099-01-01T12:00:00Z
+```
+
+It should not ask for a password.
+
+Inspect the generated timer:
+
+```bash
+sudo cat /etc/systemd/system/portfolio-publish.timer
+```
+
+You should see:
+
+```ini
+[Unit]
+Description=Run portfolio publication for the next scheduled blog post
+
+[Timer]
+OnCalendar=2099-01-01 12:00:00 UTC
+Persistent=true
+AccuracySec=1min
+Unit=portfolio-publish.service
+
+[Install]
+WantedBy=timers.target
+```
+
+The real scheduler will overwrite this test timestamp during bootstrap.
+
+---
+
+## 12. Install the systemd service
+
+Copy:
+
+```bash
+sudo cp \
+  /home/albert/portfolio/systemd/portfolio-publish.service \
+  /etc/systemd/system/portfolio-publish.service
+```
+
+Set ownership:
+
+```bash
+sudo chown root:root \
+  /etc/systemd/system/portfolio-publish.service
+
+sudo chmod 0644 \
+  /etc/systemd/system/portfolio-publish.service
+```
+
+The service is:
 
 ```ini
 [Unit]
@@ -260,15 +498,12 @@ Requires=docker.service
 
 [Service]
 Type=oneshot
-
-User=YOUR_USER
-Group=YOUR_USER
-
-WorkingDirectory=/srv/portfolio
-ExecStart=/srv/portfolio/scripts/publish-scheduled-posts.sh
-
+User=albert
+Group=albert
+WorkingDirectory=/home/albert/portfolio
+ExecStart=/home/albert/portfolio/scripts/publish-scheduled-posts.sh
+Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 TimeoutStartSec=30min
-
 StandardOutput=journal
 StandardError=journal
 
@@ -276,204 +511,227 @@ StandardError=journal
 WantedBy=multi-user.target
 ```
 
-Replace:
+---
+
+## 13. Fix: `Assignment outside of section`
+
+If you see:
 
 ```text
-YOUR_USER
+/etc/systemd/system/portfolio-publish.service:1:
+Assignment outside of section. Ignoring.
 ```
 
-with the Linux account that owns and normally deploys the portfolio.
-
-For example:
-
-```ini
-User=albert
-Group=albert
-```
-
-Do not use:
-
-```ini
-User=$USER
-```
-
-inside a unit file.
-
-Also replace every occurrence of `/srv/portfolio` with your actual repository path.
-
-## 9. Docker permissions
-
-The service user must be able to run Docker.
-
-Test:
+inspect:
 
 ```bash
-sudo -u YOUR_USER docker ps
+sudo nl -ba /etc/systemd/system/portfolio-publish.service
 ```
 
-Check groups:
-
-```bash
-groups YOUR_USER
-```
-
-If needed:
-
-```bash
-sudo usermod -aG docker YOUR_USER
-```
-
-After changing group membership, log out and back in or restart the relevant session.
-
-## 10. Create the systemd timer
-
-Create:
+Line 1 must be:
 
 ```text
-/etc/systemd/system/portfolio-publish.timer
+1  [Unit]
 ```
 
-Recommended weekly configuration:
+not:
 
-```ini
-[Unit]
-Description=Run scheduled Astro blog publication
-
-[Timer]
-OnCalendar=Tue *-*-* 08:05:00 Europe/Madrid
-Persistent=true
-AccuracySec=1min
-Unit=portfolio-publish.service
-
-[Install]
-WantedBy=timers.target
+```text
+1  Description=...
 ```
 
-This runs every Tuesday at approximately 08:05 in the `Europe/Madrid` timezone.
+Do not paste Markdown fences such as ````ini` into the actual unit file.
 
-A post can therefore use:
-
-```yaml
-publishAt: 2026-09-15T08:00:00+02:00
-```
-
-and the static site rebuild begins a few minutes later.
-
-## 11. Why `Persistent=true` matters
-
-Keep:
-
-```ini
-Persistent=true
-```
-
-If the VPS is offline when the timer should run, systemd will run the missed timer after the server comes back.
-
-Without `Persistent=true`, a scheduled publication could be skipped.
-
-## 12. Why `AccuracySec=1min` is useful
-
-```ini
-AccuracySec=1min
-```
-
-keeps execution close to the scheduled time while still allowing normal systemd timer behavior.
-
-Do not add `RandomizedDelaySec` if you want predictable publication timing.
-
-## 13. Reload systemd
-
-After creating or changing a service or timer:
+After fixing it:
 
 ```bash
 sudo systemctl daemon-reload
 ```
 
-## 14. Test the service manually
+---
 
-Start it:
+## 14. Fix: wrong `/portfolio` path
 
-```bash
-sudo systemctl start portfolio-publish.service
+If logs show:
+
+```text
+cd: /portfolio: No such file or directory
 ```
 
-Check status:
+check:
 
 ```bash
-sudo systemctl status portfolio-publish.service
+grep -n 'APP_DIR' \
+  /home/albert/portfolio/scripts/publish-scheduled-posts.sh
 ```
 
-View logs:
+It should be:
 
 ```bash
-sudo journalctl -u portfolio-publish.service
+APP_DIR="/home/albert/portfolio"
 ```
 
-Recent logs only:
+Check systemd too:
 
 ```bash
-sudo journalctl -u portfolio-publish.service -n 100 --no-pager
+systemctl show portfolio-publish.service \
+  -p WorkingDirectory \
+  -p ExecStart
 ```
 
-Follow logs:
+Both paths should point to `/home/albert/portfolio`.
+
+---
+
+## 15. Fix: `node: command not found`
+
+This exact-scheduling implementation does not use Node on the host.
+
+Remove:
 
 ```bash
-sudo journalctl -u portfolio-publish.service -f
+node scripts/schedule-next-post.mjs
 ```
 
-A successful `Type=oneshot` service usually finishes and becomes inactive again. That is normal.
-
-## 15. Enable and start the timer
+and use:
 
 ```bash
-sudo systemctl enable --now portfolio-publish.timer
+python3 "$APP_DIR/scripts/schedule-next-post.py"
 ```
 
-Check it:
+Check Python:
 
 ```bash
-systemctl status portfolio-publish.timer
+python3 --version
 ```
 
-List timers:
+---
+
+## 16. Validate syntax and reload systemd
+
+Run:
 
 ```bash
-systemctl list-timers --all
+sudo systemd-analyze verify \
+  /etc/systemd/system/portfolio-publish.service \
+  /etc/systemd/system/portfolio-publish.timer
+
+sudo systemctl daemon-reload
 ```
 
-Or only this timer:
+You may still see unrelated XFS warnings such as:
+
+```text
+Support for option CPUAccounting= has been removed and it is ignored
+```
+
+Those are not portfolio errors.
+
+---
+
+## 17. Bootstrap the first real timer
+
+Once the future posts are present on the VPS:
+
+```bash
+cd /home/albert/portfolio
+python3 scripts/schedule-next-post.py
+```
+
+The scheduler uses the sudoers permission automatically.
+
+Example output:
+
+```text
+[portfolio-scheduler] Next post: operating-postgresql-redis-celery-8gb-vps.md at 2026-09-15T06:00:00+00:00
+[portfolio-scheduler] Scheduling rebuild for 2026-09-15T06:05:00+00:00 (publishAt + 5 minutes)
+```
+
+Then check:
 
 ```bash
 systemctl list-timers portfolio-publish.timer
 ```
 
-## 16. Verify the next execution time
+This is the only manual bootstrap needed for an already-populated queue of future posts.
 
-Use:
+After each publication, the service programs the next one itself.
 
-```bash
-systemctl show portfolio-publish.timer   --property=NextElapseUSecRealtime   --property=LastTriggerUSec
-```
+---
 
-Validate the calendar expression:
+## 18. Inspect the generated timer
 
 ```bash
-systemd-analyze calendar 'Tue *-*-* 08:05:00 Europe/Madrid'
+sudo cat /etc/systemd/system/portfolio-publish.timer
 ```
 
-Always verify the next occurrence after changing `OnCalendar`.
+Check state:
 
+```bash
+systemctl status portfolio-publish.timer
+```
 
-## 16A. Recommended validation sequence after any service/timer change
-
-After editing either:
+Expected while waiting:
 
 ```text
-/etc/systemd/system/portfolio-publish.service
-/etc/systemd/system/portfolio-publish.timer
+Active: active (waiting)
 ```
 
-run this complete validation sequence:
+Check the next trigger:
+
+```bash
+systemctl list-timers portfolio-publish.timer
+```
+
+Also:
+
+```bash
+systemctl show portfolio-publish.timer \
+  -p NextElapseUSecRealtime \
+  -p LastTriggerUSec
+```
+
+---
+
+## 19. Test the service manually
+
+Run:
+
+```bash
+sudo systemctl start portfolio-publish.service
+```
+
+Then:
+
+```bash
+systemctl show portfolio-publish.service \
+  -p Result \
+  -p ExecMainStatus
+```
+
+Expected:
+
+```text
+Result=success
+ExecMainStatus=0
+```
+
+Because the service is `Type=oneshot`, it may show as `inactive (dead)` after success. That is normal.
+
+Inspect logs:
+
+```bash
+sudo journalctl \
+  -u portfolio-publish.service \
+  -n 100 \
+  --no-pager
+```
+
+---
+
+## 20. Full validation sequence
+
+After changing the service/helper/timer implementation, use:
 
 ```bash
 sudo systemd-analyze verify \
@@ -498,197 +756,52 @@ sudo systemctl restart portfolio-publish.timer
 systemctl list-timers portfolio-publish.timer
 ```
 
-What to expect:
-
-```text
-systemd-analyze verify
-    ↓
-No portfolio-specific syntax/path errors
-
-portfolio-publish.service
-    ↓
-Result=success
-ExecMainStatus=0
-
-journalctl
-    ↓
-Deployment script completes successfully
-
-portfolio-publish.timer
-    ↓
-Active and waiting for the next scheduled run
-```
-
-Because `portfolio-publish.service` is a `Type=oneshot` service, it can show as:
-
-```text
-inactive (dead)
-```
-
-after a successful run. That is normal. The important values are:
+A healthy service should end with:
 
 ```text
 Result=success
 ExecMainStatus=0
 ```
 
-`systemd-analyze verify` may also print warnings for unrelated system services. For example:
+---
 
-```text
-/usr/lib/systemd/system/xfs_scrub_all.service:
-Support for option CPUAccounting= has been removed and it is ignored
+## 21. End-to-end test with a temporary article
 
-/usr/lib/systemd/system/system-xfs_scrub.slice:
-Support for option CPUAccounting= has been removed and it is ignored
-```
+This is the strongest test.
 
-These warnings are unrelated to `portfolio-publish.service` and do not indicate a problem with the portfolio deployment.
+Suppose the local time is 14:00.
 
-
-## 17. Recommended publishing schedule
-
-A good portfolio cadence is:
-
-```text
-Tuesday 08:00  article publishAt
-Tuesday 08:05  systemd rebuild
-```
-
-Timer:
-
-```ini
-OnCalendar=Tue *-*-* 08:05:00 Europe/Madrid
-```
-
-Article:
-
-```yaml
-publishAt: 2026-09-15T08:00:00+02:00
-draft: false
-```
-
-You can commit several future posts in advance. Only posts whose `publishAt` timestamp has passed will be included in a build.
-
-## 18. Alternative schedules
-
-### Every day
-
-```ini
-OnCalendar=*-*-* 08:05:00 Europe/Madrid
-```
-
-### Every Monday
-
-```ini
-OnCalendar=Mon *-*-* 08:05:00 Europe/Madrid
-```
-
-### Every Tuesday
-
-```ini
-OnCalendar=Tue *-*-* 08:05:00 Europe/Madrid
-```
-
-### Every weekday
-
-```ini
-OnCalendar=Mon..Fri *-*-* 08:05:00 Europe/Madrid
-```
-
-## 19. Publishing every two weeks
-
-A true "every other Tuesday forever" schedule is less convenient in systemd calendar syntax.
-
-The simplest setup is still:
-
-```ini
-OnCalendar=Tue *-*-* 08:05:00 Europe/Madrid
-```
-
-and use `publishAt` on every second Tuesday.
-
-The timer rebuilds about 52 times per year, while only the Tuesdays containing a scheduled post change the blog.
-
-That is simpler than adding extra calendar logic just to avoid around 26 small static builds per year.
-
-## 20. Test a future publication
-
-Create a temporary test article:
+Create a temporary post:
 
 ```yaml
 ---
 title: "Scheduled Publishing Test"
-description: "Temporary test post."
-date: 2026-09-08
-publishAt: 2026-09-08T08:00:00+02:00
+description: "Temporary scheduling test."
+date: 2026-09-06
+publishAt: 2026-09-06T14:10:00+02:00
 tags: ["Test"]
 draft: false
 featured: false
 ---
 ```
 
-Build before the timestamp:
+Commit and push it:
 
 ```bash
-npm run build
+git add .
+git commit -m "Test exact scheduled publishing"
+git push
 ```
 
-The article should not be generated.
-
-Then temporarily set `publishAt` to a timestamp in the past and rebuild.
-
-The article should now appear.
-
-Remove the test article afterward.
-
-## 21. Test the timer without waiting a week
-
-Normally you should test the service directly:
+Deploy once before 14:10:
 
 ```bash
 sudo systemctl start portfolio-publish.service
 ```
 
-If you specifically want to test timer triggering, temporarily change the timer to:
+The article should still be hidden.
 
-```ini
-[Timer]
-OnCalendar=*-*-* *:*:00
-Persistent=true
-Unit=portfolio-publish.service
-```
-
-Then:
-
-```bash
-sudo systemctl daemon-reload
-sudo systemctl restart portfolio-publish.timer
-```
-
-After the test, restore:
-
-```ini
-OnCalendar=Tue *-*-* 08:05:00 Europe/Madrid
-```
-
-and reload/restart again.
-
-Do not leave the one-minute test schedule enabled.
-
-## 22. Change the schedule later
-
-Edit:
-
-```bash
-sudo nano /etc/systemd/system/portfolio-publish.timer
-```
-
-Change `OnCalendar`, then run:
-
-```bash
-sudo systemctl daemon-reload
-sudo systemctl restart portfolio-publish.timer
-```
+The service should discover it as the next future post and create a timer for 14:15 local time.
 
 Verify:
 
@@ -696,511 +809,291 @@ Verify:
 systemctl list-timers portfolio-publish.timer
 ```
 
-## 23. Disable automatic publishing
+Watch the logs:
 
 ```bash
-sudo systemctl disable --now portfolio-publish.timer
+sudo journalctl -u portfolio-publish.service -f
 ```
 
-The service can still be launched manually:
+At 14:15 the timer should automatically start the service.
+
+After the build, the temporary article should be visible.
+
+At the end of that same run, the scheduler should automatically replace the timer with the following future article.
+
+This proves the complete chain:
+
+```text
+future article hidden
+    ↓
+next timer generated
+    ↓
+timer fires automatically
+    ↓
+service rebuilds
+    ↓
+article becomes public
+    ↓
+next future timer generated
+```
+
+Delete the temporary article afterward and deploy again.
+
+---
+
+## 22. What happens when no future posts remain
+
+The scheduler prints:
+
+```text
+[portfolio-scheduler] No future posts remain.
+[portfolio-scheduler] Disabling the publication timer.
+```
+
+The helper disables the timer:
+
+```bash
+systemctl disable --now portfolio-publish.timer
+```
+
+That is correct.
+
+When you later add a new future article, deploy it and bootstrap again:
+
+```bash
+cd /home/albert/portfolio
+python3 scripts/schedule-next-post.py
+```
+
+The helper will enable/start the timer automatically.
+
+---
+
+## 23. Why the timer uses UTC
+
+A post can use:
+
+```yaml
+publishAt: 2026-09-15T08:00:00+02:00
+```
+
+Python converts that instant to:
+
+```text
+2026-09-15T06:00:00Z
+```
+
+then adds five minutes:
+
+```text
+2026-09-15T06:05:00Z
+```
+
+The generated timer becomes:
+
+```ini
+OnCalendar=2026-09-15 06:05:00 UTC
+```
+
+This avoids daylight-saving ambiguity inside systemd.
+
+The timezone meaning stays explicit in each article's `publishAt` value.
+
+---
+
+## 24. Multiple posts at the same timestamp
+
+If two posts have the same `publishAt`, one build publishes both.
+
+Afterward both timestamps are in the past, so the scheduler advances to the next later article.
+
+---
+
+## 25. If the publication build fails
+
+The deployment script uses:
+
+```bash
+set -euo pipefail
+```
+
+If `git pull`, Docker build, deployment, or another command fails, the service exits before scheduling the next article.
+
+That prevents the timer from advancing after an unsuccessful publication.
+
+Inspect:
+
+```bash
+sudo journalctl \
+  -u portfolio-publish.service \
+  -n 200 \
+  --no-pager
+```
+
+Fix the problem and rerun:
 
 ```bash
 sudo systemctl start portfolio-publish.service
 ```
 
-Re-enable it with:
+A successful rerun will program the next timer.
 
-```bash
-sudo systemctl enable --now portfolio-publish.timer
-```
+---
 
-## 24. Verify timer state
+## 26. Dirty Git checkout protection
 
-Enabled:
-
-```bash
-systemctl is-enabled portfolio-publish.timer
-```
-
-Expected:
-
-```text
-enabled
-```
-
-Active:
-
-```bash
-systemctl is-active portfolio-publish.timer
-```
-
-Expected:
-
-```text
-active
-```
-
-## 25. Inspect publication history
-
-All runs:
-
-```bash
-sudo journalctl -u portfolio-publish.service
-```
-
-Current boot:
-
-```bash
-sudo journalctl -u portfolio-publish.service -b
-```
-
-Since a date:
-
-```bash
-sudo journalctl   -u portfolio-publish.service   --since "2026-09-01"
-```
-
-Latest 200 lines:
-
-```bash
-sudo journalctl   -u portfolio-publish.service   -n 200   --no-pager
-```
-
-## 26. Optional health check
-
-At the end of the deployment script you can check the live site:
-
-```bash
-curl   --fail   --silent   --show-error   --location   --max-time 20   https://albertqueralto.dev/   > /dev/null
-```
-
-A failed health check makes the script exit with an error, which systemd records in the journal.
-
-## 27. Avoid overlapping deployments
-
-The recommended script already uses:
-
-```bash
-flock
-```
-
-This prevents a manual deployment and a timer-triggered deployment from running at the same time.
-
-## 28. Avoid local uncommitted server changes
-
-The script also checks:
+The script aborts if:
 
 ```bash
 git status --porcelain
 ```
 
-and aborts if the VPS repository contains local modifications.
-
-This keeps scheduled deployment predictable.
-
-## 29. Troubleshooting
-
-
-## 29A. Fix: `Assignment outside of section. Ignoring.`
-
-If you see:
-
-```text
-/etc/systemd/system/portfolio-publish.service:1:
-Assignment outside of section. Ignoring.
-```
-
-the service file is malformed.
-
-A systemd unit must begin with a valid section header such as:
-
-```ini
-[Unit]
-```
-
-Do not start the file directly with:
-
-```ini
-Description=...
-```
-
-Also make sure you did not accidentally paste Markdown code fences such as:
-
-```text
-```ini
-```
-
-into the actual unit file.
-
-Open the service:
-
-```bash
-sudo nano /etc/systemd/system/portfolio-publish.service
-```
-
-A valid file should look like:
-
-```ini
-[Unit]
-Description=Publish scheduled Astro blog posts
-After=network-online.target docker.service
-Wants=network-online.target
-Requires=docker.service
-
-[Service]
-Type=oneshot
-User=albert
-Group=albert
-
-WorkingDirectory=/ABSOLUTE/PATH/TO/PORTFOLIO
-ExecStart=/ABSOLUTE/PATH/TO/PORTFOLIO/scripts/publish-scheduled-posts.sh
-
-TimeoutStartSec=30min
-StandardOutput=journal
-StandardError=journal
-
-[Install]
-WantedBy=multi-user.target
-```
-
-Then reload systemd:
-
-```bash
-sudo systemctl daemon-reload
-```
-
-Validate again:
-
-```bash
-sudo systemd-analyze verify \
-  /etc/systemd/system/portfolio-publish.service \
-  /etc/systemd/system/portfolio-publish.timer
-```
-
-The `Assignment outside of section` error should be gone.
-
-## 29B. Fix: `Command ... is not executable: No such file or directory`
-
-If you see:
-
-```text
-portfolio-publish.service:
-Command /portfolio/scripts/publish-scheduled-posts.sh is not executable:
-No such file or directory
-```
-
-the path in `ExecStart=` is wrong, or the script does not exist at that location.
-
-The path:
-
-```text
-/portfolio/scripts/publish-scheduled-posts.sh
-```
-
-is only an example. You must use the real absolute path of the portfolio repository on the VPS.
-
-Find the repository path:
-
-```bash
-cd /path/to/your/portfolio
-pwd
-```
-
-For example, if `pwd` returns:
-
-```text
-/home/albert/portfolio
-```
-
-then the service must contain:
-
-```ini
-WorkingDirectory=/home/albert/portfolio
-ExecStart=/home/albert/portfolio/scripts/publish-scheduled-posts.sh
-```
-
-Do not use:
-
-```ini
-WorkingDirectory=~/portfolio
-ExecStart=~/portfolio/scripts/publish-scheduled-posts.sh
-```
-
-systemd does not expand `~` like an interactive shell.
-
-If you do not know where the script is, find it:
-
-```bash
-find /home/albert \
-  -name 'publish-scheduled-posts.sh' \
-  -type f \
-  2>/dev/null
-```
-
-Then verify that the exact path exists:
-
-```bash
-ls -l /home/albert/portfolio/scripts/publish-scheduled-posts.sh
-```
-
-Make it executable:
-
-```bash
-chmod +x /home/albert/portfolio/scripts/publish-scheduled-posts.sh
-```
-
-Verify the executable bit:
-
-```bash
-ls -l /home/albert/portfolio/scripts/publish-scheduled-posts.sh
-```
-
-You should see permissions similar to:
-
-```text
--rwxr-xr-x
-```
-
-Check the script interpreter:
-
-```bash
-head -n 1 /home/albert/portfolio/scripts/publish-scheduled-posts.sh
-```
-
-Expected:
-
-```bash
-#!/usr/bin/env bash
-```
-
-Then run the script as the same user configured in the service:
-
-```bash
-sudo -u albert -H \
-  /home/albert/portfolio/scripts/publish-scheduled-posts.sh
-```
-
-If this succeeds, test the systemd service:
-
-```bash
-sudo systemctl daemon-reload
-sudo systemctl start portfolio-publish.service
-```
+contains local changes.
 
 Check:
 
 ```bash
-systemctl show portfolio-publish.service \
-  -p Result \
-  -p ExecMainStatus
+cd /home/albert/portfolio
+git status --short
 ```
 
-Expected:
+The VPS should normally be a clean deployment checkout.
 
-```text
-Result=success
-ExecMainStatus=0
-```
+Commit the scheduling scripts to the repository instead of editing them only on the server.
 
-If the script is somewhere else, use that exact absolute path in both:
+---
 
-```ini
-WorkingDirectory=...
-ExecStart=...
-```
+## 27. Docker permissions
 
-## 29C. Quick path verification checklist
-
-Before starting the service, run:
+Verify the service user can access Docker:
 
 ```bash
-systemctl show portfolio-publish.service \
-  -p User \
-  -p Group \
-  -p WorkingDirectory \
-  -p ExecStart
+sudo -u albert -H docker ps
 ```
 
-Then verify the script directly:
+If it fails:
 
 ```bash
-ls -l /ABSOLUTE/PATH/TO/PORTFOLIO/scripts/publish-scheduled-posts.sh
+groups albert
 ```
 
-Then run it as the service user:
+Make sure `albert` has the required Docker access.
 
-```bash
-sudo -u albert -H \
-  /ABSOLUTE/PATH/TO/PORTFOLIO/scripts/publish-scheduled-posts.sh
-```
+---
 
-This catches most path, permission, Docker, and Git problems before waiting for the timer.
+## 28. Git authentication
 
-
-
-### Timer is not listed
-
-```bash
-sudo systemctl daemon-reload
-sudo systemctl enable --now portfolio-publish.timer
-systemctl list-timers --all
-```
-
-### Timer runs but service fails
-
-```bash
-sudo systemctl status portfolio-publish.service
-sudo journalctl -u portfolio-publish.service -n 200 --no-pager
-```
-
-### Docker permission denied
-
-```bash
-sudo -u YOUR_USER docker ps
-groups YOUR_USER
-```
-
-### Git pull fails
-
-```bash
-sudo -u YOUR_USER git -C /srv/portfolio pull --ff-only
-```
-
-Common causes:
-
-- repository authentication;
-- missing SSH key for the service user;
-- local uncommitted changes;
-- wrong repository path;
-- wrong ownership.
-
-### Article does not appear
-
-Check frontmatter:
-
-```yaml
-draft: false
-publishAt: 2026-09-15T08:00:00+02:00
-```
-
-Check server time:
-
-```bash
-date
-date --iso-8601=seconds
-timedatectl
-```
-
-Check latest commit:
-
-```bash
-cd /srv/portfolio
-git log -1 --oneline
-```
-
-Run manually:
-
-```bash
-sudo systemctl start portfolio-publish.service
-```
-
-Inspect logs:
-
-```bash
-sudo journalctl -u portfolio-publish.service -n 200 --no-pager
-```
-
-### Article appears too early
-
-Find every blog collection query:
-
-```bash
-grep -R 'getCollection("blog"' -n src
-```
-
-Make sure future-post filtering is applied to every public output.
-
-## 30. Security recommendations
-
-Do not store GitHub tokens or passwords directly inside the systemd unit.
-
-Prefer SSH deploy keys or existing Git credentials belonging to the deployment user.
-
-Avoid running the publication service as root unless necessary.
-
-The publication service should only need access to:
-
-- the portfolio Git checkout;
-- Git;
-- Docker;
-- the Docker Compose project.
-
-## 31. Complete service file
-
-`/etc/systemd/system/portfolio-publish.service`:
-
-```ini
-[Unit]
-Description=Publish scheduled Astro blog posts
-After=network-online.target docker.service
-Wants=network-online.target
-Requires=docker.service
-
-[Service]
-Type=oneshot
-
-User=albert
-Group=albert
-
-WorkingDirectory=/srv/portfolio
-ExecStart=/srv/portfolio/scripts/publish-scheduled-posts.sh
-
-TimeoutStartSec=30min
-
-StandardOutput=journal
-StandardError=journal
-
-[Install]
-WantedBy=multi-user.target
-```
-
-Adjust the user and repository path.
-
-## 32. Complete timer file
-
-`/etc/systemd/system/portfolio-publish.timer`:
-
-```ini
-[Unit]
-Description=Run scheduled Astro blog publication
-
-[Timer]
-OnCalendar=Tue *-*-* 08:05:00 Europe/Madrid
-Persistent=true
-AccuracySec=1min
-Unit=portfolio-publish.service
-
-[Install]
-WantedBy=timers.target
-```
-
-## 33. Initial installation commands
-
-```bash
-sudo systemctl daemon-reload
-```
+The service cannot answer an interactive password prompt.
 
 Test:
 
 ```bash
-sudo systemctl start portfolio-publish.service
-sudo systemctl status portfolio-publish.service
+sudo -u albert -H bash -lc '
+  cd /home/albert/portfolio &&
+  git pull --ff-only
+'
 ```
 
-Enable timer:
+This must complete without prompting.
+
+---
+
+## 29. File ownership and permissions
+
+Check:
 
 ```bash
-sudo systemctl enable --now portfolio-publish.timer
+ls -l \
+  /home/albert/portfolio/scripts/publish-scheduled-posts.sh \
+  /home/albert/portfolio/scripts/schedule-next-post.py \
+  /usr/local/sbin/portfolio-publish-timer-set \
+  /etc/systemd/system/portfolio-publish.service \
+  /etc/systemd/system/portfolio-publish.timer \
+  /etc/sudoers.d/portfolio-publish
+```
+
+Recommended:
+
+```text
+publish-scheduled-posts.sh
+  owned by albert, executable
+
+schedule-next-post.py
+  owned by albert, executable
+
+portfolio-publish-timer-set
+  root:root, mode 0755
+
+portfolio-publish.service
+  root:root, mode 0644
+
+portfolio-publish.timer
+  root:root, mode 0644
+
+/etc/sudoers.d/portfolio-publish
+  root:root, mode 0440
+```
+
+---
+
+## 30. Initial installation checklist
+
+Make repository scripts executable:
+
+```bash
+chmod +x \
+  /home/albert/portfolio/scripts/publish-scheduled-posts.sh \
+  /home/albert/portfolio/scripts/schedule-next-post.py \
+  /home/albert/portfolio/scripts/portfolio-publish-timer-set
+```
+
+Install helper:
+
+```bash
+sudo cp \
+  /home/albert/portfolio/scripts/portfolio-publish-timer-set \
+  /usr/local/sbin/portfolio-publish-timer-set
+
+sudo chown root:root \
+  /usr/local/sbin/portfolio-publish-timer-set
+
+sudo chmod 0755 \
+  /usr/local/sbin/portfolio-publish-timer-set
+```
+
+Install sudoers:
+
+```bash
+sudo cp \
+  /home/albert/portfolio/systemd/portfolio-publish.sudoers \
+  /etc/sudoers.d/portfolio-publish
+
+sudo chown root:root /etc/sudoers.d/portfolio-publish
+sudo chmod 0440 /etc/sudoers.d/portfolio-publish
+sudo visudo -cf /etc/sudoers.d/portfolio-publish
+```
+
+Install service:
+
+```bash
+sudo cp \
+  /home/albert/portfolio/systemd/portfolio-publish.service \
+  /etc/systemd/system/portfolio-publish.service
+
+sudo chown root:root \
+  /etc/systemd/system/portfolio-publish.service
+
+sudo chmod 0644 \
+  /etc/systemd/system/portfolio-publish.service
+
+sudo systemctl daemon-reload
+```
+
+Bootstrap the timer:
+
+```bash
+cd /home/albert/portfolio
+python3 scripts/schedule-next-post.py
 ```
 
 Verify:
@@ -1209,72 +1102,86 @@ Verify:
 systemctl list-timers portfolio-publish.timer
 ```
 
-## 34. Normal publishing workflow
+---
 
-Create or update the article:
+## 31. Normal publishing workflow
 
-```yaml
-date: 2026-09-15
-publishAt: 2026-09-15T08:00:00+02:00
-draft: false
-```
-
-Commit and push:
-
-```bash
-git add .
-git commit -m "Add scheduled blog post"
-git push
-```
-
-Before publication:
+Once installed:
 
 ```text
-Git repository: article exists
-Live website:   article absent
+1. Write future posts locally.
+
+2. Set:
+   draft: false
+   publishAt: exact ISO-8601 future timestamp
+
+3. Commit and push the articles.
+
+4. Deploy once so the VPS receives the new future posts.
+
+5. That deployment schedules the earliest future post.
+
+6. At publishAt + 5 minutes:
+   timer fires
+   → service rebuilds
+   → article becomes public
+   → scheduler finds the next article
+   → timer is rewritten.
+
+7. Repeat automatically until no future posts remain.
 ```
 
-At the next scheduled rebuild:
+---
+
+## 32. Example timeline
+
+Posts:
 
 ```text
-systemd timer
-    ↓
-portfolio-publish.service
-    ↓
-publish-scheduled-posts.sh
-    ↓
-git pull
-    ↓
-Astro/Docker rebuild
-    ↓
-future-date filter reevaluated
-    ↓
-article included
+A: 2026-09-15T08:00:00+02:00
+B: 2026-09-29T08:00:00+02:00
+C: 2026-10-13T08:00:00+02:00
 ```
 
-## 35. Final recommended setup
+Initial bootstrap generates:
+
+```ini
+OnCalendar=2026-09-15 06:05:00 UTC
+```
+
+September 15:
 
 ```text
-Article release:
-Tuesday 08:00 Europe/Madrid
-
-Automatic rebuild:
-Tuesday 08:05 Europe/Madrid
-
-Frequency:
-once per week
-
-Expected scheduled builds:
-about 52/year
+06:05 UTC
+→ timer fires
+→ service rebuilds
+→ A becomes public
+→ scheduler finds B
 ```
 
-This gives you scheduled publishing with:
+Timer becomes:
 
-- no hourly polling;
-- no CMS;
-- no server-side Astro requirement;
-- no manual release-day deployment;
-- static-site performance;
-- missed-timer recovery through `Persistent=true`;
-- systemd logging and status inspection;
-- predictable publication times.
+```ini
+OnCalendar=2026-09-29 06:05:00 UTC
+```
+
+September 29:
+
+```text
+→ B becomes public
+→ scheduler finds C
+```
+
+Timer becomes:
+
+```ini
+OnCalendar=2026-10-13 06:05:00 UTC
+```
+
+After C publishes, if no other future posts exist:
+
+```text
+portfolio-publish.timer disabled
+```
+
+This is Option B: **one scheduled build per actual publication event**.

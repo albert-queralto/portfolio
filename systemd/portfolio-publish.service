@@ -1,0 +1,19 @@
+[Unit]
+Description=Publish scheduled Astro blog posts
+After=network-online.target docker.service
+Wants=network-online.target
+Requires=docker.service
+
+[Service]
+Type=oneshot
+User=albert
+Group=albert
+WorkingDirectory=/home/albert/portfolio
+ExecStart=/home/albert/portfolio/scripts/publish-scheduled-posts.sh
+Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+TimeoutStartSec=30min
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

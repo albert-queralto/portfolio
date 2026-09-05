@@ -1,0 +1,2 @@
+# Allow only the fixed timer-management helper to run as root.
+albert ALL=(root) NOPASSWD: /usr/local/sbin/portfolio-publish-timer-set *

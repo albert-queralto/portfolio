@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+TIMER_FILE="/etc/systemd/system/portfolio-publish.timer"
+SERVICE_UNIT="portfolio-publish.service"
+TIMER_UNIT="portfolio-publish.timer"
+
+usage() {
+  echo "Usage: $0 YYYY-MM-DDTHH:MM:SSZ | --disable" >&2
+  exit 2
+}
+
+[[ $# -eq 1 ]] || usage
+ARG="$1"
+
+if [[ "$ARG" == "--disable" ]]; then
+  echo "[portfolio-timer-set] No future publication. Disabling timer."
+  systemctl disable --now "$TIMER_UNIT" >/dev/null 2>&1 || true
+  exit 0
+fi
+
+if [[ ! "$ARG" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$ ]]; then
+  echo "[portfolio-timer-set] Invalid timestamp: $ARG" >&2
+  usage
+fi
+
+/usr/bin/python3 - "$ARG" <<'PY'
+from datetime import datetime
+import sys
+
+datetime.strptime(sys.argv[1], "%Y-%m-%dT%H:%M:%SZ")
+PY
+
+DATE_PART="${ARG:0:10}"
+TIME_PART="${ARG:11:8}"
+TMP_FILE="$(mktemp)"
+trap 'rm -f "$TMP_FILE"' EXIT
+
+cat > "$TMP_FILE" <<EOF_TIMER
+[Unit]
+Description=Run portfolio publication for the next scheduled blog post
+
+[Timer]
+OnCalendar=${DATE_PART} ${TIME_PART} UTC
+Persistent=true
+AccuracySec=1min
+Unit=${SERVICE_UNIT}
+
+[Install]
+WantedBy=timers.target
+EOF_TIMER
+
+install -o root -g root -m 0644 "$TMP_FILE" "$TIMER_FILE"
+systemctl daemon-reload
+systemctl enable "$TIMER_UNIT" >/dev/null
+systemctl restart "$TIMER_UNIT"
+
+echo "[portfolio-timer-set] Timer scheduled for ${DATE_PART} ${TIME_PART} UTC"
+systemctl list-timers "$TIMER_UNIT" --no-pager
