@@ -59,9 +59,11 @@ const structuredData = [
       {
         posts.map((post, index) => (
           <article 
-            data-blog-additional={String(index >= INITIAL_POST_COUNT)}
-            hidden={index >= INITIAL_POST_COUNT}
-            class="group overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card-bg)] transition-[border-color,transform] hover:-translate-y-0.5 hover:border-[var(--sec)]"
+            data-blog-additional={String(index >= INITIAL_POST_COUNT ? "true" : "false")}
+            class:list={[
+              "group overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card-bg)] transition-[border-color,transform] hover:-translate-y-0.5 hover:border-[var(--sec)]",
+              index >= INITIAL_POST_COUNT && "hidden",
+            ]}
           >
             <a href={`/blog/${post.id}/`} class="flex h-full flex-col">
               <img
@@ -134,3 +136,50 @@ const structuredData = [
   </main>
   <Footer />
 </Layout>
+
+<script>
+  function setupBlogExpander() {
+    const button = document.getElementById("blog-expander");
+
+    if (!(button instanceof HTMLButtonElement)) {
+      return;
+    }
+
+    // Prevent duplicate listeners with Astro navigation.
+    if (button.dataset.initialized === "true") {
+      return;
+    }
+
+    button.dataset.initialized = "true";
+
+    const additionalPosts = document.querySelectorAll(
+      '[data-blog-additional="true"]',
+    );
+
+    let expanded = false;
+
+    button.addEventListener("click", () => {
+      expanded = !expanded;
+
+      additionalPosts.forEach((post) => {
+        post.classList.toggle("hidden", !expanded);
+      });
+
+      button.setAttribute(
+        "aria-expanded",
+        expanded ? "true" : "false",
+      );
+
+      button.textContent = expanded
+        ? button.dataset.lessLabel || "Show fewer articles ↑"
+        : button.dataset.moreLabel || "View more articles →";
+    });
+  }
+
+  setupBlogExpander();
+
+  document.addEventListener(
+    "astro:page-load",
+    setupBlogExpander,
+  );
+</script>
