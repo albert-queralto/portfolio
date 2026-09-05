@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-APP_DIR="/portfolio"
+APP_DIR="/home/albert/portfolio"
 
 cd "$APP_DIR"
 
