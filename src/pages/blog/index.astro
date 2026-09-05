@@ -7,7 +7,21 @@ import { site } from "@/data/site";
 import { toCanonicalUrl } from "@/utils/urls";
 import { buildBreadcrumbList } from "@/utils/seo";
 
-const posts = (await getCollection("blog", ({ data }) => !data.draft))
+const now = new Date();
+
+const posts = (
+  await getCollection("blog", ({ data }) => {
+    if (data.draft) {
+      return false;
+    }
+
+    if (data.publishAt && data.publishAt > now) {
+      return false;
+    }
+
+    return true;
+  })
+)
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
   .map((post) => {
     const postBody = post.body ?? "";

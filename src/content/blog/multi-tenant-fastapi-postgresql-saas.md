@@ -2,6 +2,7 @@
 title: "Building a Multi-Tenant SaaS with FastAPI and PostgreSQL"
 description: "How I structure workspace isolation, permissions, background jobs, billing and audit state when turning a FastAPI application into a multi-tenant SaaS."
 date: 2026-10-12
+publishAt: 2026-10-12T08:00:00+02:00
 tags: ["FastAPI", "PostgreSQL", "SaaS", "Python", "Security", "Backend"]
 draft: false
 cover: "/og/multi-tenant-fastapi-postgresql-saas.png"

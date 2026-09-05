@@ -2,6 +2,7 @@
 title: "Temporal Validation for Late-Payment Prediction"
 description: "Why late-payment prediction needs more than a chronological train/test split, and how I reconstruct what was actually knowable when each Payrithm prediction would have been made."
 date: 2026-09-18
+publishAt: 2026-09-18T08:00:00+02:00
 tags: ["Machine Learning", "Time Series", "Scikit-learn", "Fintech", "MLOps"]
 draft: false
 cover: "/og/temporal-validation-late-payment-prediction.png"

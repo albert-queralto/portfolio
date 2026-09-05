@@ -11,7 +11,20 @@ import "@/styles/prose.css"
 import TableOfContents from "@/components/TableOfContents.astro";
 
 export async function getStaticPaths() {
-  const posts = await getCollection("blog", ({ data }) => !data.draft);
+  const now = new Date();
+
+  const posts = await getCollection("blog", ({ data }) => {
+    if (data.draft) {
+      return false;
+    }
+
+    if (data.publishAt && data.publishAt > now) {
+      return false;
+    }
+
+    return true;
+  });
+  
   return posts.map((post) => ({
     params: { slug: post.id },
     props: { post },

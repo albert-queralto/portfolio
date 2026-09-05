@@ -2,6 +2,7 @@
 title: "From ML Probability to Business Priority Score"
 description: "Why Payrithm does not simply sort invoices by late-payment probability, and how I combine calibrated ML risk with value, urgency and collection activity."
 date: 2026-10-28
+publishAt: 2026-10-28T08:00:00+02:00
 tags: ["Machine Learning", "Product Engineering", "Fintech", "Decision Systems", "Explainability"]
 draft: false
 cover: "/og/ml-probability-business-priority-score.png"

@@ -2,6 +2,7 @@
 title: "What Went Wrong While Ingesting TED Procurement Data"
 description: "The data-model and reliability problems that shaped TenderWise's TED ingestion pipeline, from notice versions and lots to multilingual fields, retries and semi-structured qualification criteria."
 date: 2026-10-01
+publishAt: 2026-10-01T08:00:00+02:00
 tags: ["Data Engineering", "ETL", "PostgreSQL", "Celery", "Procurement", "SaaS"]
 draft: false
 cover: "/og/ted-procurement-data-ingestion-lessons.png"

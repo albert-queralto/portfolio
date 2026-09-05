@@ -4,8 +4,14 @@ import { getCollection } from "astro:content";
 import { site } from "@/data/site";
 
 export const GET: APIRoute = async ({ site: astroSite }) => {
+  const now = new Date();
+
   const posts = (
-    await getCollection("blog", ({ data }) => !data.draft)
+    await getCollection("blog", ({ data }) => {
+      if (data.draft) return false;
+      if (data.publishAt && data.publishAt > now) return false;
+      return true;
+    })
   ).sort(
     (a, b) =>
       b.data.date.valueOf() - a.data.date.valueOf(),
