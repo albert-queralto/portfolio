@@ -18,6 +18,13 @@ const posts = (await getCollection("blog", ({ data }) => !data.draft))
     };
   });
 
+const INITIAL_POST_COUNT = 6;
+
+const additionalPostCount = Math.max(
+  posts.length - INITIAL_POST_COUNT,
+  0,
+);
+
 const canonical = toCanonicalUrl("/blog/", Astro.site ?? site.url);
 const structuredData = [
   buildBreadcrumbList([
@@ -45,10 +52,17 @@ const structuredData = [
       </p>
     </header>
 
-    <div class="mt-12 grid gap-5 md:grid-cols-2">
+    <div
+      id="blog-posts-grid"
+      class="mt-12 grid gap-6 md:grid-cols-2"
+    >
       {
-        posts.map((post) => (
-          <article class="group overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card-bg)] transition-[border-color,transform] hover:-translate-y-0.5 hover:border-[var(--sec)]">
+        posts.map((post, index) => (
+          <article 
+            data-blog-additional={String(index >= INITIAL_POST_COUNT)}
+            hidden={index >= INITIAL_POST_COUNT}
+            class="group overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card-bg)] transition-[border-color,transform] hover:-translate-y-0.5 hover:border-[var(--sec)]"
+          >
             <a href={`/blog/${post.id}/`} class="flex h-full flex-col">
               <img
                 src={post.cover}
@@ -97,6 +111,26 @@ const structuredData = [
         ))
       }
     </div>
+    {
+      additionalPostCount > 0 && (
+        <div
+          id="blog-expander-container"
+          class="mt-10 flex justify-center"
+        >
+          <button
+            id="blog-expander"
+            type="button"
+            aria-expanded="false"
+            aria-controls="blog-posts-grid"
+            data-more-label={`View ${additionalPostCount} more articles →`}
+            data-less-label="Show fewer articles ↑"
+            class="inline-flex min-h-11 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--card-bg)] px-5 py-2.5 text-sm font-semibold text-[var(--white-icon)] transition-colors hover:border-[var(--sec)] hover:text-[var(--white)]"
+          >
+            View {additionalPostCount} more articles →
+          </button>
+        </div>
+      )
+    }
   </main>
   <Footer />
 </Layout>
