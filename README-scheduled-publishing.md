@@ -1183,5 +1183,3 @@ After C publishes, if no other future posts exist:
 ```text
 portfolio-publish.timer disabled
 ```
-
-This is Option B: **one scheduled build per actual publication event**.
