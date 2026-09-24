@@ -1,67 +1,58 @@
 ---
 import { getCollection } from "astro:content";
+import { getLocale, getMessages, contentLocale, contentTranslationKey, localizePath } from "@/i18n/utils";
 
-const projects = (
-  await getCollection("projects", ({ data }) => !data.draft)
-).sort((a, b) => a.data.order - b.data.order);
+const locale = getLocale(Astro.currentLocale);
+const t = getMessages(locale);
+const allProjects = await getCollection("projects", ({ data }) => !data.draft);
+const grouped = new Map<string, typeof allProjects>();
+
+for (const project of allProjects) {
+  const key = contentTranslationKey(project.id, project.data);
+  grouped.set(key, [...(grouped.get(key) ?? []), project]);
+}
+
+const projects = [...grouped.entries()]
+  .map(([key, entries]) => {
+    const localized = entries.find((entry) => contentLocale(entry.data) === locale);
+    const english = entries.find((entry) => contentLocale(entry.data) === "en");
+    const entry = localized ?? english ?? entries[0];
+    return { key, entry, fallback: contentLocale(entry.data) !== locale };
+  })
+  .sort((a, b) => a.entry.data.order - b.entry.data.order);
 
 const categories = [
   "All",
-  ...Array.from(
-    new Set(projects.map((project) => project.data.category)),
-  ),
+  ...Array.from(new Set(projects.map(({ entry }) => entry.data.category))),
 ];
-
-const initialProjectCount = 4;
-const additionalProjectCount = Math.max(
-  projects.length - initialProjectCount,
-  0,
-);
 ---
 
-<section
-  id="projects"
-  aria-labelledby="projects-title"
-  class="border-t border-[var(--border)] py-16 text-[var(--white)] md:py-24"
->
+<section id="projects" aria-labelledby="projects-title" class="border-t border-[var(--border)] py-16 text-[var(--white)] md:py-24">
   <div class="mx-auto max-w-5xl">
     <div class="max-w-3xl">
-      <p
-        class="text-sm font-semibold uppercase tracking-[0.15em] text-[var(--sec)]"
-      >
-        Selected work
-      </p>
-
-      <h2
-        id="projects-title"
-        class="mt-3 text-4xl font-semibold tracking-tight md:text-5xl"
-      >
-        Projects that connect models, data, and software.
-      </h2>
-
-      <p class="mt-4 text-[var(--white-icon)] md:text-lg">
-        Machine-learning systems, analytical products, data pipelines, and web
-        applications with detailed explanations of the decisions behind them.
-      </p>
+      <p class="text-sm font-semibold uppercase tracking-[0.15em] text-[var(--sec)]">{t.projects.eyebrow}</p>
+      <h2 id="projects-title" class="mt-3 text-4xl font-semibold tracking-tight md:text-5xl">{t.projects.title}</h2>
+      <p class="mt-4 text-[var(--white-icon)] md:text-lg">{t.projects.description}</p>
     </div>
 
     <div class="mt-8 flex flex-wrap items-center justify-between gap-4">
-      <div
-        id="project-filters"
-        class="flex flex-wrap gap-2"
-        aria-label="Filter projects"
-      >
+      <div id="project-filters" class="flex flex-wrap gap-2" aria-label={t.projects.filterAria}>
         {
-          categories.map((category) => (
-            <button
-              type="button"
-              data-filter={category}
-              aria-pressed={category === "All" ? "true" : "false"}
-              class="project-filter min-h-10 rounded-full border border-[var(--border)] bg-[var(--card-bg)] px-4 py-2 text-sm font-medium text-[var(--white-icon)] transition-colors hover:border-[var(--sec)] hover:text-[var(--white)]"
-            >
-              {category}
-            </button>
-          ))
+          categories.map((category) => {
+            const label = category === "All"
+              ? t.projects.all
+              : t.projects.categories[category as keyof typeof t.projects.categories];
+            return (
+              <button
+                type="button"
+                data-filter={category}
+                aria-pressed={category === "All" ? "true" : "false"}
+                class="project-filter min-h-10 rounded-full border border-[var(--border)] bg-[var(--card-bg)] px-4 py-2 text-sm font-medium text-[var(--white-icon)] transition-colors hover:border-[var(--sec)] hover:text-[var(--white)]"
+              >
+                {label}
+              </button>
+            );
+          })
         }
       </div>
 
@@ -69,272 +60,114 @@ const additionalProjectCount = Math.max(
         id="project-count"
         class="text-sm text-[var(--white-icon)]"
         aria-live="polite"
+        data-count-one={t.projects.countOne}
+        data-count-many={t.projects.countMany}
       >
-        {Math.min(initialProjectCount, projects.length)} of {projects.length} projects
+        {projects.length} {projects.length === 1 ? t.projects.countOne : t.projects.countMany}
       </p>
     </div>
 
-    <div
-      id="projects-grid"
-      class="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2"
-    >
+    <div id="projects-grid" class="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2">
       {
-        projects.map((project, index) => (
-          <article
-            class:list={[
-              "project-card group flex flex-col overflow-hidden rounded-2xl border bg-[var(--card-bg)] transition-[border-color,transform] duration-300 hover:-translate-y-1 hover:border-[var(--sec)]",
-              project.data.featured
-                ? "border-[var(--sec)]"
-                : "border-[var(--border)]",
-            ]}
-            data-category={project.data.category}
-            data-additional={String(index >= initialProjectCount)}
-            hidden={index >= initialProjectCount}
-            data-analytics-project-id={project.id}
-            data-analytics-project-title={project.data.title}
-          >
-            <a
-              href={`/projects/${project.id}/`}
-              class="block overflow-hidden border-b border-[var(--border)]"
+        projects.map(({ key, entry: project, fallback }) => {
+          const projectUrl = localizePath(locale, `/projects/${key}/`);
+          return (
+            <article
+              class:list={[
+                "project-card group flex flex-col overflow-hidden rounded-2xl border bg-[var(--card-bg)] transition-[border-color,transform] duration-300 hover:-translate-y-1 hover:border-[var(--sec)]",
+                project.data.featured ? "border-[var(--sec)]" : "border-[var(--border)]",
+              ]}
+              data-category={project.data.category}
+              data-analytics-project-id={key}
+              data-analytics-project-title={project.data.title}
             >
-              <img
-                src={project.data.image}
-                alt={`${project.data.title} application preview`}
-                width="1600"
-                height="1000"
-                loading="lazy"
-                decoding="async"
-                class="aspect-[16/10] w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-              />
-            </a>
+              <a href={projectUrl} class="block overflow-hidden border-b border-[var(--border)]">
+                <img
+                  src={project.data.image}
+                  alt={`${project.data.title} application preview`}
+                  width="1600"
+                  height="1000"
+                  loading="lazy"
+                  decoding="async"
+                  class="aspect-[16/10] w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                />
+              </a>
 
-            <div class="flex flex-1 flex-col p-5">
-              <div class="flex items-start justify-between gap-4">
-                <div>
-                  <p
-                    class="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--sec)]"
-                  >
-                    {project.data.focus}
-                  </p>
-
-                  <h3 class="mt-2 text-xl font-semibold leading-tight">
-                    <a
-                      href={`/projects/${project.id}/`}
-                      class="hover:text-[var(--sec)]"
-                    >
-                      {project.data.title}
-                    </a>
-                  </h3>
+              <div class="flex flex-1 flex-col p-5">
+                <div class="flex items-start justify-between gap-4">
+                  <div>
+                    <p class="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--sec)]">{project.data.focus}</p>
+                    <h3 class="mt-2 text-xl font-semibold leading-tight">
+                      <a href={projectUrl} class="hover:text-[var(--sec)]">{project.data.title}</a>
+                    </h3>
+                    {fallback && locale !== "en" && (
+                      <span class="mt-2 inline-flex rounded-full border border-[var(--border)] px-2 py-0.5 text-[10px] text-[var(--white-icon)]">{t.projectPage.fallbackBadge}</span>
+                    )}
+                  </div>
+                  <span class="shrink-0 rounded-full border border-[var(--border)] px-2.5 py-1 text-xs text-[var(--white-icon)]">
+                    {t.projects.statuses[project.data.status]}
+                  </span>
                 </div>
 
-                <span
-                  class="shrink-0 rounded-full border border-[var(--border)] px-2.5 py-1 text-xs text-[var(--white-icon)]"
-                >
-                  {project.data.status}
-                </span>
+                <p class="mt-4 flex-1 text-sm leading-relaxed text-[var(--white-icon)]">{project.data.description}</p>
+
+                <ul class="mt-5 flex flex-wrap gap-2" aria-label={`${project.data.title} ${t.common.technologies}`}>
+                  {project.data.technologies.slice(0, 5).map((technology) => (
+                    <li class="rounded-md bg-[var(--white-icon-tr)] px-2 py-1 text-xs text-[var(--sec-strong)]">{technology}</li>
+                  ))}
+                </ul>
+
+                <div class="mt-5 flex flex-wrap gap-2 border-t border-[var(--border)] pt-4">
+                  <a href={projectUrl} class="inline-flex min-h-10 items-center rounded-xl border border-[var(--border)] px-3 py-2 text-sm font-medium hover:border-[var(--sec)]">{t.common.viewCaseStudy}</a>
+                  {project.data.preview && (
+                    <a href={project.data.preview} data-analytics-event="project_live_demo_click" data-analytics-link-location="project_card" target="_blank" rel="noopener noreferrer" class="inline-flex min-h-10 items-center rounded-xl border border-[var(--border)] px-3 py-2 text-sm font-medium text-[var(--white-icon)] hover:border-[var(--sec)] hover:text-[var(--white)]">{t.common.livePreview}</a>
+                  )}
+                </div>
               </div>
-
-              <p
-                class="mt-4 flex-1 text-sm leading-relaxed text-[var(--white-icon)]"
-              >
-                {project.data.description}
-              </p>
-
-              <ul
-                class="mt-5 flex flex-wrap gap-2"
-                aria-label={`${project.data.title} technologies`}
-              >
-                {
-                  project.data.technologies.slice(0, 5).map((technology) => (
-                    <li class="rounded-md bg-[var(--white-icon-tr)] px-2 py-1 text-xs text-[var(--sec-strong)]">
-                      {technology}
-                    </li>
-                  ))
-                }
-              </ul>
-
-              <div
-                class="mt-5 flex flex-wrap gap-2 border-t border-[var(--border)] pt-4"
-              >
-                <a
-                  href={`/projects/${project.id}/`}
-                  class="inline-flex min-h-10 items-center rounded-xl border border-[var(--border)] px-3 py-2 text-sm font-medium hover:border-[var(--sec)]"
-                >
-                  View case study
-                </a>
-
-                {
-                  project.data.preview && (
-                    <a
-                      href={project.data.preview}
-                      data-analytics-event="project_live_demo_click"
-                      data-analytics-link-location="project_card"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      class="inline-flex min-h-10 items-center rounded-xl border border-[var(--border)] px-3 py-2 text-sm font-medium text-[var(--white-icon)] hover:border-[var(--sec)] hover:text-[var(--white)]"
-                    >
-                      Live preview
-                    </a>
-                  )
-                }
-              </div>
-            </div>
-          </article>
-        ))
+            </article>
+          );
+        })
       }
     </div>
-
-    {
-      additionalProjectCount > 0 && (
-        <div
-          id="project-expander-container"
-          class="mt-8 flex justify-center"
-        >
-          <button
-            id="project-expander"
-            type="button"
-            aria-expanded="false"
-            aria-controls="projects-grid"
-            data-more-label={`View ${additionalProjectCount} more projects →`}
-            data-less-label="Show fewer projects ↑"
-            class="inline-flex min-h-11 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--card-bg)] px-5 py-2.5 text-sm font-semibold text-[var(--white-icon)] transition-colors hover:border-[var(--sec)] hover:text-[var(--white)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sec)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background)]"
-          >
-            View {additionalProjectCount} more projects →
-          </button>
-        </div>
-      )
-    }
   </div>
 </section>
 
 <style>
-  .project-card[hidden] {
-    display: none;
-  }
-
-  .project-filter[aria-pressed="true"] {
-    border-color: var(--sec);
-    background: var(--sec);
-    color: var(--background);
-  }
+  .project-card[hidden] { display: none; }
+  .project-filter[aria-pressed="true"] { border-color: var(--sec); background: var(--sec); color: var(--background); }
 </style>
 
 <script>
   function initialiseProjectFilters() {
-    const filterContainer =
-      document.getElementById("project-filters");
+    const filterContainer = document.getElementById("project-filters");
     const grid = document.getElementById("projects-grid");
     const count = document.getElementById("project-count");
-    const expander =
-      document.getElementById("project-expander") as HTMLButtonElement | null;
-    const expanderContainer = document.getElementById(
-      "project-expander-container",
-    );
-
-    if (
-      !filterContainer ||
-      !grid ||
-      filterContainer.dataset.ready === "true"
-    ) {
-      return;
-    }
-
+    if (!filterContainer || !grid || filterContainer.dataset.ready === "true") return;
     filterContainer.dataset.ready = "true";
 
-    const filters = Array.from(
-      filterContainer.querySelectorAll<HTMLButtonElement>(
-        "button[data-filter]",
-      ),
-    );
+    const filters = Array.from(filterContainer.querySelectorAll<HTMLButtonElement>("button[data-filter]"));
+    const cards = Array.from(grid.querySelectorAll<HTMLElement>(".project-card[data-category]"));
 
-    const cards = Array.from(
-      grid.querySelectorAll<HTMLElement>(
-        ".project-card[data-category]",
-      ),
-    );
-
-    let selectedFilter = "All";
-    let expanded = false;
-
-    const renderProjects = () => {
+    filterContainer.addEventListener("click", (event) => {
+      const button = (event.target as Element).closest<HTMLButtonElement>("button[data-filter]");
+      if (!button) return;
+      const selected = button.dataset.filter ?? "All";
       let visibleCount = 0;
 
+      filters.forEach((filter) => filter.setAttribute("aria-pressed", String(filter === button)));
       cards.forEach((card) => {
-        const matchesFilter =
-          selectedFilter === "All" ||
-          card.dataset.category === selectedFilter;
-        const isAdditional =
-          card.dataset.additional === "true";
-
-        // Keep the landing view focused on the four strongest projects.
-        // Choosing a category is an intentional browse action, so show all
-        // matching projects regardless of whether they are in the older set.
-        const visible =
-          matchesFilter &&
-          (selectedFilter !== "All" || expanded || !isAdditional);
-
+        const visible = selected === "All" || card.dataset.category === selected;
         card.hidden = !visible;
-
-        if (visible) {
-          visibleCount += 1;
-        }
+        if (visible) visibleCount += 1;
       });
 
       if (count) {
-        if (selectedFilter === "All" && !expanded) {
-          count.textContent = `${visibleCount} of ${cards.length} projects`;
-        } else {
-          count.textContent = `${visibleCount} ${
-            visibleCount === 1 ? "project" : "projects"
-          }`;
-        }
-      }
-
-      if (expander && expanderContainer) {
-        const onAllProjects = selectedFilter === "All";
-        expanderContainer.hidden = !onAllProjects;
-        expander.setAttribute("aria-expanded", String(expanded));
-        expander.textContent = expanded
-          ? expander.dataset.lessLabel ?? "Show fewer projects ↑"
-          : expander.dataset.moreLabel ?? "View more projects →";
-      }
-    };
-
-    filterContainer.addEventListener("click", (event) => {
-      const button = (event.target as Element).closest<HTMLButtonElement>(
-        "button[data-filter]",
-      );
-
-      if (!button) return;
-
-      selectedFilter = button.dataset.filter ?? "All";
-
-      filters.forEach((filter) => {
-        filter.setAttribute(
-          "aria-pressed",
-          String(filter === button),
-        );
-      });
-
-      renderProjects();
-    });
-
-    expander?.addEventListener("click", () => {
-      expanded = !expanded;
-      renderProjects();
-
-      if (!expanded) {
-        document
-          .getElementById("projects-title")
-          ?.scrollIntoView({ behavior: "smooth", block: "start" });
+        const one = count.dataset.countOne ?? "project";
+        const many = count.dataset.countMany ?? "projects";
+        count.textContent = `${visibleCount} ${visibleCount === 1 ? one : many}`;
       }
     });
-
-    renderProjects();
   }
 
-  document.addEventListener(
-    "astro:page-load",
-    initialiseProjectFilters,
-  );
+  document.addEventListener("astro:page-load", initialiseProjectFilters);
 </script>

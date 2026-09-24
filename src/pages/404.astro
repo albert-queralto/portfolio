@@ -2,20 +2,21 @@
 import Layout from "@/layouts/Layout.astro";
 import Nav from "@/components/nav.astro";
 import Footer from "@/components/footer.astro";
+import { getLocale, getMessages, localizePath } from "@/i18n/utils";
+
+const locale = getLocale(Astro.currentLocale);
+const t = getMessages(locale);
 ---
 
-<Layout title="Page not found — Albert Queraltó" description="The requested page could not be found." noindex>
+<Layout title={`${t.error404.title} — Albert Queraltó`} description={t.error404.description} noindex alternateLocales={[]}>
   <Nav />
   <main id="main-content" class="mx-auto flex min-h-[75vh] max-w-3xl flex-col items-start justify-center py-28">
-    <p class="text-sm font-semibold uppercase tracking-[0.15em] text-[var(--sec)]">404 error</p>
-    <h1 class="mt-3 text-4xl font-semibold tracking-tight md:text-6xl">This page is not here.</h1>
-    <p class="mt-5 max-w-xl text-[var(--white-icon)]">
-      The address may be outdated, or the page may have moved. The home page and project
-      archive are still available.
-    </p>
+    <p class="text-sm font-semibold uppercase tracking-[0.15em] text-[var(--sec)]">{t.error404.label}</p>
+    <h1 class="mt-3 text-4xl font-semibold tracking-tight md:text-6xl">{t.error404.title}</h1>
+    <p class="mt-5 max-w-xl text-[var(--white-icon)]">{t.error404.description}</p>
     <div class="mt-8 flex flex-wrap gap-3">
-      <a href="/" class="rounded-xl bg-[var(--sec)] px-5 py-3 text-sm font-semibold text-[var(--background)]">Go home</a>
-      <a href="/#projects" class="rounded-xl border border-[var(--border)] bg-[var(--card-bg)] px-5 py-3 text-sm font-medium text-[var(--white)]">View projects</a>
+      <a href={localizePath(locale, "/")} class="rounded-xl bg-[var(--sec)] px-5 py-3 text-sm font-semibold text-[var(--background)]">{t.error404.home}</a>
+      <a href={`${localizePath(locale, "/")}#projects`} class="rounded-xl border border-[var(--border)] bg-[var(--card-bg)] px-5 py-3 text-sm font-medium text-[var(--white)]">{t.error404.projects}</a>
     </div>
   </main>
   <Footer />

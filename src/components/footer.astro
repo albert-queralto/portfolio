@@ -2,10 +2,13 @@
 import GitHubIcon from "@/components/icons/GitHubIcon.astro";
 import LinkedInIcon from "@/components/icons/LinkedInIcon.astro";
 import EmailIcon from "@/components/icons/EmailIcon.astro";
-import DownloadIcon from "@/components/icons/DownloadIcon.astro";
 import { site } from "@/data/site";
+import { getLocale, getMessages, localizePath } from "@/i18n/utils";
 
 const year = new Date().getFullYear();
+const locale = getLocale(Astro.currentLocale);
+const t = getMessages(locale);
+const home = localizePath(locale, "/");
 ---
 
 <footer class="border-t border-[var(--border)] py-10 text-[var(--white-icon)]">
@@ -13,78 +16,31 @@ const year = new Date().getFullYear();
     <div class="flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
       <div>
         <p class="font-semibold text-[var(--white)]">{site.name}</p>
-        <p class="mt-1 max-w-md text-sm">
-          Data science, machine learning, and software engineering for real-world systems.
-        </p>
+        <p class="mt-1 max-w-md text-sm">{t.footer.description}</p>
       </div>
 
-      <nav aria-label="Footer navigation">
+      <nav aria-label={t.footer.navigation}>
         <ul class="flex flex-wrap gap-x-5 gap-y-2 text-sm">
-          <li><a class="hover:text-[var(--white)]" href="/#home">Home</a></li>
-          <li><a class="hover:text-[var(--white)]" href="/#projects">Projects</a></li>
-          <li><a class="hover:text-[var(--white)]" href="/blog/">Blog</a></li>
-          <li><a class="hover:text-[var(--white)]" href="/#contact">Contact</a></li>
-          <li>
-            <button
-              type="button"
-              data-open-analytics-settings
-              class="hover:text-[var(--white)]"
-            >
-              Cookie settings
-            </button>
-          </li>
+          <li><a class="hover:text-[var(--white)]" href={`${home}#home`}>{t.nav.home}</a></li>
+          <li><a class="hover:text-[var(--white)]" href={`${home}#projects`}>{t.nav.projects}</a></li>
+          <li><a class="hover:text-[var(--white)]" href={localizePath(locale, "/blog/")}>{t.nav.blog}</a></li>
+          <li><a class="hover:text-[var(--white)]" href={`${home}#contact`}>{t.nav.contact}</a></li>
+          <li><button type="button" data-open-analytics-settings class="hover:text-[var(--white)]">{t.footer.cookies}</button></li>
         </ul>
       </nav>
     </div>
 
     <div class="mt-8 flex flex-col gap-6 border-t border-[var(--border)] pt-8 sm:flex-row sm:items-center sm:justify-between">
       <div class="flex items-center gap-2">
-        <a
-          href={site.github}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="GitHub"
-          class="flex size-10 items-center justify-center rounded-xl border border-[var(--border)] transition-colors hover:border-[var(--sec)] hover:text-[var(--white)]"
-        >
-          <GitHubIcon />
-        </a>
-        <a
-          href={site.linkedin}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="LinkedIn"
-          class="flex size-10 items-center justify-center rounded-xl border border-[var(--border)] transition-colors hover:border-[var(--sec)] hover:text-[var(--white)]"
-        >
-          <LinkedInIcon />
-        </a>
-        <a
-          href={`mailto:${site.email}`}
-          aria-label="Email"
-          class="flex size-10 items-center justify-center rounded-xl border border-[var(--border)] transition-colors hover:border-[var(--sec)] hover:text-[var(--white)]"
-        >
-          <EmailIcon />
-        </a>
-        <!-- <a
-          href="/CV.pdf"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="View CV"
-          class="flex min-h-10 items-center gap-2 rounded-xl border border-[var(--border)] px-3 text-sm transition-colors hover:border-[var(--sec)] hover:text-[var(--white)]"
-        >
-          <DownloadIcon />
-          CV
-        </a> -->
-        <a
-          href="/rss.xml"
-          class="text-sm text-[var(--white-icon)] hover:text-[var(--white)]"
-        >
-          RSS
-        </a>
+        <a href={site.github} target="_blank" rel="noopener noreferrer" aria-label="GitHub" class="flex size-10 items-center justify-center rounded-xl border border-[var(--border)] transition-colors hover:border-[var(--sec)] hover:text-[var(--white)]"><GitHubIcon /></a>
+        <a href={site.linkedin} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" class="flex size-10 items-center justify-center rounded-xl border border-[var(--border)] transition-colors hover:border-[var(--sec)] hover:text-[var(--white)]"><LinkedInIcon /></a>
+        <a href={`mailto:${site.email}`} aria-label={t.contact.email} class="flex size-10 items-center justify-center rounded-xl border border-[var(--border)] transition-colors hover:border-[var(--sec)] hover:text-[var(--white)]"><EmailIcon /></a>
+        <a href="/rss.xml" class="text-sm text-[var(--white-icon)] hover:text-[var(--white)]">RSS</a>
       </div>
 
       <div class="text-sm sm:text-right">
-        <p>Built with Astro and Tailwind CSS. Served with Docker and Nginx.</p>
-        <p class="mt-1">© {year} {site.name}. All rights reserved.</p>
+        <p>{t.footer.built}</p>
+        <p class="mt-1">© {year} {site.name}. {t.footer.rights}</p>
       </div>
     </div>
   </div>

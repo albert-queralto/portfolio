@@ -25,6 +25,13 @@ export default defineConfig({
     },
   },
   site: "https://albertqueralto.dev",
+  i18n: {
+    defaultLocale: "en",
+    locales: ["en", "ca", "es", "de"],
+    routing: {
+      prefixDefaultLocale: false,
+    },
+  },
   output: "static",
   build: {
     format: "directory",

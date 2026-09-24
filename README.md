@@ -76,3 +76,7 @@ scripts/issue-letsencrypt-cert.sh webroot
 ## Licence
 
 See [LICENSE](LICENSE).
+
+## Internationalization
+
+The portfolio supports English, Catalan, Spanish, and German with localized routes, SEO alternates, and gradual long-form content translation. See [`I18N.md`](./I18N.md) for the content workflow, fallback behavior, and validation commands.

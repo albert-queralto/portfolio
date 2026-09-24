@@ -1,0 +1,28 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Nav from "@/components/nav.astro";
+import Home from "@/components/home.astro";
+import Projects from "@/components/projects.astro";
+import Contact from "@/components/contact.astro";
+import Footer from "@/components/footer.astro";
+import FeaturedProject from "@/components/FeaturedProject.astro";
+import Experience from "@/components/Experience.astro";
+import { getLocale, getMessages, localizedAbsoluteUrl } from "@/i18n/utils";
+import { site } from "@/data/site";
+
+const locale = getLocale(Astro.currentLocale);
+const t = getMessages(locale);
+const canonical = localizedAbsoluteUrl(locale, "/", Astro.site ?? site.url);
+---
+
+<Layout title={t.meta.title} description={t.meta.description} canonical={canonical} alternatePath="/">
+  <Nav />
+  <main id="main-content">
+    <Home />
+    <FeaturedProject />
+    <Experience />
+    <Projects />
+    <Contact />
+  </main>
+  <Footer />
+</Layout>

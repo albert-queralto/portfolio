@@ -3,7 +3,7 @@ import ProjectDetailPage from "@/components/pages/ProjectDetailPage.astro";
 import { getLocalizedProjectEntries } from "@/i18n/content";
 
 export async function getStaticPaths() {
-  const projects = await getLocalizedProjectEntries("en");
+  const projects = await getLocalizedProjectEntries("es");
   return projects.map(({ key }) => ({ params: { slug: key }, props: { translationKey: key } }));
 }
 

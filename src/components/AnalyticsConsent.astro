@@ -1,9 +1,14 @@
 ---
+import type { Locale } from "@/i18n/config";
+import { getMessages } from "@/i18n/utils";
+
 interface Props {
   measurementId: string;
+  locale: Locale;
 }
 
-const { measurementId } = Astro.props;
+const { measurementId, locale } = Astro.props;
+const t = getMessages(locale);
 ---
 
 <section
@@ -21,15 +26,13 @@ const { measurementId } = Astro.props;
   >
     <div>
       <h2 id="analytics-consent-title" class="text-lg font-semibold text-[var(--white)]">
-        Analytics cookies
+        {t.consent.title}
       </h2>
       <p
         id="analytics-consent-description"
         class="mt-2 max-w-3xl text-sm leading-6 text-[var(--white-icon)]"
       >
-        I use Google Analytics to understand how visitors use this portfolio and improve it.
-        Analytics cookies and page-view tracking remain disabled unless you accept. You can
-        change your choice later from the footer.
+        {t.consent.description}
       </p>
     </div>
 
@@ -39,14 +42,14 @@ const { measurementId } = Astro.props;
         data-analytics-consent="denied"
         class="min-h-11 rounded-xl border border-[var(--border)] px-5 py-2.5 text-sm font-semibold text-[var(--white)] transition-colors hover:border-[var(--sec)]"
       >
-        Reject optional cookies
+        {t.consent.reject}
       </button>
       <button
         type="button"
         data-analytics-consent="granted"
         class="min-h-11 rounded-xl bg-[var(--sec)] px-5 py-2.5 text-sm font-semibold text-[var(--background)] transition-opacity hover:opacity-90"
       >
-        Accept analytics
+        {t.consent.accept}
       </button>
     </div>
   </div>

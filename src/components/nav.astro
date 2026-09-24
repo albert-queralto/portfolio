@@ -1,4 +1,7 @@
 ---
+import LanguageSwitcher from "@/components/LanguageSwitcher.astro";
+import { getLocale, getMessages, localizePath, stripLocalePrefix } from "@/i18n/utils";
+
 interface NavItem {
   label: string;
   href: string;
@@ -6,30 +9,34 @@ interface NavItem {
   icon: string;
 }
 
+const locale = getLocale(Astro.currentLocale);
+const t = getMessages(locale);
 const currentPath = Astro.url.pathname;
-const isHome = currentPath === "/";
+const localePath = stripLocalePrefix(currentPath);
+const isHome = localePath === "/";
+const homePath = localizePath(locale, "/");
 
 const navItems: NavItem[] = [
   {
-    label: "Home",
-    href: isHome ? "#home" : "/#home",
+    label: t.nav.home,
+    href: isHome ? "#home" : `${homePath}#home`,
     homeSection: "home",
     icon: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.49a1 1 0 0 1 .39-.79l8-6.22a1 1 0 0 1 1.22 0l8 6.22a1 1 0 0 1 .39.79V20Zm-2-1V9.98l-7-5.45-7 5.45V19h14Z"/></svg>`,
   },
   {
-    label: "Projects",
-    href: isHome ? "#projects" : "/#projects",
+    label: t.nav.projects,
+    href: isHome ? "#projects" : `${homePath}#projects`,
     homeSection: "projects",
     icon: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.41 5H21a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h7.41l2 2ZM4 5v14h16V7h-8.41l-2-2H4Z"/></svg>`,
   },
   {
-    label: "Blog",
-    href: "/blog/",
+    label: t.nav.blog,
+    href: localizePath(locale, "/blog/"),
     icon: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 22H4a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1Zm-1-2V4H5v16h14ZM7 6h4v4H7V6Zm0 6h10v2H7v-2Zm0 4h10v2H7v-2Zm6-9h4v2h-4V7Z"/></svg>`,
   },
   {
-    label: "Contact",
-    href: isHome ? "#contact" : "/#contact",
+    label: t.nav.contact,
+    href: isHome ? "#contact" : `${homePath}#contact`,
     homeSection: "contact",
     icon: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21.73 2.96-5.46 19.08c-.15.53-.47.56-.71.07L11 13 1.92 9.37c-.51-.2-.5-.51.04-.69l19.08-6.36c.53-.18.83.12.69.64ZM19.04 5.1 6.81 9.17l5.64 2.26 3.04 6.08 3.55-12.41Z"/></svg>`,
   },
@@ -39,13 +46,14 @@ const navItems: NavItem[] = [
 <div class="pointer-events-none fixed inset-x-0 z-[100] flex justify-center px-3 md:top-6">
   <nav
     id="main-nav"
-    aria-label="Primary navigation"
-    class="pointer-events-auto fixed bottom-0 left-1/2 w-full -translate-x-1/2 border border-[var(--border)] nav-surface backdrop-blur-xl transition-[width,background-color,border-radius] duration-500 md:static md:w-[min(80%,760px)] md:translate-x-0 md:rounded-full"
+    aria-label={t.nav.aria}
+    data-is-home={String(isHome)}
+    class="pointer-events-auto fixed bottom-0 left-1/2 w-full -translate-x-1/2 border border-[var(--border)] nav-surface backdrop-blur-xl transition-[width,background-color,border-radius] duration-500 md:static md:w-[min(88%,900px)] md:translate-x-0 md:rounded-full"
   >
     <ul class="mx-auto flex min-h-16 items-stretch justify-between px-2 md:min-h-14 md:items-center md:justify-center md:gap-10 md:px-5">
       {
         navItems.map((item) => {
-          const isBlogActive = currentPath.startsWith("/blog") && item.href === "/blog/";
+          const isBlogActive = localePath.startsWith("/blog") && item.href === localizePath(locale, "/blog/");
           const isServerActive = isBlogActive || (isHome && item.homeSection === "home");
 
           return (
@@ -68,13 +76,18 @@ const navItems: NavItem[] = [
         })
       }
       <li class="flex flex-1 items-center justify-center md:flex-none">
+        <LanguageSwitcher />
+      </li>
+      <li class="flex flex-1 items-center justify-center md:flex-none">
         <button
           id="theme-toggle"
           type="button"
           class="flex size-11 items-center justify-center rounded-xl text-[var(--white-icon)] transition-colors hover:text-[var(--white)] md:size-9"
-          aria-label="Switch to light theme"
+          aria-label={t.theme.light}
           aria-pressed="false"
-          title="Switch colour theme"
+          title={t.theme.title}
+          data-light-label={t.theme.light}
+          data-dark-label={t.theme.dark}
         >
           <svg id="toggle-sun" aria-hidden="true" viewBox="0 0 24 24" class="size-5 fill-current">
             <path d="M12 18a6 6 0 1 1 0-12 6 6 0 0 1 0 12Zm0-2a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM11 1h2v3h-2V1Zm0 19h2v3h-2v-3ZM3.51 4.93l1.42-1.42 2.12 2.13-1.41 1.41-2.13-2.12Zm13.44 13.43 1.41-1.41 2.13 2.12-1.42 1.42-2.12-2.13Zm2.12-14.85 1.42 1.42-2.13 2.12-1.41-1.41 2.12-2.13ZM5.64 16.95l1.41 1.41-2.12 2.13-1.42-1.42 2.13-2.12ZM23 11v2h-3v-2h3ZM4 11v2H1v-2h3Z" />
@@ -167,7 +180,7 @@ const navItems: NavItem[] = [
       toggle?.setAttribute("aria-pressed", String(isLight));
       toggle?.setAttribute(
         "aria-label",
-        isLight ? "Switch to dark theme" : "Switch to light theme",
+        isLight ? toggle?.dataset.darkLabel ?? "Switch to dark theme" : toggle?.dataset.lightLabel ?? "Switch to light theme",
       );
       document
         .querySelector<HTMLMetaElement>('meta[name="theme-color"]')
@@ -195,8 +208,8 @@ const navItems: NavItem[] = [
       if (window.innerWidth >= 768) {
         const progress = Math.min(window.scrollY / 900, 1);
         const eased = 1 - Math.pow(1 - progress, 4);
-        const maxWidth = Math.min(window.innerWidth * 0.8, 760);
-        const minWidth = 520;
+        const maxWidth = Math.min(window.innerWidth * 0.88, 900);
+        const minWidth = 650;
         nav.style.width = `${maxWidth - (maxWidth - minWidth) * eased}px`;
       } else {
         nav.style.removeProperty("width");
@@ -214,7 +227,7 @@ const navItems: NavItem[] = [
     window.addEventListener("resize", requestNavUpdate, { passive: true, signal });
     updateNav();
 
-    if (window.location.pathname === "/" && sectionLinks.length > 0) {
+    if (nav?.dataset.isHome === "true" && sectionLinks.length > 0) {
       const setActiveSection = (id: string) => {
         sectionLinks.forEach((link) => {
           const isActive = link.dataset.section === id;

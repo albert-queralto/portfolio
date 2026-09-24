@@ -70,7 +70,9 @@ for (const file of htmlFiles) {
   if (!types.has("Person")) fail(`${page} is missing Person JSON-LD`);
   if (!types.has("WebSite")) fail(`${page} is missing WebSite JSON-LD`);
 
-  if (/^projects\/(payrithm|tenderwise)\/index\.html$/.test(page)) {
+  const isNoindex = hasMeta(html, "name", "robots") && /noindex/i.test(html);
+
+  if (/^(?:[a-z]{2}\/)?projects\/(payrithm|tenderwise)\/index\.html$/.test(page) && !isNoindex) {
     if (!types.has("SoftwareApplication")) {
       fail(`${page} is missing SoftwareApplication JSON-LD`);
     }
@@ -79,7 +81,7 @@ for (const file of htmlFiles) {
     }
   }
 
-  if (/^blog\/[^/]+\/index\.html$/.test(page)) {
+  if (/^(?:[a-z]{2}\/)?blog\/[^/]+\/index\.html$/.test(page) && !isNoindex) {
     if (!types.has("BlogPosting")) fail(`${page} is missing BlogPosting JSON-LD`);
     if (!types.has("BreadcrumbList")) fail(`${page} is missing BreadcrumbList JSON-LD`);
   }

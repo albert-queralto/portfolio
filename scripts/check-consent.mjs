@@ -18,7 +18,7 @@ const requirements = [
   [files.component.includes('window.gtag("consent", "update"'), "missing consent updates"],
   [files.component.includes('document.addEventListener("astro:page-load"'), "missing Astro navigation tracking"],
   [files.layout.includes('import AnalyticsConsent from "@/components/AnalyticsConsent.astro"'), "Layout does not import AnalyticsConsent"],
-  [files.layout.includes("<AnalyticsConsent measurementId={GOOGLE_ANALYTICS_ID} />"), "Layout does not render AnalyticsConsent with the measurement ID"],
+  [files.layout.includes("<AnalyticsConsent measurementId={GOOGLE_ANALYTICS_ID} locale={locale} />"), "Layout does not render AnalyticsConsent with the measurement ID"],
   [files.footer.includes("data-open-analytics-settings"), "footer has no cookie settings control"],
   [files.nginx.includes("https://www.googletagmanager.com"), "CSP blocks Google Tag Manager"],
   [files.nginx.includes("https://*.google-analytics.com"), "CSP blocks Google Analytics endpoints"],

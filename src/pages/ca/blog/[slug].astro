@@ -3,7 +3,7 @@ import BlogPostPage from "@/components/pages/BlogPostPage.astro";
 import { getLocalizedBlogEntries } from "@/i18n/content";
 
 export async function getStaticPaths() {
-  const posts = await getLocalizedBlogEntries("en");
+  const posts = await getLocalizedBlogEntries("ca");
   return posts.map(({ key }) => ({ params: { slug: key }, props: { translationKey: key } }));
 }
 

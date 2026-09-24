@@ -2,20 +2,16 @@ import rss from "@astrojs/rss";
 import type { APIRoute } from "astro";
 import { getCollection } from "astro:content";
 import { site } from "@/data/site";
+import { contentLocale, contentTranslationKey, isPublished } from "@/i18n/utils";
 
 export const GET: APIRoute = async ({ site: astroSite }) => {
   const now = new Date();
-
   const posts = (
-    await getCollection("blog", ({ data }) => {
-      if (data.draft) return false;
-      if (data.publishAt && data.publishAt > now) return false;
-      return true;
-    })
-  ).sort(
-    (a, b) =>
-      b.data.date.valueOf() - a.data.date.valueOf(),
-  );
+    await getCollection(
+      "blog",
+      ({ data }) => isPublished(data, now) && contentLocale(data) === "en",
+    )
+  ).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
   return rss({
     title: `${site.name} — Machine Learning and Data Engineering`,
@@ -26,7 +22,7 @@ export const GET: APIRoute = async ({ site: astroSite }) => {
       title: post.data.title,
       description: post.data.description,
       pubDate: post.data.date,
-      link: `/blog/${post.id}`,
+      link: `/blog/${contentTranslationKey(post.id, post.data)}/`,
       categories: post.data.tags,
     })),
   });

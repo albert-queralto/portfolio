@@ -1,35 +1,37 @@
 ---
 import { site } from "@/data/site";
+import { getLocale, getMessages } from "@/i18n/utils";
+
+const locale = getLocale(Astro.currentLocale);
+const t = getMessages(locale);
 ---
 
-<section id="contact" aria-labelledby="contact-title" class="border-t border-[var(--border)] py-16 md:py-24">
+<section
+  id="contact"
+  aria-labelledby="contact-title"
+  class="border-t border-[var(--border)] py-16 md:py-24"
+  data-contact-sending={t.contact.sending}
+  data-contact-sending-message={t.contact.sendingMessage}
+  data-contact-success={t.contact.success}
+  data-contact-error={t.contact.error}
+  data-contact-send={t.contact.send}
+>
   <div class="mx-auto grid max-w-5xl gap-10 md:grid-cols-[0.8fr_1.2fr] md:gap-14">
     <div>
-      <p class="text-sm font-semibold uppercase tracking-[0.15em] text-[var(--sec)]">
-        Start a conversation
-      </p>
-      <h2 id="contact-title" class="mt-3 text-4xl font-semibold tracking-tight md:text-5xl">
-        Let’s build something useful.
-      </h2>
-      <p class="mt-5 text-[var(--white-icon)]">
-        Reach out about data science, machine-learning engineering, software engineering
-        roles, or product collaborations that require a practical path from data and
-        prototypes to production systems.
-      </p>
-      <div
-        class="mt-6 inline-flex rounded-full border border-[var(--border)] bg-[var(--card-bg)] px-4 py-2 text-sm text-[var(--white-icon)]"
-      >
-        <!-- Based in Barcelona · Open to remote opportunities across Europe -->
-        Based in Barcelona
+      <p class="text-sm font-semibold uppercase tracking-[0.15em] text-[var(--sec)]">{t.contact.eyebrow}</p>
+      <h2 id="contact-title" class="mt-3 text-4xl font-semibold tracking-tight md:text-5xl">{t.contact.title}</h2>
+      <p class="mt-5 text-[var(--white-icon)]">{t.contact.description}</p>
+      <div class="mt-6 inline-flex rounded-full border border-[var(--border)] bg-[var(--card-bg)] px-4 py-2 text-sm text-[var(--white-icon)]">
+        {t.contact.availability}
       </div>
 
       <dl class="mt-8 space-y-4 text-sm">
         <div>
-          <dt class="text-[var(--white-icon)]">Location</dt>
-          <dd class="font-medium text-[var(--white)]">{site.location}</dd>
+          <dt class="text-[var(--white-icon)]">{t.contact.location}</dt>
+          <dd class="font-medium text-[var(--white)]">{t.meta.location}</dd>
         </div>
         <div>
-          <dt class="text-[var(--white-icon)]">Email</dt>
+          <dt class="text-[var(--white-icon)]">{t.contact.email}</dt>
           <dd>
             <a class="font-medium text-[var(--white)] underline decoration-[var(--border)] underline-offset-4 hover:decoration-[var(--sec)]" href={`mailto:${site.email}`}>
               {site.email}
@@ -40,70 +42,30 @@ import { site } from "@/data/site";
     </div>
 
     <div class="rounded-2xl border border-[var(--border)] bg-[var(--card-bg)] p-5 md:p-7">
-      <form
-        id="contact-form"
-        action="https://formspree.io/f/mpqnezrg"
-        method="POST"
-        class="space-y-5"
-      >
-        <input type="hidden" name="_subject" value="New portfolio enquiry" />
+      <form id="contact-form" action="https://formspree.io/f/mpqnezrg" method="POST" class="space-y-5">
+        <input type="hidden" name="_subject" value={t.contact.subject} />
         <div class="hidden" aria-hidden="true">
           <label for="company-website">Company website</label>
           <input id="company-website" type="text" name="_gotcha" tabindex="-1" autocomplete="off" />
         </div>
 
         <div>
-          <label for="contact-name" class="mb-2 block text-sm font-medium text-[var(--white)]">
-            Name
-          </label>
-          <input
-            id="contact-name"
-            type="text"
-            name="name"
-            autocomplete="name"
-            required
-            placeholder="Your name"
-            class="min-h-12 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-[var(--white)] placeholder:text-[var(--white-icon)] focus:border-[var(--sec)] focus:outline-none"
-          />
+          <label for="contact-name" class="mb-2 block text-sm font-medium text-[var(--white)]">{t.contact.name}</label>
+          <input id="contact-name" type="text" name="name" autocomplete="name" required placeholder={t.contact.namePlaceholder} class="min-h-12 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-[var(--white)] placeholder:text-[var(--white-icon)] focus:border-[var(--sec)] focus:outline-none" />
         </div>
 
         <div>
-          <label for="contact-email" class="mb-2 block text-sm font-medium text-[var(--white)]">
-            Email
-          </label>
-          <input
-            id="contact-email"
-            type="email"
-            name="email"
-            autocomplete="email"
-            inputmode="email"
-            required
-            placeholder="you@example.com"
-            class="min-h-12 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-[var(--white)] placeholder:text-[var(--white-icon)] focus:border-[var(--sec)] focus:outline-none"
-          />
+          <label for="contact-email" class="mb-2 block text-sm font-medium text-[var(--white)]">{t.contact.email}</label>
+          <input id="contact-email" type="email" name="email" autocomplete="email" inputmode="email" required placeholder="you@example.com" class="min-h-12 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-[var(--white)] placeholder:text-[var(--white-icon)] focus:border-[var(--sec)] focus:outline-none" />
         </div>
 
         <div>
-          <label for="contact-message" class="mb-2 block text-sm font-medium text-[var(--white)]">
-            Message
-          </label>
-          <textarea
-            id="contact-message"
-            name="message"
-            rows="6"
-            minlength="20"
-            required
-            placeholder="Tell me a little about the problem, project, or role."
-            class="w-full resize-y rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-[var(--white)] placeholder:text-[var(--white-icon)] focus:border-[var(--sec)] focus:outline-none"
-          ></textarea>
+          <label for="contact-message" class="mb-2 block text-sm font-medium text-[var(--white)]">{t.contact.message}</label>
+          <textarea id="contact-message" name="message" rows="6" minlength="20" required placeholder={t.contact.messagePlaceholder} class="w-full resize-y rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-[var(--white)] placeholder:text-[var(--white-icon)] focus:border-[var(--sec)] focus:outline-none"></textarea>
         </div>
 
-        <button
-          id="contact-submit"
-          type="submit"
-          class="inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-[var(--sec)] px-5 py-3 text-sm font-semibold text-[var(--background)] transition-opacity disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          Send message
+        <button id="contact-submit" type="submit" class="inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-[var(--sec)] px-5 py-3 text-sm font-semibold text-[var(--background)] transition-opacity disabled:cursor-not-allowed disabled:opacity-60">
+          {t.contact.send}
         </button>
 
         <p id="form-message" class="min-h-6 text-sm text-[var(--white-icon)]" role="status" aria-live="polite"></p>
@@ -117,17 +79,19 @@ import { site } from "@/data/site";
     const form = document.querySelector<HTMLFormElement>("#contact-form");
     const submit = document.querySelector<HTMLButtonElement>("#contact-submit");
     const message = document.querySelector<HTMLElement>("#form-message");
-    if (!form || !submit || !message || form.dataset.ready === "true") return;
+    const section = document.querySelector<HTMLElement>("#contact");
+    if (!form || !submit || !message || !section || form.dataset.ready === "true") return;
 
     form.dataset.ready = "true";
+    const labels = section.dataset;
 
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
       if (!form.reportValidity()) return;
 
       submit.disabled = true;
-      submit.textContent = "Sending…";
-      message.textContent = "Sending your message…";
+      submit.textContent = labels.contactSending ?? "Sending…";
+      message.textContent = labels.contactSendingMessage ?? "Sending your message…";
       message.style.color = "var(--white-icon)";
 
       try {
@@ -141,15 +105,15 @@ import { site } from "@/data/site";
 
         form.reset();
         document.dispatchEvent(new CustomEvent("portfolio:contact-submit-success"));
-        message.textContent = "Thanks — your message has been sent. I’ll get back to you soon.";
+        message.textContent = labels.contactSuccess ?? "Thanks — your message has been sent.";
         message.style.color = "var(--success)";
       } catch (error) {
         console.error(error);
-        message.textContent = "The form could not send your message. Please email me directly instead.";
+        message.textContent = labels.contactError ?? "The form could not send your message.";
         message.style.color = "var(--error)";
       } finally {
         submit.disabled = false;
-        submit.textContent = "Send message";
+        submit.textContent = labels.contactSend ?? "Send message";
       }
     });
   }

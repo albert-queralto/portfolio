@@ -1,0 +1,139 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Nav from "@/components/nav.astro";
+import Footer from "@/components/footer.astro";
+import PayrithmArchitecture from "@/components/PayrithmArchitecture.astro";
+import TenderWiseArchitecture from "@/components/TenderWiseArchitecture.astro";
+import { site } from "@/data/site";
+import { buildBreadcrumbList, buildSoftwareApplication, type JsonLdNode } from "@/utils/seo";
+import "@/styles/prose.css";
+import { render } from "astro:content";
+import { availableLocales, getProjectByKey } from "@/i18n/content";
+import { contentLocale, getLocale, getMessages, localizePath, localizedAbsoluteUrl } from "@/i18n/utils";
+
+interface Props { translationKey: string; }
+const { translationKey } = Astro.props;
+const locale = getLocale(Astro.currentLocale);
+const t = getMessages(locale);
+const resolved = await getProjectByKey(translationKey, locale);
+if (!resolved) throw new Error(`Project not found: ${translationKey}`);
+
+const { entry: project, fallback, group } = resolved;
+const { Content } = await render(project);
+const actualLocale = contentLocale(project.data);
+const canonicalLocale = fallback ? actualLocale : locale;
+const canonical = localizedAbsoluteUrl(canonicalLocale, `/projects/${translationKey}/`, Astro.site ?? site.url);
+const alternateLocales = availableLocales(group);
+const ogImage = project.data.ogImage ?? "/og/default.png";
+const structuredData: JsonLdNode[] = fallback ? [] : [
+  buildBreadcrumbList([
+    { name: t.nav.home, url: localizedAbsoluteUrl(locale, "/", Astro.site ?? site.url) },
+    { name: project.data.title, url: canonical },
+  ]),
+];
+
+if (!fallback && (translationKey === "payrithm" || translationKey === "tenderwise")) {
+  structuredData.push(
+    buildSoftwareApplication({
+      canonical,
+      name: project.data.title,
+      description: project.data.description,
+      screenshot: project.data.image,
+      technologies: project.data.technologies,
+      applicationCategory: translationKey === "payrithm" ? "FinanceApplication" : "BusinessApplication",
+      liveUrl: project.data.preview,
+      sourceUrl: project.data.source,
+      language: actualLocale,
+    }),
+  );
+}
+
+const articleHref = project.data.article
+  ? project.data.article.startsWith("/")
+    ? localizePath(locale, project.data.article)
+    : project.data.article
+  : undefined;
+---
+
+<Layout
+  title={`${project.data.title} — ${site.name}`}
+  description={project.data.description}
+  canonical={canonical}
+  noindex={fallback}
+  ogImage={ogImage}
+  ogImageAlt={`${project.data.title} — ${project.data.description}`}
+  structuredData={structuredData}
+  alternateLocales={alternateLocales}
+  alternatePath={`/projects/${translationKey}/`}
+>
+  <Nav />
+
+  <main
+    id="main-content"
+    data-analytics-project-page
+    data-analytics-project-id={translationKey}
+    data-analytics-project-title={project.data.title}
+    class="mx-auto max-w-5xl py-24 text-[var(--white)] md:py-36"
+  >
+    <a href={`${localizePath(locale, "/")}#projects`} class="inline-flex min-h-10 items-center gap-2 text-sm font-medium text-[var(--white-icon)] transition-colors hover:text-[var(--white)]">
+      <span aria-hidden="true">←</span>
+      {t.common.backProjects}
+    </a>
+
+    {fallback && locale !== actualLocale && (
+      <div class="mt-8 rounded-2xl border border-[var(--border)] bg-[var(--card-bg)] p-4 text-sm text-[var(--white-icon)]">
+        <strong class="text-[var(--white)]">{t.projectPage.fallbackBadge}.</strong> {t.common.fallbackEnglish}
+      </div>
+    )}
+
+    <div lang={actualLocale}>
+      <header class="mt-10">
+        <div class="flex flex-wrap items-center gap-3">
+          <span class="rounded-full border border-[var(--border)] px-3 py-1 text-xs text-[var(--sec)]">{project.data.focus}</span>
+          <span class="rounded-full border border-[var(--border)] px-3 py-1 text-xs text-[var(--white-icon)]">{t.projects.statuses[project.data.status]}</span>
+        </div>
+
+        <h1 class="mt-5 max-w-4xl text-balance text-4xl font-semibold leading-tight tracking-tight md:text-6xl">{project.data.title}</h1>
+        <p class="mt-6 max-w-3xl text-lg leading-relaxed text-[var(--white-icon)]">{project.data.description}</p>
+
+        <div class="mt-8 flex flex-wrap gap-3">
+          {project.data.preview && (
+            <a href={project.data.preview} data-analytics-event="project_live_demo_click" data-analytics-link-location="project_detail_header" target="_blank" rel="noopener noreferrer" class="inline-flex min-h-12 items-center rounded-xl bg-[var(--sec)] px-5 py-3 text-sm font-semibold text-[var(--background)]">{t.common.openApplication}</a>
+          )}
+          {project.data.source && (
+            <a href={project.data.source} target="_blank" rel="noopener noreferrer" class="inline-flex min-h-12 items-center rounded-xl border border-[var(--border)] px-5 py-3 text-sm font-medium hover:border-[var(--sec)]">{t.common.sourceCode}</a>
+          )}
+          {articleHref && (
+            <a href={articleHref} class="inline-flex min-h-12 items-center rounded-xl border border-[var(--border)] px-5 py-3 text-sm font-medium hover:border-[var(--sec)]">{t.common.readTechnicalArticle}</a>
+          )}
+        </div>
+
+        <ul class="mt-8 flex flex-wrap gap-2" aria-label={`${project.data.title} ${t.common.technologies}`}>
+          {project.data.technologies.map((technology) => (
+            <li class="rounded-md bg-[var(--white-icon-tr)] px-2.5 py-1 text-xs text-[var(--sec-strong)]">{technology}</li>
+          ))}
+        </ul>
+      </header>
+
+      <img src={project.data.image} alt={`${project.data.title} application preview`} width="1600" height="1000" class="mt-12 aspect-[16/10] w-full rounded-2xl border border-[var(--border)] object-cover" />
+
+      {project.data.metrics.length > 0 && (
+        <dl class="mt-6 grid gap-3 sm:grid-cols-3">
+          {project.data.metrics.map((metric) => (
+            <div class="rounded-2xl border border-[var(--border)] bg-[var(--card-bg)] p-5">
+              <dt class="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--sec)]">{metric.label}</dt>
+              <dd class="mt-2 font-medium">{metric.value}</dd>
+            </div>
+          ))}
+        </dl>
+      )}
+
+      {translationKey === "payrithm" && <PayrithmArchitecture />}
+      {translationKey === "tenderwise" && <TenderWiseArchitecture />}
+
+      <article class="article-prose prose mt-12 max-w-none"><Content /></article>
+    </div>
+  </main>
+
+  <Footer />
+</Layout>

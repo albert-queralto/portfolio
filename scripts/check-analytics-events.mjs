@@ -18,10 +18,10 @@ const [layout, analytics, consent, projectPage, projects, flagships, blogPage, c
     readFile("src/layouts/Layout.astro", "utf8"),
     readFile("src/components/AnalyticsEvents.astro", "utf8"),
     readFile("src/components/AnalyticsConsent.astro", "utf8"),
-    readFile("src/pages/projects/[slug].astro", "utf8"),
+    readFile("src/components/pages/ProjectDetailPage.astro", "utf8"),
     readFile("src/components/projects.astro", "utf8"),
     readFile("src/components/FeaturedProject.astro", "utf8"),
-    readFile("src/pages/blog/[slug].astro", "utf8"),
+    readFile("src/components/pages/BlogPostPage.astro", "utf8"),
     readFile("src/components/contact.astro", "utf8"),
   ]);
 

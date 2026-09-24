@@ -1,4 +1,8 @@
 ---
+import { getLocale, getMessages } from "@/i18n/utils";
+const locale = getLocale(Astro.currentLocale);
+const t = getMessages(locale);
+
 const technologies = [
   { file: "python", name: "Python" },
   { file: "pandas", name: "Pandas" },
@@ -19,9 +23,9 @@ const technologies = [
 ];
 ---
 
-<div class="tech-wall rounded-2xl border border-[var(--border)] bg-[var(--card-bg)] py-5" aria-label="Core technology stack">
+<div class="tech-wall rounded-2xl border border-[var(--border)] bg-[var(--card-bg)] py-5" aria-label={t.home.coreStack}>
   <p class="mb-4 px-5 text-xs font-semibold uppercase tracking-[0.15em] text-[var(--white-icon)]">
-    Core stack
+    {t.home.coreStack}
   </p>
   <div class="relative overflow-hidden">
     <div class="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-[var(--card-bg)] to-transparent md:w-24" />

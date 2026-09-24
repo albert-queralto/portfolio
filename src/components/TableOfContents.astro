@@ -1,39 +1,23 @@
 ---
-interface Heading {
-  depth: number;
-  slug: string;
-  text: string;
-}
+import { getLocale, getMessages } from "@/i18n/utils";
 
-interface Props {
-  headings: Heading[];
-}
+interface Heading { depth: number; slug: string; text: string; }
+interface Props { headings: Heading[]; }
 
-const headings = Astro.props.headings.filter(
-  (heading) => heading.depth === 2 || heading.depth === 3,
-);
+const locale = getLocale(Astro.currentLocale);
+const t = getMessages(locale);
+const headings = Astro.props.headings.filter((heading) => heading.depth === 2 || heading.depth === 3);
 ---
 
 {
   headings.length > 0 && (
     <aside class="hidden lg:block">
-      <nav
-        aria-label="Article contents"
-        class="sticky top-28 rounded-2xl border border-[var(--border)] bg-[var(--card-bg)] p-5"
-      >
-        <p class="text-sm font-semibold text-[var(--white)]">
-          On this page
-        </p>
-
+      <nav aria-label={t.blog.contentsAria} class="sticky top-28 rounded-2xl border border-[var(--border)] bg-[var(--card-bg)] p-5">
+        <p class="text-sm font-semibold text-[var(--white)]">{t.blog.contents}</p>
         <ol class="mt-4 space-y-2">
           {headings.map((heading) => (
             <li class:list={[heading.depth === 3 && "pl-4"]}>
-              <a
-                href={`#${heading.slug}`}
-                class="text-sm leading-snug text-[var(--white-icon)] transition-colors hover:text-[var(--sec)]"
-              >
-                {heading.text}
-              </a>
+              <a href={`#${heading.slug}`} class="text-sm leading-snug text-[var(--white-icon)] transition-colors hover:text-[var(--sec)]">{heading.text}</a>
             </li>
           ))}
         </ol>

@@ -5,16 +5,12 @@ import SkillsList from "@/components/SkillsList.astro";
 import GitHubIcon from "@/components/icons/GitHubIcon.astro";
 import LinkedInIcon from "@/components/icons/LinkedInIcon.astro";
 import EmailIcon from "@/components/icons/EmailIcon.astro";
-import DownloadIcon from "@/components/icons/DownloadIcon.astro";
 import { site } from "@/data/site";
+import { getLocale, getMessages } from "@/i18n/utils";
 
-const proofPoints = [
-  { label: "Research", value: "PhD-trained problem solving" },
-  { label: "Engineering", value: "Maintainable APIs and full-stack tools" },
-  { label: "Applied ML", value: "Real-time monitoring and anomaly detection" },
-  { label: "Production", value: "FastAPI, React, PostgreSQL, Docker"},
-  { label: "Data systems", value: "API, FTP, Airflow and geospatial pipelines"},
-];
+const locale = getLocale(Astro.currentLocale);
+const t = getMessages(locale);
+const proofPoints = t.home.proofPoints.map(([label, value]) => ({ label, value }));
 ---
 
 <section id="home" aria-labelledby="hero-title" class="text-[var(--white)]">
@@ -22,19 +18,16 @@ const proofPoints = [
     <div class="grid items-center gap-10 lg:grid-cols-[1.3fr_0.7fr] lg:gap-14">
       <div>
         <p class="mb-4 text-sm font-medium tracking-wide text-[var(--sec)] md:text-base">
-          {site.name}, PhD · {site.location}
+          {site.name}, PhD · {t.meta.location}
         </p>
         <h1
           id="hero-title"
           class="max-w-4xl text-balance text-4xl font-semibold leading-[1.05] tracking-[-0.035em] md:text-6xl"
         >
-          I build reliable <span class="shiny-sec">machine-learning systems</span>
-          from real-world data.
+          {t.home.titleBefore} <span class="shiny-sec">{t.home.titleAccent}</span> {t.home.titleAfter}
         </h1>
         <p class="mt-6 max-w-2xl text-pretty text-base leading-relaxed text-[var(--white-icon)] md:text-xl">
-          Data scientist and software developer working across time-series modelling,
-          anomaly detection, data pipelines, APIs, and full-stack decision tools.
-          Currently applying these skills to environmental monitoring systems.
+          {t.home.intro}
         </p>
 
         <div class="mt-8 flex flex-wrap items-center gap-3">
@@ -42,7 +35,7 @@ const proofPoints = [
             href="#projects"
             class="inline-flex min-h-12 items-center justify-center rounded-xl bg-[var(--sec)] px-5 py-3 text-sm font-semibold text-[var(--background)] transition-transform hover:-translate-y-0.5"
           >
-            View selected work
+            {t.home.viewWork}
           </a>
           <!-- <a
             href="/CV.pdf"
@@ -100,10 +93,10 @@ const proofPoints = [
         </div>
         <div class="absolute inset-x-5 bottom-5 rounded-2xl border border-white/10 bg-black/50 p-4 backdrop-blur-md">
           <p class="font-mono text-xs uppercase tracking-[0.18em] text-white/60">
-            Data → Models → Products
+            {t.home.diagramTop}
           </p>
           <p class="mt-1 text-sm font-medium text-white">
-            Useful systems, not notebook-only demos.
+            {t.home.diagramBottom}
           </p>
         </div>
       </div>
@@ -129,15 +122,13 @@ const proofPoints = [
     <div class="mt-8 grid items-start gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:gap-12">
       <div class="pt-2">
         <p class="text-sm font-semibold uppercase tracking-[0.15em] text-[var(--sec)]">
-          How I work
+          {t.home.howLabel}
         </p>
         <h2 class="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
-          From ambiguous problem to maintainable system.
+          {t.home.howTitle}
         </h2>
         <p class="mt-4 max-w-xl text-[var(--white-icon)]">
-          I combine scientific reasoning with software engineering: clarify the decision,
-          validate the data, build the smallest useful model, and make the result observable
-          and usable in production.
+          {t.home.howText}
         </p>
       </div>
       <SkillsList />

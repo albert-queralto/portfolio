@@ -43,7 +43,7 @@ export function getBaseStructuredData(): JsonLdNode[] {
       name: `${site.name} Portfolio`,
       alternateName: site.title,
       description: site.description,
-      inLanguage: "en",
+      inLanguage: ["en", "ca", "es", "de"],
       publisher: {
         "@id": PERSON_ID,
       },
@@ -76,6 +76,7 @@ interface BlogPostingOptions {
   readingTimeMinutes: number;
   wordCount: number;
   section?: string;
+  language?: string;
 }
 
 export function buildBlogPosting({
@@ -89,6 +90,7 @@ export function buildBlogPosting({
   readingTimeMinutes,
   wordCount,
   section = "Machine Learning & Data Science",
+  language = "en",
 }: BlogPostingOptions): JsonLdNode {
   return {
     "@type": "BlogPosting",
@@ -99,7 +101,7 @@ export function buildBlogPosting({
     mainEntityOfPage: canonical,
     datePublished: published.toISOString(),
     dateModified: (modified ?? published).toISOString(),
-    inLanguage: "en",
+    inLanguage: language,
     image: absoluteUrl(image),
     keywords: tags,
     articleSection: section,
@@ -126,6 +128,7 @@ interface SoftwareApplicationOptions {
   applicationCategory: string;
   liveUrl?: string;
   sourceUrl?: string;
+  language?: string;
 }
 
 export function buildSoftwareApplication({
@@ -137,6 +140,7 @@ export function buildSoftwareApplication({
   applicationCategory,
   liveUrl,
   sourceUrl,
+  language = "en",
 }: SoftwareApplicationOptions): JsonLdNode {
   const sameAs = [liveUrl, sourceUrl].filter((value): value is string => Boolean(value));
 
@@ -148,7 +152,7 @@ export function buildSoftwareApplication({
     url: canonical,
     applicationCategory,
     operatingSystem: "Any",
-    inLanguage: "en",
+    inLanguage: language,
     screenshot: absoluteUrl(screenshot),
     keywords: technologies,
     creator: {
