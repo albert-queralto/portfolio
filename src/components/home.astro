@@ -48,12 +48,12 @@ const proofPoints = t.home.proofPoints.map(([label, value]) => ({ label, value }
           </a> -->
         </div>
 
-        <div class="mt-5 flex items-center gap-2" aria-label="Social links">
+        <div class="mt-5 flex items-center gap-2" aria-label={t.home.socialLinks}>
           <a
             target="_blank"
             rel="noopener noreferrer"
             href={site.github}
-            aria-label="Albert Queraltó on GitHub"
+            aria-label={t.home.githubProfile}
             class="flex size-11 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--card-bg)] text-[var(--white-icon)] transition-colors hover:border-[var(--sec)] hover:text-[var(--white)]"
           >
             <GitHubIcon />
@@ -62,14 +62,14 @@ const proofPoints = t.home.proofPoints.map(([label, value]) => ({ label, value }
             target="_blank"
             rel="noopener noreferrer"
             href={site.linkedin}
-            aria-label="Albert Queraltó on LinkedIn"
+            aria-label={t.home.linkedinProfile}
             class="flex size-11 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--card-bg)] text-[var(--white-icon)] transition-colors hover:border-[var(--sec)] hover:text-[var(--white)]"
           >
             <LinkedInIcon />
           </a>
           <a
             href={`mailto:${site.email}?subject=Portfolio%20enquiry`}
-            aria-label={`Email ${site.name}`}
+            aria-label={t.home.emailProfile}
             class="flex size-11 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--card-bg)] text-[var(--white-icon)] transition-colors hover:border-[var(--sec)] hover:text-[var(--white)]"
           >
             <EmailIcon />

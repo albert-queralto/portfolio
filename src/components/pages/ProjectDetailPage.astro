@@ -115,7 +115,7 @@ const articleHref = project.data.article
         </ul>
       </header>
 
-      <img src={project.data.image} alt={`${project.data.title} application preview`} width="1600" height="1000" class="mt-12 aspect-[16/10] w-full rounded-2xl border border-[var(--border)] object-cover" />
+      <img src={project.data.image} alt={`${project.data.title} — ${t.common.applicationPreview}`} width="1600" height="1000" class="mt-12 aspect-[16/10] w-full rounded-2xl border border-[var(--border)] object-cover" />
 
       {project.data.metrics.length > 0 && (
         <dl class="mt-6 grid gap-3 sm:grid-cols-3">

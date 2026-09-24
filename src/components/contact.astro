@@ -45,7 +45,7 @@ const t = getMessages(locale);
       <form id="contact-form" action="https://formspree.io/f/mpqnezrg" method="POST" class="space-y-5">
         <input type="hidden" name="_subject" value={t.contact.subject} />
         <div class="hidden" aria-hidden="true">
-          <label for="company-website">Company website</label>
+          <label for="company-website">{t.contact.companyWebsite}</label>
           <input id="company-website" type="text" name="_gotcha" tabindex="-1" autocomplete="off" />
         </div>
 
