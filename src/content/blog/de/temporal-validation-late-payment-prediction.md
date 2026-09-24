@@ -1,7 +1,8 @@
 ---
 title: "Zeitliche Validierung für die Vorhersage verspäteter Zahlungen"
 description: "Warum die Vorhersage verspäteter Zahlungen mehr als einen chronologischen Train/Test-Split benötigt und wie ich rekonstruiere, welches Wissen zum Zeitpunkt jeder Payrithm-Vorhersage tatsächlich verfügbar gewesen wäre."
-date: 2026-09-05
+date: 2026-09-18
+publishAt: 2026-09-18T08:00:00+02:00
 lang: de
 translationKey: temporal-validation-late-payment-prediction
 tags: ["Machine Learning", "Time Series", "Scikit-learn", "Fintech", "MLOps"]
@@ -205,9 +206,9 @@ Evaluationsdatensätze werden mit Parametern transformiert, die aus der Vergange
 
 Payrithm verwendet einen Gradient-Boosting-Klassifikator, um Folgendes zu schätzen:
 
-\[
+$$
 P(\text{verspätete Zahlung} \mid X)
-\]
+$$
 
 ROC-AUC zeigt mir, ob das Modell dazu tendiert, verspätet bezahlte Rechnungen höher einzustufen als pünktlich bezahlte.
 
@@ -253,9 +254,9 @@ für jede Evaluationsrechnung vorhersagen
 
 Ich bewerte die Qualität der Wahrscheinlichkeiten mit dem Brier Score:
 
-\[
+$$
 \frac{1}{N}\sum_{i=1}^{N}(p_i-y_i)^2
-\]
+$$
 
 und vergleiche ihn mit dieser Baseline.
 

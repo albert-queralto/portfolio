@@ -1,7 +1,8 @@
 ---
 title: "Validació temporal per a la predicció de pagaments tardans"
 description: "Per què predir pagaments tardans requereix més que una divisió cronològica train/test i com reconstrueixo què es podia saber realment quan s'hauria fet cada predicció de Payrithm."
-date: 2026-09-05
+date: 2026-09-18
+publishAt: 2026-09-18T08:00:00+02:00
 lang: ca
 translationKey: temporal-validation-late-payment-prediction
 tags: ["Machine Learning", "Time Series", "Scikit-learn", "Fintech", "MLOps"]
@@ -205,9 +206,9 @@ Els registres d'avaluació es transformen utilitzant paràmetres apresos del pas
 
 Payrithm utilitza un classificador de gradient boosting per estimar:
 
-\[
+$$
 P(\text{pagament tardà} \mid X)
-\]
+$$
 
 ROC-AUC em diu si el model tendeix a situar les factures pagades tard per sobre de les factures pagades a temps.
 
@@ -253,9 +254,9 @@ per a cada factura d'avaluació
 
 Avalúo la qualitat de les probabilitats amb el Brier score:
 
-\[
+$$
 \frac{1}{N}\sum_{i=1}^{N}(p_i-y_i)^2
-\]
+$$
 
 i el comparo amb aquesta baseline.
 
