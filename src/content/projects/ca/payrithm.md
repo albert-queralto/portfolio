@@ -6,7 +6,7 @@ translationKey: payrithm
 order: 1
 featured: true
 draft: false
-status: "In progress"
+status: "Deployed"
 category: "Machine Learning"
 focus: "SaaS ML · Operacions financeres"
 image: "/projects/payrithm/payrithm.png"
