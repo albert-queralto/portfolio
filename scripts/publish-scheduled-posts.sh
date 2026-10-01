@@ -24,11 +24,14 @@ fi
 echo "[portfolio-publish] Pulling latest commit"
 git pull --ff-only
 
-echo "[portfolio-publish] Building portfolio"
-docker compose build
+BUILD_TIMESTAMP="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+echo "[portfolio-publish] Building portfolio at ${BUILD_TIMESTAMP}"
+docker compose build \
+  --build-arg BUILD_TIMESTAMP="$BUILD_TIMESTAMP" \
+  portfolio
 
 echo "[portfolio-publish] Deploying portfolio"
-docker compose up -d
+docker compose up -d --no-deps portfolio
 
 echo "[portfolio-publish] Current containers"
 docker compose ps

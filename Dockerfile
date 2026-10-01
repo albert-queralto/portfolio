@@ -11,7 +11,11 @@ RUN if [ -f package-lock.json ]; then \
     fi
 
 COPY . .
-RUN npm run build
+
+# publishAt is evaluated at Astro build time. A changing build argument ensures
+# Docker does not reuse a stale cached Astro build when only time has changed.
+ARG BUILD_TIMESTAMP=unknown
+RUN echo "[portfolio-build] Build timestamp: ${BUILD_TIMESTAMP}" && npm run build
 
 FROM nginx:1.29-alpine AS production
 
