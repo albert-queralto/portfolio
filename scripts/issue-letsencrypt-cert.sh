@@ -13,6 +13,7 @@ domains=(
   "tenderwise.albertqueralto.dev"
   "wfpp.albertqueralto.dev"
   "traceleaf.albertqueralto.dev"
+  "energypeak.albertqueralto.dev"
 )
 
 usage() {
