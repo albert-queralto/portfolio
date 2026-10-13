@@ -31,10 +31,17 @@ docker compose build \
   portfolio
 
 echo "[portfolio-publish] Deploying portfolio"
+
 docker compose up -d --no-deps portfolio
 
 echo "[portfolio-publish] Current containers"
 docker compose ps
+
+echo "[portfolio-publish] Removing dangling Docker images"
+docker image prune -f
+
+echo "[portfolio-publish] Removing build cache older than 7 days"
+docker builder prune -f --filter "until=168h"
 
 echo "[portfolio-publish] Scheduling next publication"
 python3 "$APP_DIR/scripts/schedule-next-post.py"
