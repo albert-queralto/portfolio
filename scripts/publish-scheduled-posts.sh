@@ -11,6 +11,24 @@ if ! flock -n 9; then
   exit 0
 fi
 
+AVAILABLE_KB="$(df --output=avail "$APP_DIR" | tail -1 | tr -d ' ')"
+MIN_FREE_KB=$((3 * 1024 * 1024))
+
+if (( AVAILABLE_KB < MIN_FREE_KB )); then
+  echo "[portfolio-publish] Less than 3 GB free. Cleaning Docker build cache."
+
+  docker builder prune -a -f
+  docker image prune -f
+
+  AVAILABLE_KB="$(df --output=avail "$APP_DIR" | tail -1 | tr -d ' ')"
+
+  if (( AVAILABLE_KB < MIN_FREE_KB )); then
+    echo "[portfolio-publish] ERROR: still less than 3 GB free after cleanup."
+    df -h "$APP_DIR"
+    exit 1
+  fi
+fi
+
 cd "$APP_DIR"
 
 echo "[portfolio-publish] Started at $(date --iso-8601=seconds)"
